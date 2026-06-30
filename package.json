@@ -5,10 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next dev",
+    "lint": "eslint",
+    "kiba:scrape": "node scripts/scrape-kiba-content.mjs",
+    "kiba:seed:firestore": "node scripts/seed-kiba-firestore.mjs",
+    "firebase:emulators": "firebase emulators:start",
+    "firebase:deploy": "firebase deploy"
   },
   "dependencies": {
+    "firebase": "^12.15.0",
+    "lucide-react": "^1.22.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"

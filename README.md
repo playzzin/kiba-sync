@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KIBA ERP CRM CMS Firebase Foundation
 
-## Getting Started
+This project is a Next.js + TypeScript frontend with Firebase Auth, Cloud Firestore, Firebase Storage, Cloud Functions, Firebase Hosting, and BigQuery integration scaffolding.
 
-First, run the development server:
+## Stack
+
+- Next.js static export for Firebase Hosting
+- Firebase Auth for user identity
+- Cloud Firestore for ERP, CRM, and CMS documents
+- Firebase Storage for contracts and attachments
+- Cloud Functions for privileged jobs and aggregations
+- BigQuery for audit and reporting exports
+
+## Local setup
+
+1. Create a Firebase project.
+2. Enable Auth, Firestore, Storage, Functions, Hosting, and BigQuery in Google Cloud.
+3. Copy `.env.example` to `.env.local`.
+4. Fill in the Firebase web app config values.
+5. Copy `functions/.env.example` to `functions/.env`.
+6. Install dependencies if needed:
+
+```bash
+npm install
+npm --prefix functions install
+```
+
+7. Run the frontend:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Firebase project binding
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Use Firebase CLI to bind the local folder to your project:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+firebase login
+firebase use --add
+```
 
-## Learn More
+You can also deploy with an explicit project:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+firebase deploy --project your-firebase-project-id
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## BigQuery table
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create the audit table before deploying the BigQuery export function. Replace `PROJECT_ID` in `infra/bigquery-audit-events.sql`.
 
-## Deploy on Vercel
+```bash
+bq query --use_legacy_sql=false < infra/bigquery-audit-events.sql
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Emulators
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Set this in `.env.local` when using local Firebase emulators:
+
+```bash
+NEXT_PUBLIC_USE_FIREBASE_EMULATORS=true
+```
+
+Start emulators:
+
+```bash
+npm run firebase:emulators
+```
+
+Emulator UI:
+
+```txt
+http://127.0.0.1:4000
+```
+
+## KIBA public site migration
+
+The user site mode mirrors the original KIBA public menu structure:
+
+- 연구원 소개
+- 주요실적
+- 학술연구
+- 원가계산안내
+- 계약금액조정
+- 개발부담금
+- 클레임
+- 고객센터
+
+Scrape the original KIBA pages and regenerate the local seed file:
+
+```bash
+npm run kiba:scrape
+```
+
+This writes `data/kiba-content.seed.json` with:
+
+- `cmsMenus`: 8 top-level menus and 34 child menus
+- `cmsPages`: 34 original source pages
+- `cmsAssets`: source images mapped to `public/kiba/source/...`
+- `boardPosts`: notice, resource, and inquiry board source rows
+
+Preview the Firestore write plan without changing data:
+
+```bash
+npm run kiba:seed:firestore -- --dry-run
+```
+
+Seed Firestore after configuring credentials:
+
+```bash
+$env:FIREBASE_PROJECT_ID="your-firebase-project-id"
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\service-account.json"
+npm run kiba:seed:firestore
+```
+
+For the local emulator, start emulators and run the seed with `$env:FIRESTORE_EMULATOR_HOST="127.0.0.1:8080"`.
+
+## Deploy
+
+```bash
+npm run build
+npm --prefix functions run build
+firebase deploy
+```
+
+## Initial admin role
+
+The Firestore and Storage rules use `users/{uid}.role`.
+
+Allowed staff roles:
+
+```txt
+admin
+manager
+staff
+```
+
+After the first user signs in, set that user document manually in the Firebase Console:
+
+```json
+{
+  "role": "admin",
+  "displayName": "Initial Admin"
+}
+```
+
+## Main collections
+
+- `cmsPages`
+- `cmsMenus`
+- `cmsAssets`
+- `boardPosts`
+- `clients`
+- `contacts`
+- `projects`
+- `contracts`
+- `invoices`
+- `settlements`
+- `payments`
+- `auditLogs`
+- `stats`

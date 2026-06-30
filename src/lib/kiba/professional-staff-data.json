@@ -1,0 +1,3120 @@
+{
+  "employees": [
+    {
+      "id": "EMP0001",
+      "name": "김민선",
+      "dept": "원장",
+      "rank": "원장"
+    },
+    {
+      "id": "EMP0002",
+      "name": "이병준",
+      "dept": "건설사업",
+      "rank": "부원장"
+    },
+    {
+      "id": "EMP0003",
+      "name": "한재희",
+      "dept": "학술연구",
+      "rank": "상무"
+    },
+    {
+      "id": "EMP0004",
+      "name": "김창수",
+      "dept": "품질관리",
+      "rank": "이사"
+    },
+    {
+      "id": "EMP0005",
+      "name": "하은정",
+      "dept": "원가분석",
+      "rank": "이사"
+    },
+    {
+      "id": "EMP0006",
+      "name": "최재운",
+      "dept": "건설사업",
+      "rank": "본부장"
+    },
+    {
+      "id": "EMP0007",
+      "name": "배병권",
+      "dept": "원가분석",
+      "rank": "수석"
+    },
+    {
+      "id": "EMP0008",
+      "name": "강정구",
+      "dept": "전략기획",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0009",
+      "name": "권광민",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0010",
+      "name": "김대식",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0011",
+      "name": "김석표",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0012",
+      "name": "김재희",
+      "dept": "품질관리",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0013",
+      "name": "김종훈",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0014",
+      "name": "김혜미",
+      "dept": "갈등조정중재",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0015",
+      "name": "박판진",
+      "dept": "품질관리",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0016",
+      "name": "박희성",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0017",
+      "name": "변정도",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0018",
+      "name": "신광수",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0019",
+      "name": "신동명",
+      "dept": "갈등조정중재",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0020",
+      "name": "유길상",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0021",
+      "name": "유옥수",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0022",
+      "name": "이규희",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0023",
+      "name": "이동환",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0024",
+      "name": "정영대",
+      "dept": "갈등조정중재",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0025",
+      "name": "정재훈",
+      "dept": "학술사업",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0026",
+      "name": "조형찬",
+      "dept": "학술사업",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0027",
+      "name": "최내현",
+      "dept": "건설사업",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0028",
+      "name": "표순천",
+      "dept": "품질관리",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0029",
+      "name": "피욱환",
+      "dept": "건설사업",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0030",
+      "name": "황운희",
+      "dept": "원가분석",
+      "rank": "위원"
+    },
+    {
+      "id": "EMP0031",
+      "name": "박미야",
+      "dept": "건설사업",
+      "rank": "선임연구원"
+    },
+    {
+      "id": "EMP0032",
+      "name": "이길훈",
+      "dept": "건설사업",
+      "rank": "선임연구원"
+    },
+    {
+      "id": "EMP0033",
+      "name": "김연화",
+      "dept": "건설사업",
+      "rank": "전임연구원"
+    },
+    {
+      "id": "EMP0034",
+      "name": "장연주",
+      "dept": "원가분석",
+      "rank": "주임연구원"
+    },
+    {
+      "id": "EMP0035",
+      "name": "강종균",
+      "dept": "경영기획",
+      "rank": "사원"
+    },
+    {
+      "id": "EMP0036",
+      "name": "김나경",
+      "dept": "원가분석",
+      "rank": "사원"
+    },
+    {
+      "id": "EMP0037",
+      "name": "김현진",
+      "dept": "경영기획",
+      "rank": "사원"
+    },
+    {
+      "id": "EMP0038",
+      "name": "배다현",
+      "dept": "원가분석",
+      "rank": "사원"
+    },
+    {
+      "id": "EMP0039",
+      "name": "김태욱",
+      "dept": "미분류",
+      "rank": "-"
+    },
+    {
+      "id": "EMP0040",
+      "name": "최한영",
+      "dept": "미분류",
+      "rank": "-"
+    },
+    {
+      "id": "EMP0041",
+      "name": "태스트",
+      "dept": "경영기획",
+      "rank": "사원"
+    }
+  ],
+  "certs": [
+    {
+      "uid": "C0001",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "14.09.30"
+    },
+    {
+      "uid": "C0002",
+      "empId": "EMP0009",
+      "name": "권광민",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "15.06.12"
+    },
+    {
+      "uid": "C0003",
+      "empId": "EMP0011",
+      "name": "김석표",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "23.11.11"
+    },
+    {
+      "uid": "C0004",
+      "empId": "EMP0022",
+      "name": "이규희",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "18.11.09"
+    },
+    {
+      "uid": "C0005",
+      "empId": "EMP0023",
+      "name": "이동환",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "15.06.12"
+    },
+    {
+      "uid": "C0006",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "15.04.10"
+    },
+    {
+      "uid": "C0007",
+      "empId": "EMP0004",
+      "name": "김창수",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "21.06.11"
+    },
+    {
+      "uid": "C0008",
+      "empId": "EMP0012",
+      "name": "김재희",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "16.12.09"
+    },
+    {
+      "uid": "C0009",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "15.06.12"
+    },
+    {
+      "uid": "C0010",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "16.12.09"
+    },
+    {
+      "uid": "C0011",
+      "empId": "EMP0026",
+      "name": "조형찬",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "25.05.30"
+    },
+    {
+      "uid": "C0012",
+      "empId": "EMP0003",
+      "name": "한재희",
+      "code": "CERT-BIZ-0005",
+      "title": "공인원가분석사",
+      "issue": "25.05.30"
+    },
+    {
+      "uid": "C0013",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "code": "CERT-LAW-0001",
+      "title": "변호사",
+      "issue": "04.12.24"
+    },
+    {
+      "uid": "C0014",
+      "empId": "EMP0019",
+      "name": "신동명",
+      "code": "CERT-LAB-0001",
+      "title": "공인노무사",
+      "issue": "09.10.19"
+    },
+    {
+      "uid": "C0015",
+      "empId": "EMP0021",
+      "name": "유옥수",
+      "code": "CERT-BIZ-0001",
+      "title": "공인회계사",
+      "issue": "03.05.20"
+    },
+    {
+      "uid": "C0016",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "05.07.25"
+    },
+    {
+      "uid": "C0017",
+      "empId": "EMP0017",
+      "name": "변정도",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "04.10.27"
+    },
+    {
+      "uid": "C0018",
+      "empId": "EMP0022",
+      "name": "이규희",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "14.10.08"
+    },
+    {
+      "uid": "C0019",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "15.01.01"
+    },
+    {
+      "uid": "C0020",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "16.10.05"
+    },
+    {
+      "uid": "C0021",
+      "empId": "EMP0025",
+      "name": "정재훈",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "23.01.01"
+    },
+    {
+      "uid": "C0022",
+      "empId": "EMP0026",
+      "name": "조형찬",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "22.01.01"
+    },
+    {
+      "uid": "C0023",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-LAW-0003",
+      "title": "갈등조정전문가 1급",
+      "issue": "24.11.16"
+    },
+    {
+      "uid": "C0024",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "code": "CERT-LAW-0003",
+      "title": "갈등조정전문가 1급",
+      "issue": "24.11.16"
+    },
+    {
+      "uid": "C0025",
+      "empId": "EMP0014",
+      "name": "김혜미",
+      "code": "CERT-LAW-0003",
+      "title": "갈등조정전문가 1급",
+      "issue": "24.11.16"
+    },
+    {
+      "uid": "C0026",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "code": "CERT-LAW-0003",
+      "title": "갈등조정전문가 1급",
+      "issue": "24.11.16"
+    },
+    {
+      "uid": "C0027",
+      "empId": "EMP0003",
+      "name": "한재희",
+      "code": "CERT-LAW-0003",
+      "title": "갈등조정전문가 1급",
+      "issue": "24.11.16"
+    },
+    {
+      "uid": "C0028",
+      "empId": "EMP0027",
+      "name": "최내현",
+      "code": "CERT-BIZ-0004",
+      "title": "PMP(Project Management Institute)",
+      "issue": "99.11.27"
+    },
+    {
+      "uid": "C0029",
+      "empId": "EMP0003",
+      "name": "한재희",
+      "code": "CERT-BIZ-0004",
+      "title": "PMP(Project Management Institute)",
+      "issue": "99.07.24"
+    },
+    {
+      "uid": "C0030",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0014",
+      "title": "조달계약사",
+      "issue": "06.01.06"
+    },
+    {
+      "uid": "C0031",
+      "empId": "EMP0004",
+      "name": "김창수",
+      "code": "CERT-BIZ-0020",
+      "title": "물류관리사",
+      "issue": "20.08.19"
+    },
+    {
+      "uid": "C0032",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "code": "CERT-BIZ-0020",
+      "title": "물류관리사",
+      "issue": "17.08.02"
+    },
+    {
+      "uid": "C0033",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0001",
+      "title": "품질관리기술사",
+      "issue": "14.11.14"
+    },
+    {
+      "uid": "C0034",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0003",
+      "title": "화공안전기술사",
+      "issue": "12.05.18"
+    },
+    {
+      "uid": "C0035",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-SAF-0009",
+      "title": "산업안전기사",
+      "issue": "25.06.13"
+    },
+    {
+      "uid": "C0036",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0009",
+      "title": "산업안전기사",
+      "issue": "83.08.22"
+    },
+    {
+      "uid": "C0037",
+      "empId": "EMP0025",
+      "name": "정재훈",
+      "code": "CERT-SAF-0009",
+      "title": "산업안전기사",
+      "issue": "24.09.10"
+    },
+    {
+      "uid": "C0038",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "code": "CERT-ENG-0001",
+      "title": "일반기계기사",
+      "issue": "97.05.14"
+    },
+    {
+      "uid": "C0039",
+      "empId": "EMP0030",
+      "name": "황운희",
+      "code": "CERT-ENG-0002",
+      "title": "전자기사",
+      "issue": "09.04.30"
+    },
+    {
+      "uid": "C0040",
+      "empId": "EMP0017",
+      "name": "변정도",
+      "code": "CERT-SAF-0006",
+      "title": "품질경영기사",
+      "issue": "83.11.14"
+    },
+    {
+      "uid": "C0041",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "code": "CERT-BIZ-0010",
+      "title": "유통관리사1급",
+      "issue": "17.08.02"
+    },
+    {
+      "uid": "C0042",
+      "empId": "EMP0013",
+      "name": "김종훈",
+      "code": "CERT-ENG-0003",
+      "title": "금속기사",
+      "issue": "77.02.17"
+    },
+    {
+      "uid": "C0043",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "code": "CERT-ENG-0005",
+      "title": "에너지관리산업기사",
+      "issue": "74.06.28"
+    },
+    {
+      "uid": "C0044",
+      "empId": "EMP0010",
+      "name": "김대식",
+      "code": "CERT-ENG-0004",
+      "title": "전자계산기제어산업기사",
+      "issue": "97.06.09"
+    },
+    {
+      "uid": "C0045",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0007",
+      "title": "품질경영시스템 인증심사원",
+      "issue": "85.07.29"
+    },
+    {
+      "uid": "C0046",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0005",
+      "title": "KOLAS 평가사",
+      "issue": "22.10.12"
+    },
+    {
+      "uid": "C0047",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-TRN-0003",
+      "title": "자동차진단평가사2급",
+      "issue": "17.11.05"
+    },
+    {
+      "uid": "C0048",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-TRN-0004",
+      "title": "동력수상레저기구조종 일반조종1급",
+      "issue": "17.10.25"
+    },
+    {
+      "uid": "C0049",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-SAF-0014",
+      "title": "ISO 9000 2000(경영)",
+      "issue": "19.04.25"
+    },
+    {
+      "uid": "C0050",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-SAF-0013",
+      "title": "ISO 14001 2015(환경)",
+      "issue": "19.04.25"
+    },
+    {
+      "uid": "C0051",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-BIZ-0024",
+      "title": "FAT 1급",
+      "issue": "23.11.25"
+    },
+    {
+      "uid": "C0052",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "code": "CERT-CON-0001",
+      "title": "건축시공기술사",
+      "issue": "96.08.05"
+    },
+    {
+      "uid": "C0053",
+      "empId": "EMP0029",
+      "name": "피욱환",
+      "code": "CERT-CON-0001",
+      "title": "건축시공기술사",
+      "issue": "90.12.28"
+    },
+    {
+      "uid": "C0054",
+      "empId": "EMP0008",
+      "name": "강정구",
+      "code": "CERT-CON-0001",
+      "title": "건축시공기술사",
+      "issue": "09.11.23"
+    },
+    {
+      "uid": "C0055",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-CON-0005",
+      "title": "정비사업전문관리사",
+      "issue": "25.02.12"
+    },
+    {
+      "uid": "C0056",
+      "empId": "EMP0029",
+      "name": "피욱환",
+      "code": "CERT-SAF-0002",
+      "title": "건설안전기술사",
+      "issue": "87.08.04"
+    },
+    {
+      "uid": "C0057",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-CON-0003",
+      "title": "건축기사",
+      "issue": "20.09.11"
+    },
+    {
+      "uid": "C0058",
+      "empId": "EMP0031",
+      "name": "박미야",
+      "code": "CERT-CON-0003",
+      "title": "건축기사",
+      "issue": "99.07.05"
+    },
+    {
+      "uid": "C0059",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "code": "CERT-CON-0003",
+      "title": "건축기사",
+      "issue": "88.12.29"
+    },
+    {
+      "uid": "C0060",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "code": "CERT-SAF-0011",
+      "title": "소방설비기사(기계분야)",
+      "issue": "82.11.08"
+    },
+    {
+      "uid": "C0061",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-SAF-0008",
+      "title": "건설안전기사",
+      "issue": "22.09.02"
+    },
+    {
+      "uid": "C0062",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-CON-0006",
+      "title": "BIM 운용전문가2급 건축",
+      "issue": "20.03.04"
+    },
+    {
+      "uid": "C0063",
+      "empId": "EMP0022",
+      "name": "이규희",
+      "code": "CERT-CON-0004",
+      "title": "공인중개사",
+      "issue": "85.11.21"
+    },
+    {
+      "uid": "C0064",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-CON-0007",
+      "title": "전산응용건축제도기능사",
+      "issue": "17.04.14"
+    },
+    {
+      "uid": "C0065",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0012",
+      "title": "기술거래사",
+      "issue": "14.06.16"
+    },
+    {
+      "uid": "C0066",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-BIZ-0012",
+      "title": "기술거래사",
+      "issue": "14.06.16"
+    },
+    {
+      "uid": "C0067",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0008",
+      "title": "국제경영컨설턴트(CMC)",
+      "issue": "18.01.01"
+    },
+    {
+      "uid": "C0068",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-AGR-0004",
+      "title": "수목치료기술자",
+      "issue": "20.08.11"
+    },
+    {
+      "uid": "C0069",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-AGR-0004",
+      "title": "수목치료기술자",
+      "issue": "21.09.16"
+    },
+    {
+      "uid": "C0070",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-EDU-0003",
+      "title": "평생교육사2급",
+      "issue": "18.08.31"
+    },
+    {
+      "uid": "C0071",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-EDU-0003",
+      "title": "평생교육사2급",
+      "issue": "18.08.13"
+    },
+    {
+      "uid": "C0072",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-AGR-0006",
+      "title": "식물보호산업기사",
+      "issue": "22.12.16"
+    },
+    {
+      "uid": "C0073",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "code": "CERT-AGR-0006",
+      "title": "식물보호산업기사",
+      "issue": "23.11.15"
+    },
+    {
+      "uid": "C0074",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0022",
+      "title": "창업보육전문매니저",
+      "issue": "24.06.30"
+    },
+    {
+      "uid": "C0075",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-EDU-0001",
+      "title": "산업카운슬러1급",
+      "issue": "16.05.21"
+    },
+    {
+      "uid": "C0076",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0016",
+      "title": "M&A지도사",
+      "issue": "07.03.30"
+    },
+    {
+      "uid": "C0077",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0017",
+      "title": "ERP 물류 컨설턴트",
+      "issue": "04.07.01"
+    },
+    {
+      "uid": "C0078",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-LAB-0003",
+      "title": "채용면접관 자격인증서",
+      "issue": "17.12.08"
+    },
+    {
+      "uid": "C0079",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "code": "CERT-BIZ-0011",
+      "title": "신용분석사",
+      "issue": "90.07.16"
+    },
+    {
+      "uid": "C0080",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "code": "CERT-AGR-0007",
+      "title": "약용식물관리사",
+      "issue": "06.02.23"
+    },
+    {
+      "uid": "C0081",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-IT-0004",
+      "title": "기능점수측정전문가(K-CFPS)",
+      "issue": "20.02.28"
+    },
+    {
+      "uid": "C0082",
+      "empId": "EMP0016",
+      "name": "박희성",
+      "code": "CERT-IT-0004",
+      "title": "기능점수측정전문가(K-CFPS)",
+      "issue": "19.06.21"
+    },
+    {
+      "uid": "C0083",
+      "empId": "EMP0010",
+      "name": "김대식",
+      "code": "CERT-IT-0005",
+      "title": "정보처리기사",
+      "issue": "04.08.16"
+    },
+    {
+      "uid": "C0084",
+      "empId": "EMP0016",
+      "name": "박희성",
+      "code": "CERT-IT-0002",
+      "title": "CISA(certified Information Systems Auditor)",
+      "issue": "01.09.12"
+    },
+    {
+      "uid": "C0085",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-IT-0009",
+      "title": "데이터 사이언티스트 능력 인증(DSAC)",
+      "issue": "18.12.21"
+    },
+    {
+      "uid": "C0086",
+      "empId": "EMP0016",
+      "name": "박희성",
+      "code": "CERT-IT-0003",
+      "title": "SW프로세스품질인증심사원",
+      "issue": "13.06.11"
+    },
+    {
+      "uid": "C0087",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-EDU-0006",
+      "title": "컴퓨터그래픽기능사",
+      "issue": "13.06.28"
+    },
+    {
+      "uid": "C0088",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-EDU-0004",
+      "title": "컴퓨터활용능력 2급",
+      "issue": "24.03.01"
+    },
+    {
+      "uid": "C0089",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "code": "CERT-EDU-0005",
+      "title": "웹디자인개발기능사",
+      "issue": "13.12.27"
+    },
+    {
+      "uid": "C0090",
+      "empId": "EMP0010",
+      "name": "김대식",
+      "code": "CERT-IT-0008",
+      "title": "정보처리산업기사",
+      "issue": "97.09.29"
+    },
+    {
+      "uid": "C0091",
+      "empId": "EMP0022",
+      "name": "이규희",
+      "code": "CERT-BIZ-0007",
+      "title": "가맹거래사",
+      "issue": "19.12.30"
+    },
+    {
+      "uid": "C0092",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "code": "CERT-BIZ-0007",
+      "title": "가맹거래사",
+      "issue": "21.03.11"
+    },
+    {
+      "uid": "C0093",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "code": "CERT-BIZ-0007",
+      "title": "가맹거래사",
+      "issue": "11.12.29"
+    },
+    {
+      "uid": "C0094",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-MED-0005",
+      "title": "사회복지사2급",
+      "issue": "16.01.19"
+    },
+    {
+      "uid": "C0095",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-MED-0005",
+      "title": "사회복지사2급",
+      "issue": "16.01.19"
+    },
+    {
+      "uid": "C0096",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0006",
+      "title": "재경관리사",
+      "issue": "03.10.06"
+    },
+    {
+      "uid": "C0097",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-MED-0003",
+      "title": "보험심사평가사1급",
+      "issue": "18.10.24"
+    },
+    {
+      "uid": "C0098",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-MED-0003",
+      "title": "보험심사평가사1급",
+      "issue": "18.10.24"
+    },
+    {
+      "uid": "C0099",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-BIZ-0018",
+      "title": "ERP 회계 컨설턴트",
+      "issue": "04.05.06"
+    },
+    {
+      "uid": "C0100",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-SAF-0015",
+      "title": "재난관리지도사",
+      "issue": "15.04.03"
+    },
+    {
+      "uid": "C0101",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "code": "CERT-AGR-0003",
+      "title": "유기농업기사",
+      "issue": "12.11.23"
+    },
+    {
+      "uid": "C0102",
+      "empId": "EMP0014",
+      "name": "김혜미",
+      "code": "CERT-MED-0001",
+      "title": "간호사",
+      "issue": "02.04.19"
+    },
+    {
+      "uid": "C0103",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-LAB-0004",
+      "title": "사회보험사2급",
+      "issue": "11.07.28"
+    },
+    {
+      "uid": "C0104",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-EDU-0002",
+      "title": "R&A Level 2 Rules School",
+      "issue": "17.11.16"
+    },
+    {
+      "uid": "C0105",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-TRN-0001",
+      "title": "소형선박조종사(해기사)",
+      "issue": "17.11.30"
+    },
+    {
+      "uid": "C0106",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-BIZ-0031",
+      "title": "FAT 2급",
+      "issue": "23.10.28"
+    },
+    {
+      "uid": "C0107",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-TRN-0002",
+      "title": "초경량비행장치 조종자",
+      "issue": "20.01.20"
+    },
+    {
+      "uid": "C0108",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-BIZ-0029",
+      "title": "ERP 회계 정보관리사 2급",
+      "issue": "23.10.10"
+    },
+    {
+      "uid": "C0109",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-BIZ-0028",
+      "title": "ERP 인사 정보관리사 2급",
+      "issue": "23.04.11"
+    },
+    {
+      "uid": "C0110",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "code": "CERT-BIZ-0032",
+      "title": "전산회계 2급",
+      "issue": "23.10.26"
+    },
+    {
+      "uid": "C0111",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-MED-0004",
+      "title": "보험심사평가사2급",
+      "issue": "18.12.19"
+    },
+    {
+      "uid": "C0112",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-LAB-0002",
+      "title": "사회보험사1급",
+      "issue": "17.08.08"
+    },
+    {
+      "uid": "C0113",
+      "empId": "EMP0016",
+      "name": "박희성",
+      "code": "CERT-IT-0007",
+      "title": "ISO27001_SGS심사원",
+      "issue": "09.09.27"
+    },
+    {
+      "uid": "C0114",
+      "empId": "EMP0006",
+      "name": "최재운",
+      "code": "CERT-BIZ-0030",
+      "title": "PMP(프로젝트관리전문가) 1급",
+      "issue": "25.01.20"
+    },
+    {
+      "uid": "C0115",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "code": "CERT-CON-0002",
+      "title": "건설사업관리전문가(CMP)",
+      "issue": "11.06.29"
+    },
+    {
+      "uid": "C0116",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "code": "CERT-BIZ-0002",
+      "title": "세무사",
+      "issue": "08.10.08"
+    },
+    {
+      "uid": "C0117",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "code": "CERT-SAF-0010",
+      "title": "소방기술자 (기계 특급, 전기 고급)",
+      "issue": "22.03.22"
+    },
+    {
+      "uid": "C0118",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "code": "CERT-LAW-0002",
+      "title": "정책분석평가사1급",
+      "issue": "18.12.22"
+    },
+    {
+      "uid": "C0119",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "code": "CERT-LAW-0002",
+      "title": "정책분석평가사1급",
+      "issue": "18.12.22"
+    },
+    {
+      "uid": "C0120",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0015",
+      "title": "전산세무 2급",
+      "issue": "24.06.20"
+    },
+    {
+      "uid": "C0121",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0025",
+      "title": "전산회계 1급",
+      "issue": "23.08.24"
+    },
+    {
+      "uid": "C0122",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0032",
+      "title": "전산회계 2급",
+      "issue": "23.04.27"
+    },
+    {
+      "uid": "C0123",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0029",
+      "title": "ERP 회계 정보관리사 2급",
+      "issue": "24.06.11"
+    },
+    {
+      "uid": "C0124",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0028",
+      "title": "ERP 인사 정보관리사 2급",
+      "issue": "25.04.08"
+    },
+    {
+      "uid": "C0125",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0027",
+      "title": "ERP 생산 정보관리사 2급",
+      "issue": "25.04.08"
+    },
+    {
+      "uid": "C0126",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-EDU-0007",
+      "title": "워드프로세서",
+      "issue": "25.02.18"
+    },
+    {
+      "uid": "C0127",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-EDU-0004",
+      "title": "컴퓨터활용능력 2급",
+      "issue": "23.11.24"
+    },
+    {
+      "uid": "C0128",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0031",
+      "title": "FAT 2급",
+      "issue": "25.02.28"
+    },
+    {
+      "uid": "C0129",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "code": "CERT-BIZ-0026",
+      "title": "전산회계운용사 3급",
+      "issue": "23.09.01"
+    },
+    {
+      "uid": "C0130",
+      "empId": "EMP0038",
+      "name": "배다현",
+      "code": "CERT-EDU-0004",
+      "title": "컴퓨터활용능력 2급",
+      "issue": "26.03.05"
+    },
+    {
+      "uid": "C0131",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-BIZ-0033",
+      "title": "회계관리2급",
+      "issue": "08.07.07"
+    },
+    {
+      "uid": "C0132",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-IT-0008",
+      "title": "정보처리산업기사",
+      "issue": "91.07.31"
+    },
+    {
+      "uid": "C0133",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-AGR-0001",
+      "title": "시설원예기사",
+      "issue": "25.06.13"
+    },
+    {
+      "uid": "C0134",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-AGR-0005",
+      "title": "스마트농업관리사",
+      "issue": "25.12.30"
+    },
+    {
+      "uid": "C0135",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-BIZ-0020",
+      "title": "물류관리사",
+      "issue": "05.10.15"
+    },
+    {
+      "uid": "C0136",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-BIZ-0021",
+      "title": "무역영어1급",
+      "issue": "12.10.09"
+    },
+    {
+      "uid": "C0137",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-BIZ-0019",
+      "title": "구매 자재관리사",
+      "issue": "11.12.21"
+    },
+    {
+      "uid": "C0138",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-BIZ-0009",
+      "title": "구매공급전문가",
+      "issue": "14.01.07"
+    },
+    {
+      "uid": "C0139",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-SAF-0004",
+      "title": "6시그마 블랙밸트",
+      "issue": "07.07.06"
+    },
+    {
+      "uid": "C0140",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "code": "CERT-IT-0006",
+      "title": "OCP_오라클 데이터베이스 관리자",
+      "issue": "03.08.03"
+    },
+    {
+      "uid": "C0141",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "code": "CERT-BIZ-0003",
+      "title": "경영지도사",
+      "issue": "21.01.01"
+    },
+    {
+      "uid": "C0142",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "code": "CERT-BIZ-0012",
+      "title": "기술거래사",
+      "issue": "14.06.16"
+    },
+    {
+      "uid": "C0143",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "code": "CERT-BIZ-0013",
+      "title": "기업·기술가치평가사",
+      "issue": "16.06.01"
+    },
+    {
+      "uid": "C0144",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "code": "CERT-IT-0010",
+      "title": "사회조사분석사 2급",
+      "issue": "16.06.01"
+    },
+    {
+      "uid": "C0145",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "code": "CERT-MED-0002",
+      "title": "위생사(2급)",
+      "issue": "80.04.04"
+    },
+    {
+      "uid": "C0146",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "code": "CERT-SAF-0016",
+      "title": "대기환경산업기사",
+      "issue": "77.09.07"
+    },
+    {
+      "uid": "C0147",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "code": "CERT-SAF-0012",
+      "title": "수질환경기사",
+      "issue": "83.12.05"
+    },
+    {
+      "uid": "C0148",
+      "empId": "EMP0041",
+      "name": "태스트",
+      "code": "CERT-BIZ-0001",
+      "title": "공인회계사",
+      "issue": "26.01.01"
+    }
+  ],
+  "educations": [
+    {
+      "eduId": "EMP0001-EDU-01",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "연세대학교 정경대학원",
+      "department": "",
+      "major": "경영학전공"
+    },
+    {
+      "eduId": "EMP0001-EDU-02",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "학사",
+      "degreeTitle": "경영학사",
+      "school": "건양대학교",
+      "department": "세무학과",
+      "major": "세무학"
+    },
+    {
+      "eduId": "EMP0005-EDU-01",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "degree": "학사",
+      "degreeTitle": "세무회계학사",
+      "school": "서해대학교",
+      "department": "세무회계과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0007-EDU-01",
+      "empId": "EMP0007",
+      "name": "배병권",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "한국방송통신대학교",
+      "department": "테크노경영",
+      "major": "테크노경영전공"
+    },
+    {
+      "eduId": "EMP0009-EDU-01",
+      "empId": "EMP0009",
+      "name": "권광민",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "연세대학교 정경대학원",
+      "department": "",
+      "major": "경영학전공"
+    },
+    {
+      "eduId": "EMP0009-EDU-02",
+      "empId": "EMP0009",
+      "name": "권광민",
+      "degree": "학사",
+      "degreeTitle": "경영학사",
+      "school": "순천향대학교 글로벌경영대학",
+      "department": "경영학부",
+      "major": "경영학전공"
+    },
+    {
+      "eduId": "EMP0010-EDU-01",
+      "empId": "EMP0010",
+      "name": "김대식",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "숭실대학교 경영대학원",
+      "department": "전문경영학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0015-EDU-01",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "degree": "학사",
+      "degreeTitle": "경제학사",
+      "school": "전남대학교 상과대학",
+      "department": "경제학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0016-EDU-01",
+      "empId": "EMP0016",
+      "name": "박희성",
+      "degree": "학사",
+      "degreeTitle": "경제학사",
+      "school": "한남대학교",
+      "department": "",
+      "major": "경제학전공"
+    },
+    {
+      "eduId": "EMP0018-EDU-01",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "중앙대학교 국제경영대학원",
+      "department": "국제경영학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0019-EDU-01",
+      "empId": "EMP0019",
+      "name": "신동명",
+      "degree": "학사",
+      "degreeTitle": "경제학사",
+      "school": "성균관대학교",
+      "department": "경제학부",
+      "major": "경제학전공"
+    },
+    {
+      "eduId": "EMP0021-EDU-01",
+      "empId": "EMP0021",
+      "name": "유옥수",
+      "degree": "학사",
+      "degreeTitle": "경영학사",
+      "school": "한양대학교 경상대학",
+      "department": "경영학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0022-EDU-01",
+      "empId": "EMP0022",
+      "name": "이규희",
+      "degree": "학사",
+      "degreeTitle": "경영학사",
+      "school": "강원대학교 경영대학",
+      "department": "경영학과",
+      "major": "경영학전공"
+    },
+    {
+      "eduId": "EMP0023-EDU-01",
+      "empId": "EMP0023",
+      "name": "이동환",
+      "degree": "학사",
+      "degreeTitle": "경영학사",
+      "school": "한국방송통신대학교",
+      "department": "경영학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0028-EDU-01",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "degree": "학사",
+      "degreeTitle": "경제학사",
+      "school": "강원대학교 경영대학",
+      "department": "경제학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0036-EDU-01",
+      "empId": "EMP0036",
+      "name": "김나경",
+      "degree": "고졸",
+      "degreeTitle": "고졸",
+      "school": "성보경영고등학교",
+      "department": "세무행정과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0039-EDU-01",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "degree": "박사",
+      "degreeTitle": "경영학박사",
+      "school": "한양대학교 대학원 ",
+      "department": "경영학과",
+      "major": "생산서비스경영전공"
+    },
+    {
+      "eduId": "EMP0039-EDU-02",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "한양대학교 글로벌경영전문대학원",
+      "department": "전략프로젝트경영트랙",
+      "major": "전략프로젝트경영트랙"
+    },
+    {
+      "eduId": "EMP0001-EDU-03",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "한양사이버대학교",
+      "department": "",
+      "major": "디지털건축도시공학(주전공) /전기전자공학전공(복수전공)"
+    },
+    {
+      "eduId": "EMP0002-EDU-01",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "계명대학교",
+      "department": "건축공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0004-EDU-01",
+      "empId": "EMP0004",
+      "name": "김창수",
+      "degree": "박사",
+      "degreeTitle": "공학박사",
+      "school": "아주대학교 대학원",
+      "department": "시스템공학과",
+      "major": "시스템공학전공"
+    },
+    {
+      "eduId": "EMP0004-EDU-02",
+      "empId": "EMP0004",
+      "name": "김창수",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "서울대학교 대학원",
+      "department": "기계설계학과",
+      "major": "기계설계학전공"
+    },
+    {
+      "eduId": "EMP0004-EDU-03",
+      "empId": "EMP0004",
+      "name": "김창수",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "서울대학교 공과대학",
+      "department": "기계공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0006-EDU-01",
+      "empId": "EMP0006",
+      "name": "최재운",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "단국대학교",
+      "department": "건축공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0010-EDU-02",
+      "empId": "EMP0010",
+      "name": "김대식",
+      "degree": "학사",
+      "degreeTitle": "이학사",
+      "school": "국가평생교육진흥원",
+      "department": "",
+      "major": "컴퓨터과학전공"
+    },
+    {
+      "eduId": "EMP0013-EDU-01",
+      "empId": "EMP0013",
+      "name": "김종훈",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "연세대학교 이공대학",
+      "department": "금속공학과",
+      "major": "금속공학전공"
+    },
+    {
+      "eduId": "EMP0017-EDU-01",
+      "empId": "EMP0017",
+      "name": "변정도",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "인하대학교 공과대학",
+      "department": "공학과",
+      "major": "기계공학전공"
+    },
+    {
+      "eduId": "EMP0018-EDU-02",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "degree": "박사",
+      "degreeTitle": "이학박사",
+      "school": "건국대학교 일반대학원",
+      "department": "분자생명공학과",
+      "major": "분자생명공학전공"
+    },
+    {
+      "eduId": "EMP0018-EDU-03",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "영남대학교 공과대학",
+      "department": "기계공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0020-EDU-01",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "degree": "박사",
+      "degreeTitle": "공학박사",
+      "school": "전북대학교 대학원",
+      "department": "화학공학과",
+      "major": "공업화학전공"
+    },
+    {
+      "eduId": "EMP0020-EDU-02",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "전북대학교 대학원",
+      "department": "화학공학과",
+      "major": "공업화학전공"
+    },
+    {
+      "eduId": "EMP0020-EDU-03",
+      "empId": "EMP0020",
+      "name": "유길상",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "전북대학교 공과대학",
+      "department": "",
+      "major": "화학공학전공"
+    },
+    {
+      "eduId": "EMP0025-EDU-01",
+      "empId": "EMP0025",
+      "name": "정재훈",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "서울대학교 대학원",
+      "department": "조선해양공학과",
+      "major": "조선해양공학전공"
+    },
+    {
+      "eduId": "EMP0025-EDU-02",
+      "empId": "EMP0025",
+      "name": "정재훈",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "서울대학교 공과대학",
+      "department": "조선해양공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0027-EDU-01",
+      "empId": "EMP0027",
+      "name": "최내현",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "호원대학교",
+      "department": "",
+      "major": "토목공학전공"
+    },
+    {
+      "eduId": "EMP0029-EDU-01",
+      "empId": "EMP0029",
+      "name": "피욱환",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "경북대학교 산업대학원",
+      "department": "산업공학과",
+      "major": "건축공학전공"
+    },
+    {
+      "eduId": "EMP0030-EDU-01",
+      "empId": "EMP0030",
+      "name": "황운희",
+      "degree": "박사",
+      "degreeTitle": "공학박사",
+      "school": "성균관대학교 대학원",
+      "department": "전자공학과",
+      "major": "전자공학전공"
+    },
+    {
+      "eduId": "EMP0030-EDU-02",
+      "empId": "EMP0030",
+      "name": "황운희",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "경북대학교 대학원",
+      "department": "전자공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0030-EDU-03",
+      "empId": "EMP0030",
+      "name": "황운희",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "경북대학교 공과대학",
+      "department": "전자공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0031-EDU-01",
+      "empId": "EMP0031",
+      "name": "박미야",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "경상국립대학교",
+      "department": "건축공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0032-EDU-01",
+      "empId": "EMP0032",
+      "name": "이길훈",
+      "degree": "학사",
+      "degreeTitle": "건축학사",
+      "school": "경기과학기술대학교",
+      "department": "건축인테리어학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0034-EDU-01",
+      "empId": "EMP0034",
+      "name": "장연주",
+      "degree": "전문학사",
+      "degreeTitle": "공학전문학사",
+      "school": "서일대학교",
+      "department": "정보통신공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0039-EDU-03",
+      "empId": "EMP0039",
+      "name": "김태욱",
+      "degree": "학사",
+      "degreeTitle": "공학사",
+      "school": "경원대학교 IT대학",
+      "department": "전자공학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0040-EDU-01",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "degree": "석사",
+      "degreeTitle": "공학석사",
+      "school": "연세대학교 산업대학원",
+      "department": "환경공학과",
+      "major": "환경공해전공"
+    },
+    {
+      "eduId": "EMP0008-EDU-01",
+      "empId": "EMP0008",
+      "name": "강정구",
+      "degree": "",
+      "degreeTitle": "",
+      "school": "",
+      "department": "",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0011-EDU-01",
+      "empId": "EMP0011",
+      "name": "김석표",
+      "degree": "",
+      "degreeTitle": "",
+      "school": "",
+      "department": "",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0012-EDU-01",
+      "empId": "EMP0012",
+      "name": "김재희",
+      "degree": "",
+      "degreeTitle": "",
+      "school": "",
+      "department": "",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0015-EDU-02",
+      "empId": "EMP0015",
+      "name": "박판진",
+      "degree": "석사",
+      "degreeTitle": "경영학석사",
+      "school": "호서대학교 글로벌창업대학원",
+      "department": "창업컨설턴트학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0018-EDU-04",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "degree": "학사",
+      "degreeTitle": "문학사",
+      "school": "한국방송통신대학교",
+      "department": "영어영문학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0019-EDU-02",
+      "empId": "EMP0019",
+      "name": "신동명",
+      "degree": "석사",
+      "degreeTitle": "컨설팅학석사",
+      "school": "한성대학교 지식서비스&컨설팅대학원",
+      "department": "지식서비스&컨설팅학과",
+      "major": "매니지먼트컨설팅전공"
+    },
+    {
+      "eduId": "EMP0024-EDU-01",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "degree": "박사",
+      "degreeTitle": "동양철학박사",
+      "school": "동방문화대학원대학교",
+      "department": "",
+      "major": "동양철학전공"
+    },
+    {
+      "eduId": "EMP0024-EDU-02",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "degree": "석사",
+      "degreeTitle": "신학석사",
+      "school": "한신대학교 신학대학원",
+      "department": "신학과",
+      "major": "실천신학전공"
+    },
+    {
+      "eduId": "EMP0024-EDU-03",
+      "empId": "EMP0024",
+      "name": "정영대",
+      "degree": "학사",
+      "degreeTitle": "신학사",
+      "school": "한신대학교 신학대학",
+      "department": "신학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0026-EDU-01",
+      "empId": "EMP0026",
+      "name": "조형찬",
+      "degree": "석사",
+      "degreeTitle": "신학석사",
+      "school": "한신대학교 대학원",
+      "department": "신학과",
+      "major": "기독교윤리전공"
+    },
+    {
+      "eduId": "EMP0026-EDU-02",
+      "empId": "EMP0026",
+      "name": "조형찬",
+      "degree": "학사",
+      "degreeTitle": "신학사",
+      "school": "한신대학교 신학대학",
+      "department": "신학과",
+      "major": "신학전공"
+    },
+    {
+      "eduId": "EMP0028-EDU-02",
+      "empId": "EMP0028",
+      "name": "표순천",
+      "degree": "석사",
+      "degreeTitle": "컨설팅학석사",
+      "school": "한성대학교 지식서비스&컨설팅대학원",
+      "department": "지식서비스&컨설팅학과",
+      "major": "매니지먼트컨설팅전공"
+    },
+    {
+      "eduId": "EMP0033-EDU-01",
+      "empId": "EMP0033",
+      "name": "김연화",
+      "degree": "고졸",
+      "degreeTitle": "고졸",
+      "school": "",
+      "department": "",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0037-EDU-01",
+      "empId": "EMP0037",
+      "name": "김현진",
+      "degree": "학사",
+      "degreeTitle": "농학사",
+      "school": "대구가톨릭대학교",
+      "department": "식물육종학과",
+      "major": "식물분자유전학전공"
+    },
+    {
+      "eduId": "EMP0038-EDU-01",
+      "empId": "EMP0038",
+      "name": "배다현",
+      "degree": "학사",
+      "degreeTitle": "법행정학사",
+      "school": "강남대학교 경영관리대학",
+      "department": "정경학부",
+      "major": "공공인재학전공"
+    },
+    {
+      "eduId": "EMP0040-EDU-02",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "degree": "박사",
+      "degreeTitle": "이학박사",
+      "school": "연세대학교 대학원",
+      "department": "환경과학과",
+      "major": "환경과학전공"
+    },
+    {
+      "eduId": "EMP0002-EDU-02",
+      "empId": "EMP0002",
+      "name": "이병준",
+      "degree": "석사",
+      "degreeTitle": "법학석사",
+      "school": "광운대학교 건설법무대학원",
+      "department": "건설법무학과",
+      "major": "건설소송실무전공"
+    },
+    {
+      "eduId": "EMP0035-EDU-01",
+      "empId": "EMP0035",
+      "name": "강종균",
+      "degree": "석사",
+      "degreeTitle": "법학석사",
+      "school": "순천향대학교 일반대학원",
+      "department": "법학과",
+      "major": "법학"
+    },
+    {
+      "eduId": "EMP0035-EDU-02",
+      "empId": "EMP0035",
+      "name": "강종균",
+      "degree": "학사",
+      "degreeTitle": "법학사 경영학사",
+      "school": "순천향대학교 사회과학대학",
+      "department": "법정학부",
+      "major": "법학전공"
+    },
+    {
+      "eduId": "EMP0001-EDU-04",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "학사",
+      "degreeTitle": "행정학사",
+      "school": "국가평생교육진흥원",
+      "department": "",
+      "major": "사회복지학전공"
+    },
+    {
+      "eduId": "EMP0005-EDU-02",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "degree": "석사",
+      "degreeTitle": "행정학석사",
+      "school": "동국대학교 행정대학원",
+      "department": "행정학과",
+      "major": "행정학전공"
+    },
+    {
+      "eduId": "EMP0001-EDU-05",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "박사",
+      "degreeTitle": "이학박사",
+      "school": "을지대학교 대학원",
+      "department": "의료IT마케팅학과",
+      "major": "의료IT마케팅학전공"
+    },
+    {
+      "eduId": "EMP0005-EDU-03",
+      "empId": "EMP0005",
+      "name": "하은정",
+      "degree": "학사",
+      "degreeTitle": "보건행정학사",
+      "school": "한양사이버대학교",
+      "department": "",
+      "major": "보건행정학전공"
+    },
+    {
+      "eduId": "EMP0014-EDU-01",
+      "empId": "EMP0014",
+      "name": "김혜미",
+      "degree": "학사",
+      "degreeTitle": "간호학사",
+      "school": "서울보건대학교(현 을지대학교)",
+      "department": "간호과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0001-EDU-06",
+      "empId": "EMP0001",
+      "name": "김민선",
+      "degree": "학사",
+      "degreeTitle": "농학사",
+      "school": "한국방송통신대학교",
+      "department": "농학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0018-EDU-05",
+      "empId": "EMP0018",
+      "name": "신광수",
+      "degree": "학사",
+      "degreeTitle": "농학사",
+      "school": "한국방송통신대학교",
+      "department": "농학과",
+      "major": ""
+    },
+    {
+      "eduId": "EMP0037-EDU-02",
+      "empId": "EMP0037",
+      "name": "김현진",
+      "degree": "석사",
+      "degreeTitle": "농학석사",
+      "school": "대구가톨릭대학교",
+      "department": "원예학과",
+      "major": "식물육종학전공"
+    },
+    {
+      "eduId": "EMP0040-EDU-03",
+      "empId": "EMP0040",
+      "name": "최한영",
+      "degree": "학사",
+      "degreeTitle": "이학사",
+      "school": "인하대학교 이과대학",
+      "department": "생명과학",
+      "major": "생물학전공"
+    }
+  ],
+  "works": [
+    {
+      "uid": "W0001",
+      "code": "WORK-CA-111",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "제작",
+      "taskType": "산정",
+      "scope": "제작설치(제조로 일괄 적용), 구매, LCC",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "물품제조, 제작, 시제품제작, 시스템구축, 장비제작, 가공조립, 현장설치, 제조, 제작, 가공, 조립, 생산, 완성, 규격, 시방서, 물품, 납품, 설치",
+      "description": "[예정가격작성기준 제2장] 재료를 매입하여 제조공장(작업장)에서 가공·조립하여 새로운 생산품을 완성하고, 필요시 현장에 설치하는 과업.",
+      "guideline": "정부입찰계약집행기준, 예정가격작성기준(계약예규)",
+      "law": "국가를 당사자로 하는 계약에 관한 법률(국계법) 지방자치단체를 당사자로 하는 계약에 관한 법률(지계법)"
+    },
+    {
+      "uid": "W0002",
+      "code": "WORK-CA-112",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "제작",
+      "taskType": "검증",
+      "scope": "제작설치(제조로 일괄 적용), 구매, LCC",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "물품제조, 제작, 시제품제작, 시스템구축, 장비제작, 가공조립, 현장설치, 제조, 제작, 가공, 조립, 생산, 완성, 규격, 시방서, 물품, 납품, 설치",
+      "description": "[예정가격작성기준 제2장] 재료를 매입하여 제조공장(작업장)에서 가공·조립하여 새로운 생산품을 완성하고, 필요시 현장에 설치하는 과업.",
+      "guideline": "정부입찰계약집행기준, 예정가격작성기준(계약예규)",
+      "law": "국가를 당사자로 하는 계약에 관한 법률(국계법) 지방자치단체를 당사자로 하는 계약에 관한 법률(지계법)"
+    },
+    {
+      "uid": "W0003",
+      "code": "WORK-CA-121",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "구매",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "물품구매, 기자재구매, 관급자재, 자재구입, 도서구매, 비품구입, 품목 장비구매, 완성품, 납품, 구매, 구입, 도입, 물품, 자재, 장비, H/W, 관급, 판금",
+      "description": "[국가계약법 시행규칙 제6조]별도의 가공 없이 완성된 형태의 물품을 단순히 구매하여 납품받는 계약.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0004",
+      "code": "WORK-CA-122",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "구매",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "물품구매, 기자재구매, 관급자재, 자재구입, 도서구매, 비품구입, 품목 장비구매, 완성품, 납품, 구매, 구입, 도입, 물품, 자재, 장비, H/W, 관급, 판금",
+      "description": "[국가계약법 시행규칙 제6조]별도의 가공 없이 완성된 형태의 물품을 단순히 구매하여 납품받는 계약.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0005",
+      "code": "WORK-CA-131",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "경제성효과(LCC)",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "LCC, 생애주기비용, 경제성효과, 수명주기, 내구연한분석 교체주기, 효과분석, 생애주기, 내구연한, 절감효과",
+      "description": "[건설기술진흥법 시행령 제75조]설계의 경제성 등 검토(VE)의 일환으로 생애주기 동안 발생하는 총 비용을 분석.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0006",
+      "code": "WORK-CA-132",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "경제성효과(LCC)",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "LCC, 생애주기비용, 경제성효과, 수명주기, 내구연한분석 교체주기, 효과분석, 생애주기, 내구연한, 절감효과",
+      "description": "[건설기술진흥법 시행령 제75조]설계의 경제성 등 검토(VE)의 일환으로 생애주기 동안 발생하는 총 비용을 분석.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0007",
+      "code": "WORK-CA-141",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "납품대금연동",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "납품대금연동, 연동제, 약정서, 원재료비, 조정, 상생협력, 동행기업, 가격변동반영",
+      "description": "[대·중소기업 상생협력 촉진에 관한 법률 제21조] 주요 원재료 가격 등락에 따라 납품 대금을 조정(연동)하기 위해 약정서를 작성하거나 관련 원가 변동분을 검토하는 과업.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0008",
+      "code": "WORK-CA-142",
+      "domain": "원가(C)",
+      "category": "제조",
+      "subCategory": "납품대금연동",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "납품대금연동, 연동제, 약정서, 원재료비, 조정, 상생협력, 동행기업, 가격변동반영",
+      "description": "[대·중소기업 상생협력 촉진에 관한 법률 제21조] 주요 원재료 가격 등락에 따라 납품 대금을 조정(연동)하기 위해 약정서를 작성하거나 관련 원가 변동분을 검토하는 과업.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0009",
+      "code": "WORK-CB-211",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "공사원가",
+      "taskType": "산정",
+      "scope": "공사 원가산정용역 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "토목, 전기, 조경, 소방, 인테리어, 철거, 포장, 보수, 증축, 통신, 개보수, 배관, 가설, 공사, 시공, 건립, 정비, 복구, 설치공사",
+      "description": "[예정가격작성기준 제3장] 건설산업기본법, 전기공사업법, 정보통신공사업법 등 관련 법령에 의하여 면허·허가·등록을 필한 사업자가 시공하는 건설 공사 과업.",
+      "guideline": "품질관리, 안전관리, 산업재해예방",
+      "law": "정부(지자체) 계약집행 기준"
+    },
+    {
+      "uid": "W0010",
+      "code": "WORK-CB-212",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "공사원가",
+      "taskType": "검증",
+      "scope": "공사 원가산정용역 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "토목, 전기, 조경, 소방, 인테리어, 철거, 포장, 보수, 증축, 통신, 개보수, 배관, 가설, 공사, 시공, 건립, 정비, 복구, 설치공사",
+      "description": "[예정가격작성기준 제3장] 건설산업기본법, 전기공사업법, 정보통신공사업법 등 관련 법령에 의하여 면허·허가·등록을 필한 사업자가 시공하는 건설 공사 과업.",
+      "guideline": "품질관리, 안전관리, 산업재해예방",
+      "law": "정부(지자체) 계약집행 기준"
+    },
+    {
+      "uid": "W0011",
+      "code": "WORK-CB-221",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "물가변동",
+      "taskType": "산정",
+      "scope": "ES / DS",
+      "department": "건설사업본부",
+      "owner": "하은정 이사",
+      "keywords": "물가변동, ESC, 지수조정율, 품목조정율, 단가변동, 계약금액조정, 등락폭, 비목군, 조정기준일, K,Z값, 계약금액, 조정, 지수, 변동, 등락, 검토용역, 증액, 감액",
+      "description": "[국가계약법 시행령 제64조] 계약 체결 후 물가 변동으로 인한 계약 금액의 조정(Escalation).",
+      "guideline": "시설분야 물가변동 사전검토 처리지침",
+      "law": "국가를 당사자로 하는 계약에 관한 법률(국계법) 지방자치단체를 당사자로 하는 계약에 관한 법률(지계법)"
+    },
+    {
+      "uid": "W0012",
+      "code": "WORK-CB-222",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "물가변동",
+      "taskType": "검증",
+      "scope": "ES / DS",
+      "department": "건설사업본부",
+      "owner": "하은정 이사",
+      "keywords": "물가변동, ESC, 지수조정율, 품목조정율, 단가변동, 계약금액조정, 등락폭, 비목군, 조정기준일, K,Z값, 계약금액, 조정, 지수, 변동, 등락, 검토용역, 증액, 감액",
+      "description": "[국가계약법 시행령 제64조] 계약 체결 후 물가 변동으로 인한 계약 금액의 조정(Escalation).",
+      "guideline": "시설분야 물가변동 사전검토 처리지침",
+      "law": "국가를 당사자로 하는 계약에 관한 법률(국계법) 지방자치단체를 당사자로 하는 계약에 관한 법률(지계법)"
+    },
+    {
+      "uid": "W0013",
+      "code": "WORK-CB-231",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "개발비용",
+      "taskType": "산정",
+      "scope": "개발비용 산정 및 검증용역(재산정)",
+      "department": "건설사업본부",
+      "owner": "하은정 이사",
+      "keywords": "개발비용, 개발부담금, 조성비, 기반시설설치비, 산지전용, 농지전용, 부담금, 택지조성, 원인자부담금, 대체조림비, 산출명세서, 비용검증, 산정확인, 명세서, 검증, 부과, 환수, 산출",
+      "description": "[개발이익 환수에 관한 법률] 토지 개발 사업 완료 후 개발이익 산정 및 부담금 부과를 위한 비용 산출.",
+      "guideline": "도시개발 업무지침",
+      "law": "개발이익 환수에 관한 법률, 도시개발법, 택지개발촉진법"
+    },
+    {
+      "uid": "W0014",
+      "code": "WORK-CB-232",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "개발비용",
+      "taskType": "검증",
+      "scope": "개발비용 산정 및 검증용역(재산정)",
+      "department": "건설사업본부",
+      "owner": "하은정 이사",
+      "keywords": "개발비용, 개발부담금, 조성비, 기반시설설치비, 산지전용, 농지전용, 부담금, 택지조성, 원인자부담금, 대체조림비, 산출명세서, 비용검증, 산정확인, 명세서, 검증, 부과, 환수, 산출",
+      "description": "[개발이익 환수에 관한 법률] 토지 개발 사업 완료 후 개발이익 산정 및 부담금 부과를 위한 비용 산출.",
+      "guideline": "도시개발 업무지침",
+      "law": "개발이익 환수에 관한 법률, 도시개발법, 택지개발촉진법"
+    },
+    {
+      "uid": "W0015",
+      "code": "WORK-CB-241",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "설계변경",
+      "taskType": "산정",
+      "scope": "설계변경에 따른 공사원가 산정용역 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "설계변경",
+      "description": "[공공발주사업에 대한 건축사의 업무범위] 공사 발주를 위해 설계 단계에서 공사비를 예측하고 내역서를 작성하는 업무.",
+      "guideline": "(각 공사별) 설계지침, 건설공사 안전보건설계지침",
+      "law": "건축설계기본법, 안전관련법, 공사 종류별 사업법, 하도급법"
+    },
+    {
+      "uid": "W0016",
+      "code": "WORK-CB-242",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "설계변경",
+      "taskType": "검증",
+      "scope": "설계변경에 따른 공사원가 산정용역 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "설계변경",
+      "description": "[공공발주사업에 대한 건축사의 업무범위] 공사 발주를 위해 설계 단계에서 공사비를 예측하고 내역서를 작성하는 업무.",
+      "guideline": "(각 공사별) 설계지침, 건설공사 안전보건설계지침",
+      "law": "건축설계기본법, 안전관련법, 공사 종류별 사업법, 하도급법"
+    },
+    {
+      "uid": "W0017",
+      "code": "WORK-CB-251",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "기부채납",
+      "taskType": "산정",
+      "scope": "",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "기부채납, 무상귀속, 공공기여, 국공유지, 기반시설부담, 인계인수, 소유권이전, 진입도로개설, 청사건립, 시설물귀속, 소유권, 이전, 귀속, 검증, 관리위탁",
+      "description": "[국유재산법 제13조] 사업 시행자가 공공시설 등을 설치하여 국가나 지자체에 무상으로 소유권을 이전하는 비용 산정.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0018",
+      "code": "WORK-CB-252",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "기부채납",
+      "taskType": "검증",
+      "scope": "",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "기부채납, 무상귀속, 공공기여, 국공유지, 기반시설부담, 인계인수, 소유권이전, 진입도로개설, 청사건립, 시설물귀속, 소유권, 이전, 귀속, 검증, 관리위탁",
+      "description": "[국유재산법 제13조] 사업 시행자가 공공시설 등을 설치하여 국가나 지자체에 무상으로 소유권을 이전하는 비용 산정.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0019",
+      "code": "WORK-CB-291",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "기타",
+      "taskType": "산정",
+      "scope": "간접비 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "긴급보수, 하자보수, 철거공사, 가시설, 부대공사, 재해복구, 안전점검비용, 시공상세도, 샵드로잉, 가설사무실, 간접비, 공기연장, 현장, 자재, 안전점검, 폐기물(공사성), 지장물, 이전, 가설",
+      "description": "분류가 모호하거나, 소규모/특수 목적의 공사성 과업.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0020",
+      "code": "WORK-CB-292",
+      "domain": "원가(C)",
+      "category": "공사",
+      "subCategory": "기타",
+      "taskType": "검증",
+      "scope": "간접비 등",
+      "department": "건설사업본부",
+      "owner": "최재운 본부장",
+      "keywords": "긴급보수, 하자보수, 철거공사, 가시설, 부대공사, 재해복구, 안전점검비용, 시공상세도, 샵드로잉, 가설사무실, 간접비, 공기연장, 현장, 자재, 안전점검, 폐기물(공사성), 지장물, 이전, 가설",
+      "description": "분류가 모호하거나, 소규모/특수 목적의 공사성 과업.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0021",
+      "code": "WORK-CC-311",
+      "domain": "원가(C)",
+      "category": "학술용역",
+      "subCategory": "연구",
+      "taskType": "산정",
+      "scope": "기초,응용과학 관련, 정책(시책) 자문",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "학술연구, 정책연구, 기본계획, 실태조사, 보고서, 연구백서발간, 중장기계획, 설문조사, 연구, 조사, 분석, 수립, 방안, 실태, 모델, 전략, 진단, 평가, 회계",
+      "description": "[예정가격작성기준 제4장]학문적 전문지식을 활용하여 사업의 타당성 등을 분석하는 연구 용역.",
+      "guideline": "",
+      "law": "."
+    },
+    {
+      "uid": "W0022",
+      "code": "WORK-CC-312",
+      "domain": "원가(C)",
+      "category": "학술용역",
+      "subCategory": "연구",
+      "taskType": "검증",
+      "scope": "기초,응용과학 관련, 정책(시책) 자문",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "학술연구, 정책연구, 기본계획, 실태조사, 보고서, 연구백서발간, 중장기계획, 설문조사, 연구, 조사, 분석, 수립, 방안, 실태, 모델, 전략, 진단, 평가, 회계",
+      "description": "[예정가격작성기준 제4장]학문적 전문지식을 활용하여 사업의 타당성 등을 분석하는 연구 용역.",
+      "guideline": "",
+      "law": "."
+    },
+    {
+      "uid": "W0023",
+      "code": "WORK-CC-321",
+      "domain": "원가(C)",
+      "category": "학술용역",
+      "subCategory": "행사,운영(대행)",
+      "taskType": "산정",
+      "scope": "행사, 대행",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "행사대행, 축제, 이벤트, 전시회, 박람회, 공연기획, 워크숍운영, 무대설치, 홍보, 행사운영, 개막식, 행사, 대행, 운영, 페스티벌, 대회, 워크숍, 기획, 대행사, 사업",
+      "description": "[기타 일반용역 계약특수조건] 특정 목적의 행사를 기획하고 운영하는 대행 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0024",
+      "code": "WORK-CC-322",
+      "domain": "원가(C)",
+      "category": "학술용역",
+      "subCategory": "행사,운영(대행)",
+      "taskType": "검증",
+      "scope": "행사, 대행",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "행사대행, 축제, 이벤트, 전시회, 박람회, 공연기획, 워크숍운영, 무대설치, 홍보, 행사운영, 개막식, 행사, 대행, 운영, 페스티벌, 대회, 워크숍, 기획, 대행사, 사업",
+      "description": "[기타 일반용역 계약특수조건] 특정 목적의 행사를 기획하고 운영하는 대행 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0025",
+      "code": "WORK-CC-331",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "시설",
+      "taskType": "산정",
+      "scope": "시설물 유지관리, 경비",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "시설관리, 청소, 경비, 위생관리, 방역소독, 저수조청소, 시설물유지관리, 주차관리, 미화, 보안, 위탁, 관리, 운영, 청소, 경비, 시설, 유지, 사무",
+      "description": "시설용역이란, 시설물경비용역, 시설물관리용역과 더불어 방역, 부대소각로 운영관리, 위탁운영, 지원업무 및 보조인력 파견 등 인건비 비중이 높은 행정보조, 관리 및 이에 준하는 용역을 말한다",
+      "guideline": "계약일반조건, 입찰유의서, 계약특수조건",
+      "law": ""
+    },
+    {
+      "uid": "W0026",
+      "code": "WORK-CC-332",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "시설",
+      "taskType": "검증",
+      "scope": "시설물 유지관리, 경비",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "시설관리, 청소, 경비, 위생관리, 방역소독, 저수조청소, 시설물유지관리, 주차관리, 미화, 보안, 위탁, 관리, 운영, 청소, 경비, 시설, 유지, 사무",
+      "description": "시설용역이란, 시설물경비용역, 시설물관리용역과 더불어 방역, 부대소각로 운영관리, 위탁운영, 지원업무 및 보조인력 파견 등 인건비 비중이 높은 행정보조, 관리 및 이에 준하는 용역을 말한다",
+      "guideline": "계약일반조건, 입찰유의서, 계약특수조건",
+      "law": ""
+    },
+    {
+      "uid": "W0027",
+      "code": "WORK-CC-341",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "SW",
+      "taskType": "산정",
+      "scope": "기능점수, 투입공수, DB구축",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "스마트공장, 스마트팜, 스마트, AI, 소프트웨어개발, DB구축, 유지보수(SW), 스마트시티 정보시스템, 홈페이지제작, 웹개발, 기능개선, 마이그레이션, 전산개발, 솔루션도입, 시스템, 유지보수, 고도화, 플랫폼, DB, 웹, 앱, 데이터, 클라우드",
+      "description": "[소프트웨어 진흥법 / SW사업 대가산정 가이드정보시스템의 기획, 구축, 운영, 유지관리에 관한 용역.",
+      "guideline": "SW 사업의 하도급 승인 및 관리지침 SW 기술성 평가기준, 정보시스템 운영지침",
+      "law": "소프트웨어 산업진흥법"
+    },
+    {
+      "uid": "W0028",
+      "code": "WORK-CC-342",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "SW",
+      "taskType": "검증",
+      "scope": "기능점수, 투입공수, DB구축",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "스마트공장, 스마트팜, 스마트, AI, 소프트웨어개발, DB구축, 유지보수(SW), 스마트시티 정보시스템, 홈페이지제작, 웹개발, 기능개선, 마이그레이션, 전산개발, 솔루션도입, 시스템, 유지보수, 고도화, 플랫폼, DB, 웹, 앱, 데이터, 클라우드",
+      "description": "[소프트웨어 진흥법 / SW사업 대가산정 가이드정보시스템의 기획, 구축, 운영, 유지관리에 관한 용역.",
+      "guideline": "SW 사업의 하도급 승인 및 관리지침 SW 기술성 평가기준, 정보시스템 운영지침",
+      "law": "소프트웨어 산업진흥법"
+    },
+    {
+      "uid": "W0029",
+      "code": "WORK-CC-351",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "폐기물처리",
+      "taskType": "산정",
+      "scope": "청소",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "폐기물처리, 운반비, 소각비, 매립비, 폐기물용역, 건설폐기물, 석면해체, 오염물 지정폐기물, 중간처리, 수집운반, 폐기물, 처리, 운반, 수집, 소각, 매립, 환경, 슬러지, 협잡물, 폐기",
+      "description": "[폐기물관리법 / 건설폐기물 재활용촉진법] 사업장 또는 공사 현장에서 발생하는 폐기물의 수집, 운반, 처리 용역.",
+      "guideline": "",
+      "law": "이러닝 콘텐츠 개발 대가기준 가이드라인"
+    },
+    {
+      "uid": "W0030",
+      "code": "WORK-CC-352",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "폐기물처리",
+      "taskType": "검증",
+      "scope": "청소",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "폐기물처리, 운반비, 소각비, 매립비, 폐기물용역, 건설폐기물, 석면해체, 오염물 지정폐기물, 중간처리, 수집운반, 폐기물, 처리, 운반, 수집, 소각, 매립, 환경, 슬러지, 협잡물, 폐기",
+      "description": "[폐기물관리법 / 건설폐기물 재활용촉진법] 사업장 또는 공사 현장에서 발생하는 폐기물의 수집, 운반, 처리 용역.",
+      "guideline": "",
+      "law": "이러닝 콘텐츠 개발 대가기준 가이드라인"
+    },
+    {
+      "uid": "W0031",
+      "code": "WORK-CC-361",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "육상운송",
+      "taskType": "산정",
+      "scope": "운송",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "운송, 차량임차, 셔틀버스, 통학버스, 화물운송, 이사비용, 전세버스, 배차관리, 물류운송, 차량운행, 운송, 운반, 차량, 임차, 버스, 배차, 셔틀, 화물, 이동, 운행",
+      "description": "[화물자동차 운수사업법] 사람이나 물건을 차량을 이용해 이동시키는 용역.",
+      "guideline": "",
+      "law": "폐기물 관리법"
+    },
+    {
+      "uid": "W0032",
+      "code": "WORK-CC-362",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "육상운송",
+      "taskType": "검증",
+      "scope": "운송",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "운송, 차량임차, 셔틀버스, 통학버스, 화물운송, 이사비용, 전세버스, 배차관리, 물류운송, 차량운행, 운송, 운반, 차량, 임차, 버스, 배차, 셔틀, 화물, 이동, 운행",
+      "description": "[화물자동차 운수사업법] 사람이나 물건을 차량을 이용해 이동시키는 용역.",
+      "guideline": "",
+      "law": "폐기물 관리법"
+    },
+    {
+      "uid": "W0033",
+      "code": "WORK-CC-371",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "컨텐츠제작",
+      "taskType": "산정",
+      "scope": "e-러닝, 콘텐츠 제작",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "홍보물제작, 디자인 영상제작, 인쇄, 디자인, 콘텐츠, 영상, 제작(영상),",
+      "description": "",
+      "guideline": "이러닝 콘텐츠 개발 대가기준 가이드라인",
+      "law": ""
+    },
+    {
+      "uid": "W0034",
+      "code": "WORK-CC-372",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "컨텐츠제작",
+      "taskType": "검증",
+      "scope": "e-러닝, 콘텐츠 제작",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "홍보물제작, 디자인 영상제작, 인쇄, 디자인, 콘텐츠, 영상, 제작(영상),",
+      "description": "",
+      "guideline": "이러닝 콘텐츠 개발 대가기준 가이드라인",
+      "law": ""
+    },
+    {
+      "uid": "W0035",
+      "code": "WORK-CC-391",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "기타",
+      "taskType": "산정",
+      "scope": "방역, 소독, 의료",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "방역, 소독, 의료",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0036",
+      "code": "WORK-CC-392",
+      "domain": "원가(C)",
+      "category": "일반용역",
+      "subCategory": "기타",
+      "taskType": "검증",
+      "scope": "방역, 소독, 의료",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "방역, 소독, 의료",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0037",
+      "code": "WORK-CD-411",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "설계 감리비",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "실시설계, 기본설계, 건축설계, 설계용역, 현상설계, 구조계산, 도면작성, 설계공모, 계획설계, , 도면, 디자인(건축), 구조, 계획, 현상공모",
+      "description": "[건축사법 / 엔지니어링산업 진흥법] 공사나 제작에 앞서 구조물이나 시스템의 형태와 내용을 결정하는 기술적 작업.",
+      "guideline": "",
+      "law": "건설산업기본법, 엔지니어링상업진흥법"
+    },
+    {
+      "uid": "W0038",
+      "code": "WORK-CD-412",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "설계 감리비",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "실시설계, 기본설계, 건축설계, 설계용역, 현상설계, 구조계산, 도면작성, 설계공모, 계획설계, , 도면, 디자인(건축), 구조, 계획, 현상공모",
+      "description": "[건축사법 / 엔지니어링산업 진흥법] 공사나 제작에 앞서 구조물이나 시스템의 형태와 내용을 결정하는 기술적 작업.",
+      "guideline": "",
+      "law": "건설산업기본법, 엔지니어링상업진흥법"
+    },
+    {
+      "uid": "W0039",
+      "code": "WORK-CD-421",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "엔지니어링",
+      "taskType": "산정",
+      "scope": "엔지니어링 관련 감리, 연구",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "건설사업관리, CM, 안전진단, 구조안전, 내진성능평가, 감독권한대행, 정밀안전진단, 계측관리, 감독, 대행, 관리, 계측, 점검, 영향평가, 시험",
+      "description": "[엔지니어링사업대가의 기준]설계, 감리, 사업관리, 안전진단 등 고도의 기술이 필요한 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0040",
+      "code": "WORK-CD-422",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "엔지니어링",
+      "taskType": "검증",
+      "scope": "엔지니어링 관련 감리, 연구",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "건설사업관리, CM, 안전진단, 구조안전, 내진성능평가, 감독권한대행, 정밀안전진단, 계측관리, 감독, 대행, 관리, 계측, 점검, 영향평가, 시험",
+      "description": "[엔지니어링사업대가의 기준]설계, 감리, 사업관리, 안전진단 등 고도의 기술이 필요한 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0041",
+      "code": "WORK-CD-431",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "타당성",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "타당성조사(기술), 기술적타당성, 적정성검토, 입지선정, 노선검토, 기술제안, 사전타당성, 투자심사,, 수요예측, 타당성, 적정성, 기술, 검토, 입지, 노선, 사전, 투자, 심사",
+      "description": "[건설기술진흥법]주로 건설/토목 사업 시행 전 기술적, 경제적 타당성을 검토하는 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0042",
+      "code": "WORK-CD-432",
+      "domain": "원가(C)",
+      "category": "기술용역",
+      "subCategory": "타당성",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "타당성조사(기술), 기술적타당성, 적정성검토, 입지선정, 노선검토, 기술제안, 사전타당성, 투자심사,, 수요예측, 타당성, 적정성, 기술, 검토, 입지, 노선, 사전, 투자, 심사",
+      "description": "[건설기술진흥법]주로 건설/토목 사업 시행 전 기술적, 경제적 타당성을 검토하는 용역.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0043",
+      "code": "WORK-CE-501",
+      "domain": "원가(C)",
+      "category": "사후정산",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "사후원가정산 시행령 73조",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "사후원가, 정산보고서, 개산급, 사후정산, 사업비정산, 집행잔액, 정산검토, 실발생비용, 비용확정, 정산금, 정산, 사후, 검증, 집행, 잔액, 보고서, 지원금, , 확정",
+      "description": "[국가계약법 시행령 제73조] 계약 이행 후 실제 투입된 비용을 근거로 대금을 확정하는 업무.",
+      "guideline": "국고보조금 사용설명서(기획재정부)",
+      "law": ""
+    },
+    {
+      "uid": "W0044",
+      "code": "WORK-CE-502",
+      "domain": "원가(C)",
+      "category": "사후정산",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "사후원가정산 시행령 73조",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "사후원가, 정산보고서, 개산급, 사후정산, 사업비정산, 집행잔액, 정산검토, 실발생비용, 비용확정, 정산금, 정산, 사후, 검증, 집행, 잔액, 보고서, 지원금, , 확정",
+      "description": "[국가계약법 시행령 제73조] 계약 이행 후 실제 투입된 비용을 근거로 대금을 확정하는 업무.",
+      "guideline": "국고보조금 사용설명서(기획재정부)",
+      "law": ""
+    },
+    {
+      "uid": "W0045",
+      "code": "WORK-CF-601",
+      "domain": "원가(C)",
+      "category": "각종 수수료",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "주차요금, 사용료 등 산정용역 등",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "수수료, 대행수수료, 위탁수수료, 요율산정, 사용료, 인허가수수료 면허세, 검사수수료, 관리비수수료, 분담금,, 요율, 미청구, 확인서, 발급, 관리위탁, 사용료",
+      "description": "[지방자치법 제139조(사용료)] 특정 업무 대행이나 시설 사용에 대한 대가성 요금 산정.",
+      "guideline": "각종 징수, 면제 관련 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0046",
+      "code": "WORK-CF-602",
+      "domain": "원가(C)",
+      "category": "각종 수수료",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "주차요금, 사용료 등 산정용역 등",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "수수료, 대행수수료, 위탁수수료, 요율산정, 사용료, 인허가수수료 면허세, 검사수수료, 관리비수수료, 분담금,, 요율, 미청구, 확인서, 발급, 관리위탁, 사용료",
+      "description": "[지방자치법 제139조(사용료)] 특정 업무 대행이나 시설 사용에 대한 대가성 요금 산정.",
+      "guideline": "각종 징수, 면제 관련 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0047",
+      "code": "WORK-CG-711",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "법원, 중재원 감정",
+      "taskType": "산정",
+      "scope": "법원감정(공사대금 등 법원에 접수된 사건 대상으로  진행되는 용역)",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "법원감정, 감정신청, 소송비용, 감정료, 중재원, 분쟁조정, 기성고감정, 하자감정, 손해배상청구, 감정인, 법원, 소송, 감정, 분쟁, 중재, 판결, 사건, 청구, 기성고, 배상",
+      "description": "[민사소송법 / 중재법] 법적 분쟁 발생 시 법원이나 중재원의 촉탁에 의해 수행하는 감정.",
+      "guideline": "건설감정 가이드북, 소송관계자를 위한 건설감정실무(박영사)",
+      "law": ""
+    },
+    {
+      "uid": "W0048",
+      "code": "WORK-CG-712",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "법원, 중재원 감정",
+      "taskType": "검증",
+      "scope": "법원감정(공사대금 등 법원에 접수된 사건 대상으로  진행되는 용역)",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "법원감정, 감정신청, 소송비용, 감정료, 중재원, 분쟁조정, 기성고감정, 하자감정, 손해배상청구, 감정인, 법원, 소송, 감정, 분쟁, 중재, 판결, 사건, 청구, 기성고, 배상",
+      "description": "[민사소송법 / 중재법] 법적 분쟁 발생 시 법원이나 중재원의 촉탁에 의해 수행하는 감정.",
+      "guideline": "건설감정 가이드북, 소송관계자를 위한 건설감정실무(박영사)",
+      "law": ""
+    },
+    {
+      "uid": "W0049",
+      "code": "WORK-CG-721",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "사감정",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "사감정, 클레임검토, 의견서, 피해액산정, 추가공사비청구, 공기연장비용, 간접비청구, 손실보상, 미지급금, 계약분쟁, 클레임, 추가, 청구, 분쟁, 손실, 보상, 미지급, 검토",
+      "description": "[건설산업기본법] 소송 전 단계나 당사자 간 합의를 위해 수행하는 사적 감정 및 비용 산정.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0050",
+      "code": "WORK-CG-722",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "사감정",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "사감정, 클레임검토, 의견서, 피해액산정, 추가공사비청구, 공기연장비용, 간접비청구, 손실보상, 미지급금, 계약분쟁, 클레임, 추가, 청구, 분쟁, 손실, 보상, 미지급, 검토",
+      "description": "[건설산업기본법] 소송 전 단계나 당사자 간 합의를 위해 수행하는 사적 감정 및 비용 산정.",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0051",
+      "code": "WORK-CG-731",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "기타",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0052",
+      "code": "WORK-CG-732",
+      "domain": "원가(C)",
+      "category": "클레임",
+      "subCategory": "기타",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0053",
+      "code": "WORK-CH-801",
+      "domain": "원가(C)",
+      "category": "비교견적",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "비교견적, 시장가격조사, 견적대비표, 최저가비교, 가격비교, 시세조사, 견적검토, 가격적정성, 예가비교, 비교, 견적, 시장, 가격, 조사, 시세, 최저가, 대비, 거래, 실례",
+      "description": "[예정가격작성기준(거래실례가격)] 원가계산이 곤란할 때 시장 거래 가격을 비교하여 가격을 결정.",
+      "guideline": "건설공사 사업관리방식 검토기준 및 세부 수행지침",
+      "law": ""
+    },
+    {
+      "uid": "W0054",
+      "code": "WORK-CH-802",
+      "domain": "원가(C)",
+      "category": "비교견적",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "비교견적, 시장가격조사, 견적대비표, 최저가비교, 가격비교, 시세조사, 견적검토, 가격적정성, 예가비교, 비교, 견적, 시장, 가격, 조사, 시세, 최저가, 대비, 거래, 실례",
+      "description": "[예정가격작성기준(거래실례가격)] 원가계산이 곤란할 때 시장 거래 가격을 비교하여 가격을 결정.",
+      "guideline": "건설공사 사업관리방식 검토기준 및 세부 수행지침",
+      "law": ""
+    },
+    {
+      "uid": "W0055",
+      "code": "WORK-CI-901",
+      "domain": "원가(C)",
+      "category": "기타",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0056",
+      "code": "WORK-CI-902",
+      "domain": "원가(C)",
+      "category": "기타",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "원가분석본부",
+      "owner": "하은정 이사",
+      "keywords": "",
+      "description": "",
+      "guideline": "",
+      "law": ""
+    },
+    {
+      "uid": "W0057",
+      "code": "WORK-PA-101",
+      "domain": "연구용역(P)",
+      "category": "타당성",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "예비타당성, 경제성분석, 재무적타당성, 출자타당성, 건립타당성, 민간위탁타당성, 공기업전환, 설립타당성, 파급효과, 타당성, 경제성, B/C, 예비, 출자, 설립, 재무, 파급, 효과, 분석, 연구용역",
+      "description": "[지방재정법 / 지방공기업법] 사업 시행 여부 결정을 위한 정책적·경제적 분석 위주의 연구.",
+      "guideline": "의뢰처의 각종 타당성 수행(표준) 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0058",
+      "code": "WORK-PA-102",
+      "domain": "연구용역(P)",
+      "category": "타당성",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "예비타당성, 경제성분석, 재무적타당성, 출자타당성, 건립타당성, 민간위탁타당성, 공기업전환, 설립타당성, 파급효과, 타당성, 경제성, B/C, 예비, 출자, 설립, 재무, 파급, 효과, 분석, 연구용역",
+      "description": "[지방재정법 / 지방공기업법] 사업 시행 여부 결정을 위한 정책적·경제적 분석 위주의 연구.",
+      "guideline": "의뢰처의 각종 타당성 수행(표준) 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0059",
+      "code": "WORK-PB-201",
+      "domain": "연구용역(P)",
+      "category": "컨설팅",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "경영진단, 조직진단, 컨설팅, 경영평가, 비전수립, 전략수립, 직무분석, 성과평가, 재무구조개선, 발전계획, 경영, 조직, 진단, 전략, 자문, 평가, 비전, 개선, 고도화 연구용역",
+      "description": "[중소기업진흥에 관한 법률 등] 조직의 경영 효율화, 구조 개선, 전략 수립을 위한 자문형 용역.",
+      "guideline": "의뢰처의 컨설팅 운영 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0060",
+      "code": "WORK-PB-202",
+      "domain": "연구용역(P)",
+      "category": "컨설팅",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "경영진단, 조직진단, 컨설팅, 경영평가, 비전수립, 전략수립, 직무분석, 성과평가, 재무구조개선, 발전계획, 경영, 조직, 진단, 전략, 자문, 평가, 비전, 개선, 고도화 연구용역",
+      "description": "[중소기업진흥에 관한 법률 등] 조직의 경영 효율화, 구조 개선, 전략 수립을 위한 자문형 용역.",
+      "guideline": "의뢰처의 컨설팅 운영 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0061",
+      "code": "WORK-PC-301",
+      "domain": "연구용역(P)",
+      "category": "만족도",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "만족도조사, 설문분석, CSI, 고객만족도, 여론조사, 인지도조사, 친절도평가, 서비스평가, 리서치, 조사분석, 만족도, 설문, 고객, 인식, 조사, 여론, 체감도, 친절도 연구용역",
+      "description": "[통계법 / 공공기관 운영법] 서비스 이용자나 대상의 주관적 평가를 통계적으로 분석하는 용역.",
+      "guideline": "의뢰처의 조사 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0062",
+      "code": "WORK-PC-302",
+      "domain": "연구용역(P)",
+      "category": "만족도",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "만족도조사, 설문분석, CSI, 고객만족도, 여론조사, 인지도조사, 친절도평가, 서비스평가, 리서치, 조사분석, 만족도, 설문, 고객, 인식, 조사, 여론, 체감도, 친절도 연구용역",
+      "description": "[통계법 / 공공기관 운영법] 서비스 이용자나 대상의 주관적 평가를 통계적으로 분석하는 용역.",
+      "guideline": "의뢰처의 조사 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0063",
+      "code": "WORK-PD-901",
+      "domain": "연구용역(P)",
+      "category": "기타",
+      "subCategory": "",
+      "taskType": "산정",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "만족도조사, 설문분석, CSI, 고객만족도, 여론조사, 인지도조사, 친절도평가, 서비스평가, 리서치, 조사분석, 만족도, 설문, 고객, 인식, 조사, 여론, 체감도, 친절도 연구용역",
+      "description": "순수 연구보다는 학술 행사, 교육, 콘텐츠 개발 성격의 용역.",
+      "guideline": "의뢰처의 수행(운영, 조사) 지침",
+      "law": ""
+    },
+    {
+      "uid": "W0064",
+      "code": "WORK-PD-902",
+      "domain": "연구용역(P)",
+      "category": "기타",
+      "subCategory": "",
+      "taskType": "검증",
+      "scope": "",
+      "department": "학술사업본부",
+      "owner": "김창수이사",
+      "keywords": "만족도조사, 설문분석, CSI, 고객만족도, 여론조사, 인지도조사, 친절도평가, 서비스평가, 리서치, 조사분석, 만족도, 설문, 고객, 인식, 조사, 여론, 체감도, 친절도 연구용역",
+      "description": "순수 연구보다는 학술 행사, 교육, 콘텐츠 개발 성격의 용역.",
+      "guideline": "의뢰처의 수행(운영, 조사) 지침",
+      "law": ""
+    }
+  ]
+}

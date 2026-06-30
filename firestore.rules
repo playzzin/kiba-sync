@@ -1,0 +1,100 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasRole(roles) {
+      return signedIn() && userDoc().data.role in roles;
+    }
+
+    function isStaff() {
+      return hasRole(['admin', 'manager', 'staff']);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
+      allow update: if isStaff() || (isOwner(userId) && request.resource.data.role == resource.data.role);
+      allow delete: if isStaff();
+    }
+
+    match /cmsPages/{pageId} {
+      allow read: if isStaff() || resource.data.status == 'published';
+      allow write: if isStaff();
+    }
+
+    match /cmsMenus/{menuId} {
+      allow read: if resource.data.visible == true || isStaff();
+      allow write: if isStaff();
+    }
+
+    match /cmsAssets/{assetId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /boardPosts/{postId} {
+      allow read: if isStaff() || resource.data.status == 'published';
+      allow write: if isStaff();
+    }
+
+    match /clients/{clientId} {
+      allow read, write: if isStaff();
+    }
+
+    match /contacts/{contactId} {
+      allow read, write: if isStaff();
+    }
+
+    match /projects/{projectId} {
+      allow read, write: if isStaff();
+    }
+
+    match /contracts/{contractId} {
+      allow read, write: if isStaff();
+    }
+
+    match /invoices/{invoiceId} {
+      allow read, write: if isStaff();
+    }
+
+    match /settlements/{settlementId} {
+      allow read, write: if isStaff();
+    }
+
+    match /payments/{paymentId} {
+      allow read, write: if isStaff();
+    }
+
+    match /systemChecks/{checkId} {
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow read, update, delete: if (signedIn() && resource.data.ownerId == request.auth.uid) || isStaff();
+    }
+
+    match /auditLogs/{auditId} {
+      allow create: if signedIn() && request.resource.data.actorId == request.auth.uid;
+      allow read: if isStaff();
+      allow update, delete: if false;
+    }
+
+    match /stats/{statPath=**} {
+      allow read: if isStaff();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
