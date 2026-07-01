@@ -118,10 +118,29 @@ For the local emulator, start emulators and run the seed with `$env:FIRESTORE_EM
 
 ## Deploy
 
+The repository is bound to Firebase project `kiba-bedc9` through `.firebaserc`.
+
+Local Firebase Hosting deploy:
+
+```bash
+npm run build
+firebase deploy --only hosting --project kiba-bedc9
+```
+
+GitHub Actions deploys Firebase Hosting from `main` with `.github/workflows/deploy.yml`. Add this repository secret before using the workflow:
+
+```txt
+FIREBASE_SERVICE_ACCOUNT_KIBA_BEDC9
+```
+
+Create the secret from a Firebase service account JSON with permission to deploy Hosting.
+
+Full Firebase deploy, including Functions and rules:
+
 ```bash
 npm run build
 npm --prefix functions run build
-firebase deploy
+firebase deploy --project kiba-bedc9
 ```
 
 ## Initial admin role
