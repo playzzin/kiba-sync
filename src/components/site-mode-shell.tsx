@@ -392,7 +392,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/dashboard": {
     section: "KIBA",
     title: "한국경영분석연구원",
-    summary: "원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
+    summary: "[예린]  원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
     points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "ERP/CRM/CMS 운영 확장"],
     deliverables: ["기관 소개와 전문업무를 분리한 정보 구조", "원가·계약·개발부담금 핵심 업무 바로가기", "고객센터 콘텐츠 운영 영역"],
     related: ["/cost-guide/government-contract", "/contract-adjustment/overview", "/development-charge/overview", "/support/contact"],
