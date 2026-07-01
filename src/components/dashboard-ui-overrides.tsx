@@ -261,6 +261,12 @@ function dashboardMarkup() {
   `;
 }
 
+function setText(node: Element | null, value: string) {
+  if (node && node.textContent !== value) {
+    node.textContent = value;
+  }
+}
+
 export function DashboardUiOverrides() {
   useEffect(() => {
     let applying = false;
@@ -298,19 +304,9 @@ export function DashboardUiOverrides() {
         }
 
         app.setAttribute("data-dashboard-copy-override", "admin-dashboard");
-
-        const small = hero.querySelector("small");
-        const heading = hero.querySelector("h1");
-        const paragraph = hero.querySelector("p");
-        if (small) {
-          small.textContent = eyebrow;
-        }
-        if (heading) {
-          heading.textContent = title;
-        }
-        if (paragraph) {
-          paragraph.textContent = summary;
-        }
+        setText(hero.querySelector("small"), eyebrow);
+        setText(hero.querySelector("h1"), title);
+        setText(hero.querySelector("p"), summary);
 
         let override = container.querySelector<HTMLElement>(".dashboard-copy-override");
         if (!override) {
@@ -318,7 +314,10 @@ export function DashboardUiOverrides() {
           override.className = "dashboard-copy-override";
           hero.insertAdjacentElement("afterend", override);
         }
-        override.innerHTML = dashboardMarkup();
+        if (override.dataset.rendered !== "true") {
+          override.innerHTML = dashboardMarkup();
+          override.dataset.rendered = "true";
+        }
       } finally {
         window.setTimeout(() => {
           applying = false;
