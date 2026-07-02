@@ -34,6 +34,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import professionalStaffData from "@/lib/kiba/professional-staff-data.json";
 import { kibaSeedPagesByRoute, kibaSeedSummary, type KibaSeedPage } from "@/lib/kiba/source-content";
@@ -1559,11 +1560,13 @@ export function SiteModeShell() {
 
         <main className="main" tabIndex={-1}>
           <div className="container">
-            <section className="hero">
-              <small>{modeName(shell.mode)}</small>
-              <h1>{title}</h1>
-              <p>{heroDescription}</p>
-            </section>
+            {!(shell.mode === "user" && shell.route === "/dashboard") ? (
+              <section className="hero">
+                <small>{modeName(shell.mode)}</small>
+                <h1>{title}</h1>
+                <p>{heroDescription}</p>
+              </section>
+            ) : null}
 
             {shell.mode === "admin" ? (
               <AdminDashboard />
@@ -1784,6 +1787,7 @@ function SwPricingModule({ go }: { go: (route: string) => void }) {
 }
 
 function KibaHome({ go }: { go: (route: string) => void }) {
+  const [logoMissing, setLogoMissing] = useState(false);
   const featuredRoutes = [
     "/intro/greeting",
     "/performance/costing",
@@ -1795,9 +1799,48 @@ function KibaHome({ go }: { go: (route: string) => void }) {
 
   return (
     <div className="public-site">
+      <header className="kiba-main-header">
+        <div className="kiba-main-brand">
+          {logoMissing ? (
+            <div className="kiba-main-logo-fallback" aria-hidden="true">
+              KIBA
+            </div>
+          ) : (
+            <Image
+              src="/한국경영분석연구원로고.jpg"
+              alt="한국경영분석연구원 로고"
+              className="kiba-main-logo"
+              width={170}
+              height={54}
+              onError={() => setLogoMissing(true)}
+              unoptimized
+            />
+          )}
+          <div className="kiba-main-brand-copy">
+            <span>Korea Institute of Business Analysis</span>
+            <strong>한국경영분석연구원</strong>
+          </div>
+        </div>
+        <button className="secondary-btn" type="button" onClick={() => go("/support/contact")}>
+          <Phone size={16} />
+          상담 및 문의
+        </button>
+      </header>
+
+      <nav className="kiba-main-nav" aria-label="메인 메뉴 바로가기">
+        {topLevelUserMenus().map((group) => {
+          const route = flattenItems(group.children ?? [])[0]?.href;
+          return (
+            <button key={group.label} type="button" onClick={() => route && go(route)}>
+              {group.label}
+            </button>
+          );
+        })}
+      </nav>
+
       <section className="public-hero">
         <div className="hero-copy">
-          <span className="eyebrow">Korea Institute of Business Analysis & Development</span>
+          <span className="eyebrow">공공예산 · 원가검증 전문기관</span>
           <h1>한국경영분석연구원</h1>
           <p>
             1998년 기획재정부 허가를 받은 원가계산전문기관의 소개서 자료를 바탕으로 공공예산 검증,
@@ -1954,6 +1997,24 @@ function KibaHome({ go }: { go: (route: string) => void }) {
           </button>
         </div>
       </section>
+
+      <footer className="kiba-main-footer">
+        <div>
+          <strong>한국경영분석연구원</strong>
+          <p>원가산정 · 계약금액조정 · 개발부담금 · 학술연구 · 분쟁검증</p>
+        </div>
+        <div className="kiba-main-footer-links">
+          <button type="button" onClick={() => go("/intro/location")}>
+            찾아오시는길
+          </button>
+          <button type="button" onClick={() => go("/support/contact")}>
+            상담 및 문의
+          </button>
+          <button type="button" onClick={() => go("/support/news")}>
+            공지사항
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
