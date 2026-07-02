@@ -4196,9 +4196,12 @@ function todayStamp() {
 
 type CestStep = "upload" | "preview" | "result";
 type CestUploadMode = "unified" | "separate";
+type CestPreviewTab = "flow" | "price" | "unit" | "detail" | "validation";
 type CostCategory = "material" | "labor" | "expense";
 type CestDraftStatus = { kind: "success" | "error"; message: string } | null;
 type CestParseStatus = { kind: "success" | "error" | "info"; messages: string[] } | null;
+type CestRelationStatus = "ok" | "warning";
+type CestValidationLevel = "ok" | "warning" | "info";
 
 type CostRow = {
   id: string;
@@ -4228,6 +4231,32 @@ type CostRates = {
   generalAdmin: string;
   profit: string;
   vat: string;
+};
+
+type CestPricePreviewItem = {
+  id: string;
+  itemName: string;
+  spec: string;
+  unit: string;
+  appliedUnitPrice: number;
+  formula: string;
+  sourceCell: string;
+  usedBy: string;
+  relationIds: string[];
+};
+
+type CestUnitPricePreviewItem = {
+  id: string;
+  title: string;
+  unit: string;
+  materialTotal: number;
+  laborTotal: number;
+  expenseTotal: number;
+  total: number;
+  totalCell: string;
+  sourceRefs: string;
+  usedBy: string;
+  relationIds: string[];
 };
 
 const COST_CATEGORY_LABELS: Record<CostCategory, string> = {
@@ -4344,6 +4373,194 @@ const RATE_LABELS: { key: keyof CostRates; label: string; hint: string; source: 
   { key: "vat", label: "부가세", hint: "총원가 기준", source: "원가계산서!J35" },
 ];
 
+const COST_PREVIEW_TABS: { id: CestPreviewTab; label: string }[] = [
+  { id: "flow", label: "전체 흐름" },
+  { id: "price", label: "단가대비표" },
+  { id: "unit", label: "일위대가표" },
+  { id: "detail", label: "내역서" },
+  { id: "validation", label: "검증 로그" },
+];
+
+const COST_PREVIEW_FLOW_NODES = ["단가대비표", "일위대가표", "일위대가목록", "내역서", "집계표", "원가계산서"];
+
+const COST_PREVIEW_RELATIONS: {
+  id: string;
+  from: string;
+  to: string;
+  label: string;
+  example: string;
+  count: number;
+  status: CestRelationStatus;
+}[] = [
+  {
+    id: "price-to-unit",
+    from: "단가대비표",
+    to: "일위대가표",
+    label: "노무·재료 적용단가",
+    example: "단가대비표!M55 → 일위대가표!G8",
+    count: 9,
+    status: "ok",
+  },
+  {
+    id: "price-to-detail",
+    from: "단가대비표",
+    to: "내역서",
+    label: "재료·경비 직접 적용단가",
+    example: "단가대비표!M7 → 내역서!E11",
+    count: 48,
+    status: "ok",
+  },
+  {
+    id: "unit-to-list",
+    from: "일위대가표",
+    to: "일위대가목록",
+    label: "호표별 재료·노무·경비 합계",
+    example: "일위대가표!F21/H21/J21 → 일위대가목록!E7:G7",
+    count: 4,
+    status: "ok",
+  },
+  {
+    id: "unit-to-detail",
+    from: "일위대가목록",
+    to: "내역서",
+    label: "일위대가 적용단가",
+    example: "일위대가목록!E7:F7 → 내역서!E52/H52",
+    count: 6,
+    status: "ok",
+  },
+  {
+    id: "detail-to-summary",
+    from: "내역서",
+    to: "집계표",
+    label: "직접 재료·노무·경비 합계",
+    example: "내역서!F71/H71/J71 → 집계표!D7:F7",
+    count: 3,
+    status: "ok",
+  },
+  {
+    id: "summary-to-cost",
+    from: "집계표",
+    to: "원가계산서",
+    label: "원가 요소 반영",
+    example: "집계표!D7:F7 → 원가계산서!E7/E10/E13",
+    count: 3,
+    status: "warning",
+  },
+];
+
+const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
+  {
+    id: "price-shell-plate",
+    itemName: "SHELL PLATE-STS304",
+    spec: "t6*5'*9200",
+    unit: "SH",
+    appliedUnitPrice: 3400000,
+    formula: "MIN(D7,H7,J7)",
+    sourceCell: "단가대비표!M7",
+    usedBy: "내역서!E9",
+    relationIds: ["price-to-detail"],
+  },
+  {
+    id: "price-pipe-worker",
+    itemName: "배관공",
+    spec: "플랜트 배관",
+    unit: "인",
+    appliedUnitPrice: 247897,
+    formula: "MIN(D55,H55,J55)",
+    sourceCell: "단가대비표!M55",
+    usedBy: "일위대가표!G8",
+    relationIds: ["price-to-unit"],
+  },
+  {
+    id: "price-common-worker",
+    itemName: "보통인부",
+    spec: "일반 노무",
+    unit: "인",
+    appliedUnitPrice: 172068,
+    formula: "MIN(D56,H56,J56)",
+    sourceCell: "단가대비표!M56",
+    usedBy: "일위대가표!G9, 내역서!G63",
+    relationIds: ["price-to-unit", "price-to-detail"],
+  },
+  {
+    id: "price-mechanical-worker",
+    itemName: "기계설비공",
+    spec: "기계 설치",
+    unit: "인",
+    appliedUnitPrice: 241698,
+    formula: "MIN(D57,H57,J57)",
+    sourceCell: "단가대비표!M57",
+    usedBy: "일위대가표!G23",
+    relationIds: ["price-to-unit"],
+  },
+  {
+    id: "price-equipment",
+    itemName: "장비사용료",
+    spec: "현장 설치 장비",
+    unit: "LOT",
+    appliedUnitPrice: 3000000,
+    formula: "MIN(D68,H68,J68)",
+    sourceCell: "단가대비표!M68",
+    usedBy: "내역서!I68",
+    relationIds: ["price-to-detail"],
+  },
+];
+
+const REFERENCE_UNIT_PRICE_PREVIEW_ITEMS: CestUnitPricePreviewItem[] = [
+  {
+    id: "unit-1",
+    title: "일위 1호 현장배관공사비",
+    unit: "M",
+    materialTotal: 494,
+    laborTotal: 24724,
+    expenseTotal: 0,
+    total: 25218,
+    totalCell: "일위대가표!L21",
+    sourceRefs: "단가대비표!M55, M56",
+    usedBy: "일위대가목록!E7:F7, 내역서!E52/H52",
+    relationIds: ["price-to-unit", "unit-to-list", "unit-to-detail"],
+  },
+  {
+    id: "unit-2",
+    title: "일위 2호 현장설치비",
+    unit: "M",
+    materialTotal: 0,
+    laborTotal: 5140,
+    expenseTotal: 0,
+    total: 5140,
+    totalCell: "일위대가표!L36",
+    sourceRefs: "단가대비표!M57, M56",
+    usedBy: "일위대가목록!E8:F8, 내역서!G56",
+    relationIds: ["price-to-unit", "unit-to-list", "unit-to-detail"],
+  },
+  {
+    id: "unit-3",
+    title: "일위 3호 기존TANK 철거",
+    unit: "대",
+    materialTotal: 0,
+    laborTotal: 3053237,
+    expenseTotal: 0,
+    total: 3053237,
+    totalCell: "일위대가표!L52",
+    sourceRefs: "단가대비표!M58:M63",
+    usedBy: "일위대가목록!E9:F9, 내역서!G65",
+    relationIds: ["price-to-unit", "unit-to-list", "unit-to-detail"],
+  },
+  {
+    id: "unit-4",
+    title: "일위 4호 신규제작TANK 설치",
+    unit: "대",
+    materialTotal: 0,
+    laborTotal: 1526617,
+    expenseTotal: 0,
+    total: 1526617,
+    totalCell: "일위대가표!L69",
+    sourceRefs: "단가대비표!M58:M63",
+    usedBy: "일위대가목록!E10:F10, 내역서!G66",
+    relationIds: ["price-to-unit", "unit-to-list", "unit-to-detail"],
+  },
+];
+
 function newCostRow(): CostRow {
   return {
     id: `r${Date.now()}`,
@@ -4453,6 +4670,44 @@ function sourceAmountCell(row: CostRow) {
 
 function sourceBasis(row: CostRow) {
   return row.section ? `${row.section} / ${sourceAmountCell(row)}` : sourceAmountCell(row);
+}
+
+function relationIdsForCostRow(row: CostRow) {
+  const relationIds = ["detail-to-summary", "summary-to-cost"];
+  const name = row.itemName.toLowerCase();
+  const section = (row.section ?? "").toLowerCase();
+
+  if (
+    name.includes("현장") ||
+    name.includes("tank") ||
+    name.includes("보온") ||
+    section.includes("heating") ||
+    section.includes("설치")
+  ) {
+    relationIds.unshift("unit-to-detail");
+  } else {
+    relationIds.unshift("price-to-detail");
+  }
+
+  return relationIds;
+}
+
+function toPreviewPriceItems(items: Array<{ itemName: string; spec: string; unit: string; appliedUnitPrice: number; sourceRow: number }>) {
+  return items.map<CestPricePreviewItem>((item, index) => ({
+    id: `parsed-price-${index + 1}`,
+    itemName: item.itemName,
+    spec: item.spec,
+    unit: item.unit,
+    appliedUnitPrice: item.appliedUnitPrice,
+    formula: `단가대비표 적용단가 행 ${item.sourceRow}`,
+    sourceCell: `단가대비표!M${item.sourceRow}`,
+    usedBy: "일위대가표/내역서 매칭 예정",
+    relationIds: ["price-to-unit", "price-to-detail"],
+  }));
+}
+
+function previewRelationClass(relationIds: string[], selectedRelationId: string) {
+  return relationIds.includes(selectedRelationId) ? " is-related" : "";
 }
 
 function xmlCell(value: string | number, type: "String" | "Number" = "String", formula?: string) {
@@ -4815,15 +5070,44 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   const [syncingDraft, setSyncingDraft] = useState(false);
   const [parseStatus, setParseStatus] = useState<CestParseStatus>(null);
   const [parsing, setParsing] = useState(false);
+  const [previewTab, setPreviewTab] = useState<CestPreviewTab>("flow");
+  const [pricePreviewItems, setPricePreviewItems] = useState<CestPricePreviewItem[]>(REFERENCE_PRICE_PREVIEW_ITEMS);
+  const [selectedRelationId, setSelectedRelationId] = useState(COST_PREVIEW_RELATIONS[0].id);
 
   const canProceed =
     uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
 
   const summary = calcCostSummary(rows, rates);
   const calculated = calcRows(rows);
+  const selectedRelation =
+    COST_PREVIEW_RELATIONS.find((relation) => relation.id === selectedRelationId) ?? COST_PREVIEW_RELATIONS[0];
+  const previewValidationItems: { level: CestValidationLevel; title: string; detail: string }[] = [
+    {
+      level: pricePreviewItems.length > 0 ? "ok" : "warning",
+      title: "단가대비표 미리보기",
+      detail: `${pricePreviewItems.length}개 적용단가를 표로 표시합니다.`,
+    },
+    {
+      level: "info",
+      title: "일위대가표 미리보기",
+      detail: `${REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.length}개 호표의 합계와 원본 참조 셀을 표시합니다.`,
+    },
+    {
+      level: calculated.length > 0 ? "ok" : "warning",
+      title: "내역서 미리보기",
+      detail: `${calculated.length}개 비목 행의 수량·단가·금액을 편집 가능한 표로 표시합니다.`,
+    },
+    {
+      level: parseStatus?.kind === "error" ? "warning" : "ok",
+      title: "상관관계 표시",
+      detail: `${COST_PREVIEW_RELATIONS.length}개 연결 규칙으로 단가대비표 → 일위대가표 → 내역서 → 원가계산서 흐름을 추적합니다.`,
+    },
+  ];
 
   async function handleUploadProceed() {
     if (!canProceed) {
+      setPreviewTab("flow");
+      setPricePreviewItems(REFERENCE_PRICE_PREVIEW_ITEMS);
       setStep("preview");
       return;
     }
@@ -4833,6 +5117,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
 
     try {
       let parsedRows: CostRow[] = [];
+      let parsedPriceItems: CestPricePreviewItem[] = [];
       const allWarnings: string[] = [];
 
       if (uploadMode === "unified" && unifiedFile) {
@@ -4841,7 +5126,18 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
         if (result.data.rows.length > 0) {
           parsedRows = result.data.rows.map((r) => toCostRow(r));
         }
+        if (result.data.priceItems.length > 0) {
+          parsedPriceItems = toPreviewPriceItems(result.data.priceItems);
+        }
       } else {
+        if (file1) {
+          const result = await parseDangaDaebiPyo(file1);
+          allWarnings.push(...result.warnings);
+          if (result.data.length > 0) {
+            parsedPriceItems = toPreviewPriceItems(result.data);
+          }
+        }
+
         // Separate files: 내역서 (file3) is the primary source for cost rows
         // 단가대비표 (file1) enriches unit prices when 내역서 is absent
         if (file3) {
@@ -4850,26 +5146,22 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
           parsedRows = result.data.map((r) => toCostRow(r));
         }
 
-        if (parsedRows.length === 0 && file1) {
-          // Fall back: try to read 단가대비표 and construct basic rows
-          const result = await parseDangaDaebiPyo(file1);
-          allWarnings.push(...result.warnings);
-          if (result.data.length > 0) {
-            parsedRows = result.data.map((item, idx) => toCostRow({
-              id: `price-${idx + 1}`,
-              code: `P${String(item.sourceRow).padStart(3, "0")}-M`,
-              category: "material" as const,
-              itemName: item.itemName,
-              spec: item.spec,
-              unit: item.unit,
-              qty: "1",
-              unitPrice: String(item.appliedUnitPrice),
-              sourceRow: item.sourceRow,
-            }));
-          }
+        if (parsedRows.length === 0 && parsedPriceItems.length > 0) {
+          parsedRows = parsedPriceItems.map((item, idx) => toCostRow({
+            id: `price-${idx + 1}`,
+            code: `P${String(idx + 1).padStart(3, "0")}-M`,
+            category: "material" as const,
+            itemName: item.itemName,
+            spec: item.spec,
+            unit: item.unit,
+            qty: "1",
+            unitPrice: String(item.appliedUnitPrice),
+            sourceRow: Number(item.sourceCell.replace(/[^0-9]/g, "")) || undefined,
+          }));
         }
       }
 
+      setPricePreviewItems(parsedPriceItems.length > 0 ? parsedPriceItems : REFERENCE_PRICE_PREVIEW_ITEMS);
       if (parsedRows.length > 0) {
         setRows(parsedRows);
         setParseStatus({ kind: "success", messages: allWarnings });
@@ -4886,6 +5178,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
       }
     } catch (err) {
       setRows(DEMO_ROWS);
+      setPricePreviewItems(REFERENCE_PRICE_PREVIEW_ITEMS);
       setParseStatus({
         kind: "error",
         messages: [
@@ -4897,6 +5190,8 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
       setParsing(false);
     }
 
+    setPreviewTab("flow");
+    setSelectedRelationId(COST_PREVIEW_RELATIONS[0].id);
     setStep("preview");
   }
 
@@ -5003,6 +5298,9 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
       setFile1(null);
       setFile2(null);
       setFile3(null);
+      setPricePreviewItems(REFERENCE_PRICE_PREVIEW_ITEMS);
+      setPreviewTab("flow");
+      setSelectedRelationId(COST_PREVIEW_RELATIONS[0].id);
       setStep("preview");
       setDraftStatus({ kind: "success", message: "Firebase 초안을 불러와 미리보기에 반영했습니다." });
     } catch (error) {
@@ -5135,86 +5433,333 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
             <div className="ceg-panel-head">
               <div>
                 <span className="eyebrow">Preview</span>
-                <h2>내역서 미리보기</h2>
-                <p>업로드 파일에서 파싱된 수량·단가·금액을 확인하고 편집하세요.</p>
+                <h2>3종 파일 미리보기</h2>
+                <p>단가대비표·일위대가표·내역서의 산식 연결을 확인하고 내역서 행을 편집하세요.</p>
               </div>
-              <button className="secondary-btn" type="button" onClick={handleAddRow}>
+              <button
+                className="secondary-btn"
+                type="button"
+                onClick={() => {
+                  setPreviewTab("detail");
+                  handleAddRow();
+                }}
+              >
                 + 행 추가
               </button>
             </div>
 
-            <div className="ceg-table-wrap">
-              <table className="table ceg-table">
-                <thead>
-                  <tr>
-                    <th>항목코드</th>
-                    <th>비목</th>
-                    <th>품명</th>
-                    <th>규격</th>
-                    <th>단위</th>
-                    <th className="num">수량</th>
-                    <th className="num">단가</th>
-                    <th className="num">금액</th>
-                    <th>근거</th>
-                    <th>작업</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {calculated.map((row) =>
-                    editingId === row.id && editDraft ? (
-                      <tr key={row.id} className="editing">
-                        <td><input className="input ceg-input" value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} /></td>
-                        <td>
-                          <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value as CostCategory })}>
-                            <option value="material">재료비</option>
-                            <option value="labor">직접노무비</option>
-                            <option value="expense">경비</option>
-                          </select>
-                        </td>
-                        <td><input className="input ceg-input" value={editDraft.itemName} onChange={(e) => setEditDraft({ ...editDraft, itemName: e.target.value })} /></td>
-                        <td><input className="input ceg-input" value={editDraft.spec} onChange={(e) => setEditDraft({ ...editDraft, spec: e.target.value })} /></td>
-                        <td><input className="input ceg-input" value={editDraft.unit} style={{ width: 52 }} onChange={(e) => setEditDraft({ ...editDraft, unit: e.target.value })} /></td>
-                        <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
-                        <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
-                        <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
-                        <td>{sourceBasis(editDraft)}</td>
-                        <td className="ceg-row-actions">
-                          <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
-                          <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr key={row.id}>
-                        <td>{row.code}</td>
-                        <td>{costCategoryLabel(row.category)}</td>
-                        <td>{row.itemName}</td>
-                        <td>{row.spec}</td>
-                        <td>{row.unit}</td>
-                        <td className="num">{row.qty}</td>
-                        <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
-                        <td className="num">{formatMoney(row.amount)}</td>
-                        <td>{sourceBasis(row)}</td>
-                        <td className="ceg-row-actions">
-                          <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
-                          <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
-                        </td>
-                      </tr>
-                    ),
-                  )}
-                  {rows.length === 0 ? (
-                    <tr><td colSpan={10} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
-                  ) : null}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
-                    <td className="num" style={{ fontWeight: 700 }}>{formatMoney(calculated.reduce((s, r) => s + r.amount, 0))}</td>
-                    <td>집계표!K19</td>
-                    <td />
-                  </tr>
-                </tfoot>
-              </table>
+            <div className="ceg-preview-summary-grid">
+              <button
+                className={`ceg-preview-summary-card${previewTab === "price" ? " active" : ""}`}
+                type="button"
+                onClick={() => setPreviewTab("price")}
+              >
+                <span>단가대비표</span>
+                <strong>{pricePreviewItems.length}</strong>
+                <small>적용단가</small>
+              </button>
+              <button
+                className={`ceg-preview-summary-card${previewTab === "unit" ? " active" : ""}`}
+                type="button"
+                onClick={() => setPreviewTab("unit")}
+              >
+                <span>일위대가표</span>
+                <strong>{REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.length}</strong>
+                <small>호표 합계</small>
+              </button>
+              <button
+                className={`ceg-preview-summary-card${previewTab === "detail" ? " active" : ""}`}
+                type="button"
+                onClick={() => setPreviewTab("detail")}
+              >
+                <span>내역서</span>
+                <strong>{calculated.length}</strong>
+                <small>비목 행</small>
+              </button>
+              <button
+                className={`ceg-preview-summary-card${previewTab === "flow" ? " active" : ""}`}
+                type="button"
+                onClick={() => setPreviewTab("flow")}
+              >
+                <span>상관관계</span>
+                <strong>{COST_PREVIEW_RELATIONS.length}</strong>
+                <small>연결 규칙</small>
+              </button>
             </div>
+
+            <div className="ceg-preview-tabs" role="tablist" aria-label="원가계산서 미리보기 탭">
+              {COST_PREVIEW_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={previewTab === tab.id}
+                  className={previewTab === tab.id ? "active" : ""}
+                  onClick={() => setPreviewTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="ceg-selected-relation">
+              <span>선택 연결</span>
+              <strong>{selectedRelation.from} → {selectedRelation.to}</strong>
+              <small>{selectedRelation.label} · {selectedRelation.example}</small>
+            </div>
+
+            {previewTab === "flow" ? (
+              <div className="ceg-preview-pane">
+                <div className="ceg-relation-map">
+                  {COST_PREVIEW_FLOW_NODES.map((node, index) => (
+                    <div key={node} className="ceg-relation-map-item">
+                      <span className={`ceg-relation-node${node === selectedRelation.from || node === selectedRelation.to ? " active" : ""}`}>
+                        {node}
+                      </span>
+                      {index < COST_PREVIEW_FLOW_NODES.length - 1 ? <span className="ceg-relation-arrow">→</span> : null}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="ceg-relation-edge-list">
+                  {COST_PREVIEW_RELATIONS.map((relation) => (
+                    <button
+                      key={relation.id}
+                      type="button"
+                      className={`ceg-relation-edge${selectedRelationId === relation.id ? " active" : ""}`}
+                      onClick={() => setSelectedRelationId(relation.id)}
+                    >
+                      <span>{relation.from} → {relation.to}</span>
+                      <strong>{relation.label}</strong>
+                      <small>{relation.example}</small>
+                      <em>{relation.count}개 연결</em>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="ceg-flow-preview-grid">
+                  <div className="ceg-flow-preview-card">
+                    <strong>단가대비표</strong>
+                    {pricePreviewItems.slice(0, 3).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`ceg-flow-row${previewRelationClass(item.relationIds, selectedRelationId)}`}
+                        onClick={() => setSelectedRelationId(item.relationIds[0])}
+                      >
+                        <span>{item.itemName}</span>
+                        <b>{formatMoney(item.appliedUnitPrice)}</b>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="ceg-flow-preview-card">
+                    <strong>일위대가표</strong>
+                    {REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.slice(0, 3).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`ceg-flow-row${previewRelationClass(item.relationIds, selectedRelationId)}`}
+                        onClick={() => setSelectedRelationId(item.relationIds[0])}
+                      >
+                        <span>{item.title}</span>
+                        <b>{formatMoney(item.total)}</b>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="ceg-flow-preview-card">
+                    <strong>내역서</strong>
+                    {calculated.slice(0, 3).map((row) => {
+                      const relationIds = relationIdsForCostRow(row);
+                      return (
+                        <button
+                          key={row.id}
+                          type="button"
+                          className={`ceg-flow-row${previewRelationClass(relationIds, selectedRelationId)}`}
+                          onClick={() => setSelectedRelationId(relationIds[0])}
+                        >
+                          <span>{row.itemName}</span>
+                          <b>{formatMoney(row.amount)}</b>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {previewTab === "price" ? (
+              <div className="ceg-preview-pane">
+                <div className="ceg-table-wrap">
+                  <table className="table ceg-table ceg-mini-table">
+                    <thead>
+                      <tr>
+                        <th>품명</th>
+                        <th>규격</th>
+                        <th>단위</th>
+                        <th className="num">적용단가</th>
+                        <th>산식</th>
+                        <th>원본 셀</th>
+                        <th>참조 대상</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pricePreviewItems.map((item) => (
+                        <tr
+                          key={item.id}
+                          className={previewRelationClass(item.relationIds, selectedRelationId)}
+                          onClick={() => setSelectedRelationId(item.relationIds[0])}
+                        >
+                          <td>{item.itemName}</td>
+                          <td>{item.spec}</td>
+                          <td>{item.unit}</td>
+                          <td className="num">{formatMoney(item.appliedUnitPrice)}</td>
+                          <td>{item.formula}</td>
+                          <td>{item.sourceCell}</td>
+                          <td>{item.usedBy}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {previewTab === "unit" ? (
+              <div className="ceg-preview-pane">
+                <div className="ceg-table-wrap">
+                  <table className="table ceg-table ceg-mini-table">
+                    <thead>
+                      <tr>
+                        <th>호표</th>
+                        <th>단위</th>
+                        <th className="num">재료비</th>
+                        <th className="num">노무비</th>
+                        <th className="num">경비</th>
+                        <th className="num">합계</th>
+                        <th>합계 셀</th>
+                        <th>단가 출처</th>
+                        <th>사용처</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.map((item) => (
+                        <tr
+                          key={item.id}
+                          className={previewRelationClass(item.relationIds, selectedRelationId)}
+                          onClick={() => setSelectedRelationId(item.relationIds[0])}
+                        >
+                          <td>{item.title}</td>
+                          <td>{item.unit}</td>
+                          <td className="num">{formatMoney(item.materialTotal)}</td>
+                          <td className="num">{formatMoney(item.laborTotal)}</td>
+                          <td className="num">{formatMoney(item.expenseTotal)}</td>
+                          <td className="num">{formatMoney(item.total)}</td>
+                          <td>{item.totalCell}</td>
+                          <td>{item.sourceRefs}</td>
+                          <td>{item.usedBy}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {previewTab === "detail" ? (
+              <div className="ceg-preview-pane">
+                <div className="ceg-table-wrap">
+                  <table className="table ceg-table">
+                    <thead>
+                      <tr>
+                        <th>항목코드</th>
+                        <th>비목</th>
+                        <th>품명</th>
+                        <th>규격</th>
+                        <th>단위</th>
+                        <th className="num">수량</th>
+                        <th className="num">단가</th>
+                        <th className="num">금액</th>
+                        <th>근거</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {calculated.map((row) => {
+                        const relationIds = relationIdsForCostRow(row);
+                        return editingId === row.id && editDraft ? (
+                          <tr key={row.id} className={`editing${previewRelationClass(relationIds, selectedRelationId)}`}>
+                            <td><input className="input ceg-input" value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} /></td>
+                            <td>
+                              <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value as CostCategory })}>
+                                <option value="material">재료비</option>
+                                <option value="labor">직접노무비</option>
+                                <option value="expense">경비</option>
+                              </select>
+                            </td>
+                            <td><input className="input ceg-input" value={editDraft.itemName} onChange={(e) => setEditDraft({ ...editDraft, itemName: e.target.value })} /></td>
+                            <td><input className="input ceg-input" value={editDraft.spec} onChange={(e) => setEditDraft({ ...editDraft, spec: e.target.value })} /></td>
+                            <td><input className="input ceg-input" value={editDraft.unit} style={{ width: 52 }} onChange={(e) => setEditDraft({ ...editDraft, unit: e.target.value })} /></td>
+                            <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
+                            <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
+                            <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
+                            <td>{sourceBasis(editDraft)}</td>
+                            <td className="ceg-row-actions">
+                              <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
+                              <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr
+                            key={row.id}
+                            className={previewRelationClass(relationIds, selectedRelationId)}
+                            onClick={() => setSelectedRelationId(relationIds[0])}
+                          >
+                            <td>{row.code}</td>
+                            <td>{costCategoryLabel(row.category)}</td>
+                            <td>{row.itemName}</td>
+                            <td>{row.spec}</td>
+                            <td>{row.unit}</td>
+                            <td className="num">{row.qty}</td>
+                            <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
+                            <td className="num">{formatMoney(row.amount)}</td>
+                            <td>{sourceBasis(row)}</td>
+                            <td className="ceg-row-actions">
+                              <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
+                              <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {rows.length === 0 ? (
+                        <tr><td colSpan={10} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
+                      ) : null}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan={7} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
+                        <td className="num" style={{ fontWeight: 700 }}>{formatMoney(calculated.reduce((s, r) => s + r.amount, 0))}</td>
+                        <td>집계표!K19</td>
+                        <td />
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {previewTab === "validation" ? (
+              <div className="ceg-preview-pane">
+                <div className="ceg-validation-list">
+                  {previewValidationItems.map((item) => (
+                    <div key={item.title} className={`ceg-validation-item ${item.level}`}>
+                      <span>{item.level === "ok" ? "OK" : item.level === "warning" ? "확인" : "정보"}</span>
+                      <strong>{item.title}</strong>
+                      <p>{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="ceg-next-row">
               <button
