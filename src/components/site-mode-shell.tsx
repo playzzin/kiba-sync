@@ -73,6 +73,7 @@ type MenuItem = {
   badge?: string;
   badgeType?: BadgeType;
   disabled?: boolean;
+  hidden?: boolean;
   children?: MenuItem[];
 };
 
@@ -208,6 +209,7 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "예정가격", href: "/cost-guide/estimated-price", icon: "chart" },
             { label: "정부원가계산의 활용", href: "/cost-guide/application", icon: "task" },
             { label: "원가계산실무", href: "/cost-guide/practice", icon: "database" },
+            { label: "SW 대가산정", href: "/cost-guide/sw-pricing", icon: "code" },
           ],
         },
         {
@@ -249,14 +251,21 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "상담 및 문의", href: "/support/contact", icon: "help" },
           ],
         },
+        {
+          label: "업무자동화",
+          icon: "task",
+          children: [
+            { label: "원가계산서 만들기", href: "/automation/cost-estimate-generator", icon: "doc", badge: "NEW" },
+          ],
+        },
       ],
     },
   ],
   erp: [
     {
-      group: "ERP",
+      group: "실무",
       items: [
-        { label: "ERP 대시보드", href: "/erp/dashboard", icon: "chart", badge: "ERP" },
+        { label: "실무 대시보드", href: "/erp/dashboard", icon: "chart", badge: "실무" },
         {
           label: "업무관리",
           icon: "folder",
@@ -268,6 +277,7 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "CMS 구성",
           icon: "doc",
+          hidden: true,
           children: [
             { label: "페이지 관리", href: "/erp/cms/pages", icon: "doc" },
             { label: "메뉴·폴더 관리", href: "/erp/cms/navigation", icon: "folder" },
@@ -277,6 +287,7 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "회계·통계",
           icon: "chart",
+          hidden: true,
           children: [
             { label: "회계 항목", href: "/erp/accounting/items", icon: "database" },
             { label: "BigQuery 통계", href: "/erp/analytics/bigquery", icon: "chart" },
@@ -285,9 +296,10 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "시스템 설정",
           icon: "settings",
+          hidden: true,
           children: [
             { label: "Firebase 운영", href: "/erp/system/firebase", icon: "server", badge: "Live", badgeType: "success" },
-            { label: "ERP 설정", href: "/erp/settings", icon: "settings" },
+            { label: "실무 설정", href: "/erp/settings", icon: "settings" },
           ],
         },
       ],
@@ -345,6 +357,7 @@ const titles: Record<string, string> = {
   "/cost-guide/estimated-price": "예정가격",
   "/cost-guide/application": "정부원가계산의 활용",
   "/cost-guide/practice": "원가계산실무",
+  "/cost-guide/sw-pricing": "SW 대가산정",
   "/contract-adjustment/overview": "계약금액조정",
   "/contract-adjustment/price-change": "물가변동",
   "/contract-adjustment/design-change": "설계변경",
@@ -367,7 +380,7 @@ const titles: Record<string, string> = {
   "/admin/security": "Security Policy",
   "/admin/settings": "Company Settings",
   "/admin/reports": "Operation Stats",
-  "/erp/dashboard": "ERP 대시보드",
+  "/erp/dashboard": "실무 대시보드",
   "/erp/workforce/professionals": "전문인력 통합DB",
   "/erp/cost-estimates/new": "원가계산서 생성",
   "/erp/cms/pages": "페이지 관리",
@@ -376,7 +389,8 @@ const titles: Record<string, string> = {
   "/erp/accounting/items": "회계 항목",
   "/erp/analytics/bigquery": "BigQuery 통계",
   "/erp/system/firebase": "Firebase 운영",
-  "/erp/settings": "ERP 설정",
+  "/erp/settings": "실무 설정",
+  "/automation/cost-estimate-generator": "원가계산서 만들기",
 };
 
 type KibaPageDetail = {
@@ -402,7 +416,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/dashboard": {
     section: "KIBA",
     title: "한국경영분석연구원",
-    summary: "원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
+    summary: "예린  원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
     points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "ERP/CRM/CMS 운영 확장"],
     deliverables: ["기관 소개와 전문업무를 분리한 정보 구조", "원가·계약·개발부담금 핵심 업무 바로가기", "고객센터 콘텐츠 운영 영역"],
     related: ["/cost-guide/government-contract", "/contract-adjustment/overview", "/development-charge/overview", "/support/contact"],
@@ -426,6 +440,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/cost-guide/estimated-price": page("원가계산안내", "예정가격", "예정가격 산정의 원칙, 구성, 검토 절차를 설명하는 페이지입니다.", ["가격 기준", "원가 구성", "검토 절차"], ["산정 흐름", "필수 서류", "사례 링크"], ["/performance/costing", "/cost-guide/practice"]),
   "/cost-guide/application": page("원가계산안내", "정부원가계산의 활용", "정부원가계산 결과를 계약·예산·정산 업무에 활용하는 방식을 안내합니다.", ["계약 활용", "예산 검토", "사후 관리"], ["활용 시나리오", "업무 체크리스트", "연계 서비스"], ["/performance/settlement", "/contract-adjustment/overview"]),
   "/cost-guide/practice": page("원가계산안내", "원가계산실무", "원가계산 실무자가 확인해야 할 자료, 절차, 산출물 기준을 정리합니다.", ["비목 분류", "증빙 검토", "계산서 작성"], ["실무 단계", "자료 목록", "검토 포인트"], ["/cost-guide/estimated-price", "/support/contact"]),
+  "/cost-guide/sw-pricing": page("원가계산안내", "SW 대가산정", "SW사업대가 산정 기준과 최신 변경 알림을 제공합니다. 개발·유지관리·운영·DB구축비 산정 방식을 안내합니다.", ["개발비 산정", "유지관리비", "운영비"], ["기준 고시", "템플릿 다운로드", "변경 이력"], ["/cost-guide/practice", "/support/resources"]),
   "/contract-adjustment/overview": page("계약금액조정", "계약금액조정", "계약 체결 후 조건 변화에 따른 금액 조정 업무를 안내하는 페이지입니다.", ["조정 사유", "검토 절차", "증빙 자료"], ["조정 신청 흐름", "필요 서류", "상담 CTA"], ["/contract-adjustment/price-change", "/contract-adjustment/design-change"]),
   "/contract-adjustment/price-change": page("계약금액조정", "물가변동", "물가 변동에 따른 계약금액 조정 기준과 검토 절차를 제공하는 페이지입니다.", ["지수조정", "품목조정", "기준일 검토"], ["변동률 검토", "산식 안내", "증빙 관리"], ["/contract-adjustment/overview", "/support/resources"]),
   "/contract-adjustment/design-change": page("계약금액조정", "설계변경", "설계 변경에 따른 수량·단가·금액 변경 검토를 안내합니다.", ["변경 사유", "수량 검토", "단가 검토"], ["변경 절차", "검토 표준", "프로젝트 연결"], ["/research/construction-management", "/contract-adjustment/etc"]),
@@ -441,6 +456,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/support/news": page("고객센터", "공지사항&새소식", "기관 공지, 사업 안내, 주요 계약·성과 소식을 게시하는 페이지입니다.", ["공지 목록", "중요 공지", "새소식"], ["게시판", "상단 고정", "첨부파일"], ["/support/resources", "/support/contact"]),
   "/support/resources": page("고객센터", "자료실", "법령, 서식, 참고자료, 보고서 파일을 관리하는 자료실입니다.", ["서식", "참고자료", "보고서"], ["파일 업로드", "카테고리", "다운로드 통계"], ["/cost-guide/laws", "/support/news"]),
   "/support/contact": page("고객센터", "상담 및 문의", "원가계산, 계약금액조정, 개발부담금 상담을 접수하는 페이지입니다.", ["문의 유형", "담당자 배정", "답변 상태"], ["상담 폼", "CRM 전환", "알림 연동"], ["/intro/location", "/performance/costing"]),
+  "/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
 };
 
 function page(
@@ -673,6 +689,72 @@ const kibaNews = [
   "서울시 개발비용산정기관",
   "용인시 죽전동 공동주택 신축공사 분양가산정 관련 계약",
   "항공임무 외주정비 원가계산 검증용역 계약",
+];
+
+type SwPricingStatus = "confirmed" | "archived";
+
+const swPricingUpdates: {
+  id: string;
+  title: string;
+  year: number;
+  publishedAt: string;
+  sourceName: string;
+  sourceUrl: string;
+  attachmentUrl: string | null;
+  status: SwPricingStatus;
+  tags: string[];
+  summary: string;
+  relatedRoutes: string[];
+}[] = [
+  {
+    id: "2026-template",
+    title: "[사업대가] SW사업대가 산정 방식별 엑셀 템플릿 (2026)",
+    year: 2026,
+    publishedAt: "2026-01-15",
+    sourceName: "한국SW산업협회",
+    sourceUrl: "https://www.sw.or.kr/",
+    attachmentUrl: "#",
+    status: "confirmed",
+    tags: ["2026 기준", "첨부 있음", "최신 공지 확인 완료"],
+    summary:
+      "2026년도 SW사업대가 기준이 고시되었습니다. 개발비·유지관리비·운영비 산정 방식별 엑셀 템플릿이 포함됩니다.",
+    relatedRoutes: ["/cost-guide/sw-pricing", "/cost-guide/practice", "/support/resources"],
+  },
+  {
+    id: "2025-template",
+    title: "[사업대가] SW사업대가 산정 방식별 엑셀 템플릿 (2025)",
+    year: 2025,
+    publishedAt: "2025-01-20",
+    sourceName: "한국SW산업협회",
+    sourceUrl: "https://www.sw.or.kr/",
+    attachmentUrl: "#",
+    status: "confirmed",
+    tags: ["2025 기준", "첨부 있음"],
+    summary:
+      "2025년도 SW사업대가 기준이 반영된 산정 방식별 엑셀 템플릿입니다. 기능점수(FP), 투입공수(MM) 방식 모두 지원합니다.",
+    relatedRoutes: ["/cost-guide/sw-pricing", "/cost-guide/practice", "/support/resources"],
+  },
+  {
+    id: "2024-revision",
+    title: "SW사업 대가기준 개정 안내 (2024 하반기)",
+    year: 2024,
+    publishedAt: "2024-07-01",
+    sourceName: "과학기술정보통신부",
+    sourceUrl: "https://www.msit.go.kr/",
+    attachmentUrl: null,
+    status: "archived",
+    tags: ["2024 기준"],
+    summary:
+      "2024년 하반기 SW사업 대가기준 개정 내용입니다. 직접인건비 산정 기준과 간접원가 요율이 변경되었습니다.",
+    relatedRoutes: ["/cost-guide/practice"],
+  },
+];
+
+const swPricingRelatedWork = [
+  { label: "SW 대가산정 안내", route: "/cost-guide/sw-pricing" },
+  { label: "원가계산실무", route: "/cost-guide/practice" },
+  { label: "자료실", route: "/support/resources" },
+  { label: "공지사항&새소식", route: "/support/news" },
 ];
 
 const greetingExperts = [
@@ -1054,17 +1136,24 @@ function modeName(mode: Mode) {
     return "ADMIN MODE";
   }
   if (mode === "erp") {
-    return "ERP MODE";
+    return "직원 페이지";
   }
   return "USER MODE";
+}
+
+function modeTabLabel(mode: Mode) {
+  if (mode === "erp") {
+    return "실무";
+  }
+  return mode.toUpperCase();
 }
 
 function toMode(value: string | null): Mode {
   if (value === "developer" || value === "erp") {
     return "erp";
   }
-  if (value === "admin" || value === "user") {
-    return value;
+  if (value === "user") {
+    return "user";
   }
   return "user";
 }
@@ -1130,14 +1219,16 @@ function routeParentsFor(mode: Mode, route: string) {
 }
 
 function visibleItems(items: MenuItem[], query: string): MenuItem[] {
+  const candidates = items.filter((item) => !item.hidden);
+
   if (!query) {
-    return items;
+    return candidates;
   }
 
   const normalized = query.toLowerCase();
   const result: MenuItem[] = [];
 
-  for (const item of items) {
+  for (const item of candidates) {
     const children = item.children ? visibleItems(item.children, normalized) : undefined;
     const matched = item.label.toLowerCase().includes(normalized);
     if (matched || children?.length) {
@@ -1162,6 +1253,7 @@ export function SiteModeShell() {
   const [toast, setToast] = useState({ show: false, message: "Ready" });
   const [tooltip, setTooltip] = useState({ show: false, label: "", left: 0, top: 0 });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const visibleModeTabs: Mode[] = ["user", "erp"];
 
   const isPublicMode = shell.mode === "user";
   const title = titles[shell.route] || "Dashboard";
@@ -1171,8 +1263,8 @@ export function SiteModeShell() {
       ? userPage.summary
       : shell.mode === "erp"
         ? shell.route === "/erp/workforce/professionals"
-          ? "전문인력 데이터를 검색하고 필요한 인력만 선택해 PDF와 엑셀 보고서로 정리하는 ERP 업무 화면입니다."
-          : "전문인력 DB, CMS, 회계·통계를 한 곳에서 구성하고 운영하는 KIBA ERP 업무 화면입니다."
+          ? "전문인력 데이터를 검색하고 필요한 인력만 선택해 PDF와 엑셀 보고서로 정리하는 직원 실무 화면입니다."
+          : "전문인력 DB와 원가계산서 생성 업무를 한 곳에서 구성하고 운영하는 KIBA 직원 실무 화면입니다."
         : "사용자 권한, 보안 정책, 운영 리포트를 관리하는 KIBA 관리자 화면입니다.";
   const effectiveOpen = useMemo(() => {
     const next = new Set(shell.open);
@@ -1403,7 +1495,7 @@ export function SiteModeShell() {
           <button className="brand-btn" type="button" aria-label="Toggle sidebar" onClick={toggleCollapse}>
             <span className="logo">K</span>
             <span className="brand-text">
-              <strong>KIBA Admin</strong>
+              <strong>{shell.mode === "erp" ? "직원 페이지" : "한국경영분석연구원"}</strong>
               <span>{modeName(shell.mode)}</span>
             </span>
             <span className="collapse-mark">
@@ -1440,7 +1532,7 @@ export function SiteModeShell() {
         </nav>
 
         <div className="footer">
-          <div className="footer-banner">
+          <div className="footer-banner mock-hidden">
             <strong>KIBA Site Map</strong>
             <span>8 categories / 33 public pages</span>
           </div>
@@ -1496,10 +1588,7 @@ export function SiteModeShell() {
               </button>
               <div className="public-header-tools">
                 <button className="public-work-btn" type="button" onClick={() => setMode("erp")}>
-                  ERP
-                </button>
-                <button className="public-work-btn" type="button" onClick={() => setMode("admin")}>
-                  CMS
+                  실무
                 </button>
                 <button className="icon-btn" type="button" aria-label="테마 전환" onClick={toggleDark}>
                   {shell.dark ? <Sun size={16} /> : <Moon size={16} />}
@@ -1542,7 +1631,7 @@ export function SiteModeShell() {
 
             <div className="header-right">
               <div className="mode-tabs" role="tablist" aria-label="Site mode selection">
-                {(["user", "erp", "admin"] as Mode[]).map((mode) => (
+                {visibleModeTabs.map((mode) => (
                   <button
                     key={mode}
                     className={`mode-tab ${shell.mode === mode ? "active" : ""}`}
@@ -1551,7 +1640,7 @@ export function SiteModeShell() {
                     aria-selected={shell.mode === mode}
                     onClick={() => setMode(mode)}
                   >
-                    {mode.toUpperCase()}
+                    {modeTabLabel(mode)}
                   </button>
                 ))}
               </div>
@@ -1671,10 +1760,129 @@ function UserSitePage({ route, go }: { route: string; go: (route: string) => voi
   if (route === "/performance/costing" || route === "/performance/settlement" || route === "/performance/research") {
     return <KibaPerformancePage route={route} go={go} />;
   }
+  if (route === "/automation/cost-estimate-generator") {
+    return <KibaCostEstimateGeneratorPage go={go} />;
+  }
 
   const detail = kibaPageDetails[route] ?? kibaPageDetails["/dashboard"];
   const pageData = kibaSeedPagesByRoute[route];
   return <KibaDetailPage detail={detail} page={pageData} route={route} go={go} />;
+}
+
+function SwPricingModule({ go }: { go: (route: string) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleUpdates = expanded ? swPricingUpdates : swPricingUpdates.slice(0, 2);
+
+  return (
+    <section className="public-section">
+      <div className="public-section-head">
+        <span className="eyebrow">SW Pricing Updates</span>
+        <h2>SW 대가산정 기준 업데이트</h2>
+        <p>
+          최신 SW사업대가 기준과 변경 알림을 확인하세요. 자료 원문·첨부파일과 관련 업무 페이지로
+          바로 이동할 수 있습니다.
+        </p>
+      </div>
+
+      <div className="sw-pricing-layout">
+        <div className="sw-pricing-timeline">
+          {visibleUpdates.map((item) => (
+            <article key={item.id} className="sw-pricing-card">
+              <div className="sw-pricing-card-header">
+                <span className="sw-pricing-year">{item.year}</span>
+                <div className="sw-pricing-chips">
+                  {item.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={`sw-pricing-chip${item.status === "confirmed" && tag.includes("확인") ? " confirmed" : ""}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <strong className="sw-pricing-title">{item.title}</strong>
+              <p className="sw-pricing-summary">{item.summary}</p>
+              <div className="sw-pricing-meta">
+                <Clock size={12} />
+                <span>{item.publishedAt}</span>
+                <span className="sw-pricing-source">{item.sourceName}</span>
+              </div>
+              <div className="sw-pricing-actions">
+                <button
+                  className="sw-pricing-action-btn"
+                  type="button"
+                  onClick={() => go("/cost-guide/sw-pricing")}
+                >
+                  <Database size={13} />
+                  가이드 보기
+                </button>
+                {item.attachmentUrl ? (
+                  <button className="sw-pricing-action-btn" type="button" onClick={() => go("/support/resources")}>
+                    <FileText size={13} />
+                    첨부 다운로드
+                  </button>
+                ) : (
+                  <span className="sw-pricing-action-disabled">
+                    <FileText size={13} />
+                    첨부 없음
+                  </span>
+                )}
+                <a
+                  className="sw-pricing-action-btn"
+                  href={item.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={13} />
+                  공지 원문
+                </a>
+              </div>
+            </article>
+          ))}
+
+          {swPricingUpdates.length > 2 && (
+            <button
+              className="sw-pricing-expand-btn"
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+            >
+              {expanded ? "접기" : `더보기 (${swPricingUpdates.length - 2}건 더)`}
+              <ChevronRight
+                size={14}
+                style={{ transform: expanded ? "rotate(90deg)" : "none" }}
+              />
+            </button>
+          )}
+        </div>
+
+        <aside className="sw-pricing-related">
+          <span className="eyebrow">Related</span>
+          <h3 className="sw-pricing-related-title">관련 업무 및 자료</h3>
+          <div className="sw-pricing-related-list">
+            {swPricingRelatedWork.map((item) => (
+              <button
+                key={item.route}
+                className="sw-pricing-related-btn"
+                type="button"
+                onClick={() => go(item.route)}
+              >
+                <span>{item.label}</span>
+                <ChevronRight size={14} />
+              </button>
+            ))}
+          </div>
+          <div className="sw-pricing-note">
+            <ShieldCheck size={14} />
+            <span>
+              자료는 한국SW산업협회 및 과기정통부 고시 기준을 참조합니다. CMS 연동 시 자동
+              업데이트됩니다.
+            </span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
 }
 
 function KibaHome({ go }: { go: (route: string) => void }) {
@@ -1815,6 +2023,8 @@ function KibaHome({ go }: { go: (route: string) => void }) {
         </div>
       </section>
 
+      <SwPricingModule go={go} />
+
       <section className="public-section">
         <div className="split-showcase">
           <div>
@@ -1840,6 +2050,42 @@ function KibaHome({ go }: { go: (route: string) => void }) {
           </div>
         </div>
       </section>
+
+      <section className="public-section">
+        <div className="public-section-head">
+          <span className="eyebrow">업무자동화</span>
+          <h2>원가계산서 만들기</h2>
+          <p>단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성합니다.</p>
+        </div>
+        <div className="automation-cta-banner">
+          <div className="automation-cta-text">
+            <strong>파일 업로드 한 번으로 원가계산서 완성</strong>
+            <p>간접노무비·4대보험·퇴직공제·산업안전·일반관리비·이윤·부가세가 요율표 기준으로 자동 계산됩니다.</p>
+          </div>
+          <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+            <FileText size={16} />
+            원가계산서 만들기 시작
+          </button>
+        </div>
+      </section>
+
+      <footer className="kiba-main-footer">
+        <div>
+          <strong>한국경영분석연구원</strong>
+          <p>원가산정 · 계약금액조정 · 개발부담금 · 학술연구 · 분쟁검증</p>
+        </div>
+        <div className="kiba-main-footer-links">
+          <button type="button" onClick={() => go("/intro/location")}>
+            찾아오시는길
+          </button>
+          <button type="button" onClick={() => go("/support/contact")}>
+            상담 및 문의
+          </button>
+          <button type="button" onClick={() => go("/support/news")}>
+            공지사항
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -2623,7 +2869,7 @@ function KibaDetailPage({
             </div>
           </div>
 
-          <div className="side-card">
+          <div className="side-card mock-hidden">
             <span className="eyebrow">Related</span>
             <h3>연계 페이지</h3>
             <div className="side-link-list">
@@ -2643,6 +2889,18 @@ function KibaDetailPage({
               상담 및 문의
             </button>
           </div>
+
+          {route === "/cost-guide/practice" ? (
+            <div className="side-card automation-cta-side">
+              <span className="eyebrow">업무자동화</span>
+              <h3>원가계산서 만들기</h3>
+              <p>파일 업로드만으로 원가계산서·집계표·산출근거를 포함한 Excel을 자동 생성합니다.</p>
+              <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+                <FileText size={14} />
+                바로가기
+              </button>
+            </div>
+          ) : null}
         </aside>
       </div>
     </div>
@@ -3164,16 +3422,11 @@ function CostEstimateBuilderPage() {
   );
   const [rows, setRows] = useState<Record<string, CostEstimateRowState>>(() => initialCostEstimateRows(template));
   const [meta, setMeta] = useState<CostEstimateMeta>({
-    title: "원가계산서",
+    title: `${template.shortLabel} 원가계산서`,
     client: "",
     manager: "원가분석본부",
     note: "",
   });
-
-  useEffect(() => {
-    setRows(initialCostEstimateRows(template));
-    setMeta((current) => ({ ...current, title: `${template.shortLabel} 원가계산서` }));
-  }, [template]);
 
   const calculatedRows = useMemo(() => calculateCostEstimateRows(template, rows), [template, rows]);
   const totalItem = lastCostItem(template, "total");
@@ -3185,7 +3438,7 @@ function CostEstimateBuilderPage() {
   const inputAmount = template.items
     .filter((item) => item.kind === "amount")
     .reduce((sum, item) => sum + (calculatedRows[item.id] ?? 0), 0);
-  const estimateNumber = `KIBA-${template.shortLabel}-${todayStamp().replaceAll("-", "")}`;
+  const estimateNumber = `KIBA-${template.shortLabel}-${todayStamp().replace(/-/g, "")}`;
 
   function updateRow(itemId: string, field: keyof CostEstimateRowState, value: string) {
     const cleanValue = field === "rate" ? cleanRateInput(value) : cleanMoneyInput(value);
@@ -3201,6 +3454,12 @@ function CostEstimateBuilderPage() {
 
   function updateMeta(field: keyof CostEstimateMeta, value: string) {
     setMeta((current) => ({ ...current, [field]: value }));
+  }
+
+  function selectTemplate(nextTemplate: CostEstimateTemplate) {
+    setTemplateId(nextTemplate.id);
+    setRows(initialCostEstimateRows(nextTemplate));
+    setMeta((current) => ({ ...current, title: `${nextTemplate.shortLabel} 원가계산서` }));
   }
 
   function printEstimate() {
@@ -3254,7 +3513,7 @@ function CostEstimateBuilderPage() {
                 key={item.id}
                 className={item.id === template.id ? "active" : ""}
                 type="button"
-                onClick={() => setTemplateId(item.id)}
+                onClick={() => selectTemplate(item)}
               >
                 <strong>{item.label}</strong>
                 <span>{item.description}</span>
@@ -3456,7 +3715,7 @@ function ErpDashboard({ route }: { route: string }) {
     return <CostEstimateBuilderPage />;
   }
 
-  const pageTitle = titles[route] ?? "ERP 대시보드";
+  const pageTitle = titles[route] ?? "실무 대시보드";
   const erpPagePlan =
     {
       "/erp/cms/pages": ["공개 페이지", "초안", "검수", "배포 상태"],
@@ -3467,7 +3726,7 @@ function ErpDashboard({ route }: { route: string }) {
       "/erp/analytics/bigquery": ["업무 통계", "상담 전환", "정산 기간", "월별 리포트"],
       "/erp/system/firebase": ["Auth", "Firestore", "Storage", "Functions"],
       "/erp/settings": ["기관 정보", "업무 코드", "알림", "권한 기본값"],
-    }[route] ?? ["전문인력", "CMS", "회계", "통계"];
+    }[route] ?? ["전문인력", "자격 등록", "업무분류", "원가계산서"];
 
   const erpFolders = [
     { folder: "업무관리", pages: "전문인력 통합DB, 원가계산서 생성" },
@@ -3489,19 +3748,19 @@ function ErpDashboard({ route }: { route: string }) {
         <div className="card">
           <div className="section-title">
             <h2>{pageTitle} 구성</h2>
-            <span>ERP</span>
+            <span>실무</span>
           </div>
           <div className="related-list">
             {erpPagePlan.map((item) => (
               <div key={item} className="related-item">
                 <strong>{item}</strong>
-                <span>ERP 필드 및 화면 구성 항목</span>
+                <span>실무 필드 및 화면 구성 항목</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="card">
+        <div className="card mock-hidden">
           <div className="section-title">
             <h2>ERP 폴더 / 페이지</h2>
             <span>Navigation</span>
@@ -3525,7 +3784,7 @@ function ErpDashboard({ route }: { route: string }) {
         </div>
       </div>
 
-      <div className="grid grid2 gap-top">
+      <div className="grid grid2 gap-top mock-hidden">
         <ChartCard title="ERP 업무 흐름" />
         <div className="card terminal">
           <div className="section-title">
@@ -3868,6 +4127,597 @@ function downloadBlob(filename: string, type: string, content: string) {
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10);
+}
+
+// ─── 원가계산서 만들기 ──────────────────────────────────────────────────────
+
+type CestStep = "upload" | "preview" | "result";
+type CestUploadMode = "unified" | "separate";
+
+type CostRow = {
+  id: string;
+  code: string;
+  category: string;
+  spec: string;
+  unit: string;
+  qty: string;
+  unitPrice: string;
+};
+
+type CostRates = {
+  indirectLabor: string;
+  insurance: string;
+  retirementReserve: string;
+  safetyHealth: string;
+  generalAdmin: string;
+  profit: string;
+  vat: string;
+};
+
+const DEFAULT_RATES: CostRates = {
+  indirectLabor: "10.0",
+  insurance: "9.23",
+  retirementReserve: "1.0",
+  safetyHealth: "1.86",
+  generalAdmin: "6.0",
+  profit: "15.0",
+  vat: "10.0",
+};
+
+const DEMO_ROWS: CostRow[] = [
+  { id: "r1", code: "L001", category: "직접노무비", spec: "원가분석사", unit: "인일", qty: "30", unitPrice: "250000" },
+  { id: "r2", code: "L002", category: "직접노무비", spec: "보조원", unit: "인일", qty: "15", unitPrice: "150000" },
+  { id: "r3", code: "M001", category: "재료비", spec: "인쇄·제본", unit: "식", qty: "1", unitPrice: "120000" },
+  { id: "r4", code: "M002", category: "재료비", spec: "소모품", unit: "식", qty: "1", unitPrice: "50000" },
+  { id: "r5", code: "E001", category: "경비", spec: "교통비", unit: "식", qty: "1", unitPrice: "80000" },
+  { id: "r6", code: "E002", category: "경비", spec: "통신비", unit: "식", qty: "1", unitPrice: "30000" },
+];
+
+function newCostRow(): CostRow {
+  return { id: `r${Date.now()}`, code: "", category: "", spec: "", unit: "식", qty: "1", unitPrice: "0" };
+}
+
+function parseMoney(v: string) {
+  return Math.max(0, Number(v.replace(/[^0-9.]/g, "")) || 0);
+}
+
+function formatMoney(v: number) {
+  return v.toLocaleString("ko-KR");
+}
+
+function calcRows(rows: CostRow[]) {
+  return rows.map((row) => ({
+    ...row,
+    amount: parseMoney(row.qty) * parseMoney(row.unitPrice),
+  }));
+}
+
+function calcCostSummary(rows: CostRow[], rates: CostRates) {
+  const calculated = calcRows(rows);
+  const directLabor = calculated.filter((r) => r.category === "직접노무비").reduce((s, r) => s + r.amount, 0);
+  const materials = calculated.filter((r) => r.category === "재료비").reduce((s, r) => s + r.amount, 0);
+  const expense = calculated.filter((r) => r.category === "경비").reduce((s, r) => s + r.amount, 0);
+
+  const indirectLaborAmt = Math.round(directLabor * (parseMoney(rates.indirectLabor) / 100));
+  const totalLabor = directLabor + indirectLaborAmt;
+  const insuranceAmt = Math.round(totalLabor * (parseMoney(rates.insurance) / 100));
+  const retirementAmt = Math.round(totalLabor * (parseMoney(rates.retirementReserve) / 100));
+  const safetyAmt = Math.round((totalLabor + materials + expense) * (parseMoney(rates.safetyHealth) / 100));
+  const subtotal = totalLabor + materials + expense + insuranceAmt + retirementAmt + safetyAmt;
+  const generalAdminAmt = Math.round(subtotal * (parseMoney(rates.generalAdmin) / 100));
+  const profitAmt = Math.round((subtotal + generalAdminAmt) * (parseMoney(rates.profit) / 100));
+  const preVat = subtotal + generalAdminAmt + profitAmt;
+  const vatAmt = Math.round(preVat * (parseMoney(rates.vat) / 100));
+  const total = preVat + vatAmt;
+
+  return {
+    directLabor,
+    indirectLaborAmt,
+    totalLabor,
+    materials,
+    expense,
+    insuranceAmt,
+    retirementAmt,
+    safetyAmt,
+    subtotal,
+    generalAdminAmt,
+    profitAmt,
+    preVat,
+    vatAmt,
+    total,
+  };
+}
+
+function buildCostEstimateXml(rows: CostRow[], rates: CostRates, projectName: string) {
+  const summary = calcCostSummary(rows, rates);
+  const calculated = calcRows(rows);
+  const stamp = todayStamp();
+
+  function xmlCell(value: string | number, type: "String" | "Number" = "String") {
+    const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return `<Cell><Data ss:Type="${type}">${escaped}</Data></Cell>`;
+  }
+
+  function xmlRow(...cells: string[]) {
+    return `<Row>${cells.join("")}</Row>`;
+  }
+
+  function sheet(name: string, rows: string[]) {
+    return `<Worksheet ss:Name="${name}"><Table>${rows.join("")}</Table></Worksheet>`;
+  }
+
+  const costStatementRows = [
+    xmlRow(xmlCell(`원가계산서 — ${projectName || "프로젝트"}`), xmlCell(stamp)),
+    xmlRow(xmlCell("비목"), xmlCell("금액 (원)"), xmlCell("비고")),
+    xmlRow(xmlCell("직접노무비"), xmlCell(summary.directLabor, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell(summary.indirectLaborAmt, "Number"), xmlCell("직접노무비 기준")),
+    xmlRow(xmlCell("노무비 계"), xmlCell(summary.totalLabor, "Number"), xmlCell("")),
+    xmlRow(xmlCell("재료비"), xmlCell(summary.materials, "Number"), xmlCell("")),
+    xmlRow(xmlCell("경비"), xmlCell(summary.expense, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`4대보험 (${rates.insurance}%)`), xmlCell(summary.insuranceAmt, "Number"), xmlCell("노무비 기준")),
+    xmlRow(xmlCell(`퇴직공제 (${rates.retirementReserve}%)`), xmlCell(summary.retirementAmt, "Number"), xmlCell("노무비 기준")),
+    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell(summary.safetyAmt, "Number"), xmlCell("(노무비+재료비+경비) 기준")),
+    xmlRow(xmlCell("소계"), xmlCell(summary.subtotal, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell(summary.generalAdminAmt, "Number"), xmlCell("소계 기준")),
+    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell(summary.profitAmt, "Number"), xmlCell("(소계+일반관리비) 기준")),
+    xmlRow(xmlCell("부가세 전 합계"), xmlCell(summary.preVat, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`부가세 (${rates.vat}%)`), xmlCell(summary.vatAmt, "Number"), xmlCell("")),
+    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number"), xmlCell("")),
+  ];
+
+  const summaryRows = [
+    xmlRow(xmlCell("집계표"), xmlCell(stamp)),
+    xmlRow(xmlCell("비목"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액")),
+    ...calculated.map((r) =>
+      xmlRow(xmlCell(`[${r.code}] ${r.category} — ${r.spec}`), xmlCell(r.qty, "Number"), xmlCell(r.unitPrice, "Number"), xmlCell(r.amount, "Number")),
+    ),
+    xmlRow(xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(calculated.reduce((s, r) => s + r.amount, 0), "Number")),
+  ];
+
+  const basisRows = [
+    xmlRow(xmlCell("산출근거"), xmlCell(stamp)),
+    xmlRow(xmlCell("항목코드"), xmlCell("비목"), xmlCell("규격"), xmlCell("단위"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액"), xmlCell("산출식")),
+    ...calculated.map((r) =>
+      xmlRow(
+        xmlCell(r.code),
+        xmlCell(r.category),
+        xmlCell(r.spec),
+        xmlCell(r.unit),
+        xmlCell(r.qty, "Number"),
+        xmlCell(r.unitPrice, "Number"),
+        xmlCell(r.amount, "Number"),
+        xmlCell(`${r.qty} × ${r.unitPrice}`),
+      ),
+    ),
+  ];
+
+  const rateRows = [
+    xmlRow(xmlCell("요율표"), xmlCell(stamp)),
+    xmlRow(xmlCell("항목"), xmlCell("요율 (%)"), xmlCell("기준")),
+    xmlRow(xmlCell("간접노무비"), xmlCell(rates.indirectLabor, "Number"), xmlCell("직접노무비")),
+    xmlRow(xmlCell("4대보험"), xmlCell(rates.insurance, "Number"), xmlCell("노무비 합계")),
+    xmlRow(xmlCell("퇴직공제"), xmlCell(rates.retirementReserve, "Number"), xmlCell("노무비 합계")),
+    xmlRow(xmlCell("산업안전보건관리비"), xmlCell(rates.safetyHealth, "Number"), xmlCell("노무비+재료비+경비")),
+    xmlRow(xmlCell("일반관리비"), xmlCell(rates.generalAdmin, "Number"), xmlCell("소계")),
+    xmlRow(xmlCell("이윤"), xmlCell(rates.profit, "Number"), xmlCell("소계+일반관리비")),
+    xmlRow(xmlCell("부가세"), xmlCell(rates.vat, "Number"), xmlCell("부가세전합계")),
+  ];
+
+  const logRows = [
+    xmlRow(xmlCell("검증로그"), xmlCell(stamp)),
+    xmlRow(xmlCell("구분"), xmlCell("내용")),
+    xmlRow(xmlCell("입력 행 수"), xmlCell(String(rows.length), "Number")),
+    xmlRow(xmlCell("총 직접노무비"), xmlCell(summary.directLabor, "Number")),
+    xmlRow(xmlCell("총 재료비"), xmlCell(summary.materials, "Number")),
+    xmlRow(xmlCell("총 경비"), xmlCell(summary.expense, "Number")),
+    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number")),
+    xmlRow(xmlCell("생성일시"), xmlCell(stamp)),
+    xmlRow(xmlCell("프로젝트명"), xmlCell(projectName || "(미입력)")),
+  ];
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  ${sheet("원가계산서", costStatementRows)}
+  ${sheet("집계표", summaryRows)}
+  ${sheet("산출근거", basisRows)}
+  ${sheet("요율표", rateRows)}
+  ${sheet("검증로그", logRows)}
+</Workbook>`;
+}
+
+function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) {
+  const [step, setStep] = useState<CestStep>("upload");
+  const [uploadMode, setUploadMode] = useState<CestUploadMode>("separate");
+  const [unifiedFile, setUnifiedFile] = useState<File | null>(null);
+  const [file1, setFile1] = useState<File | null>(null);
+  const [file2, setFile2] = useState<File | null>(null);
+  const [file3, setFile3] = useState<File | null>(null);
+  const [rows, setRows] = useState<CostRow[]>(DEMO_ROWS);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<CostRow | null>(null);
+  const [rates, setRates] = useState<CostRates>(DEFAULT_RATES);
+  const [projectName, setProjectName] = useState("");
+
+  const canProceed =
+    uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
+
+  const summary = calcCostSummary(rows, rates);
+  const calculated = calcRows(rows);
+
+  function handleUploadProceed() {
+    setStep("preview");
+  }
+
+  function handleAddRow() {
+    const nr = newCostRow();
+    setRows((prev) => [...prev, nr]);
+    setEditingId(nr.id);
+    setEditDraft(nr);
+  }
+
+  function handleDeleteRow(id: string) {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+    if (editingId === id) {
+      setEditingId(null);
+      setEditDraft(null);
+    }
+  }
+
+  function handleEditStart(row: CostRow) {
+    setEditingId(row.id);
+    setEditDraft({ ...row });
+  }
+
+  function handleEditSave() {
+    if (!editDraft) return;
+    setRows((prev) => prev.map((r) => (r.id === editDraft.id ? editDraft : r)));
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function handleEditCancel() {
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function handleRateChange(key: keyof CostRates, value: string) {
+    setRates((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleDownload() {
+    const xml = buildCostEstimateXml(rows, rates, projectName);
+    downloadBlob(`원가계산서_${projectName || todayStamp()}.xls`, "application/vnd.ms-excel;charset=utf-8", xml);
+  }
+
+  const rateLabels: { key: keyof CostRates; label: string; hint: string }[] = [
+    { key: "indirectLabor", label: "간접노무비", hint: "직접노무비 기준" },
+    { key: "insurance", label: "4대보험", hint: "노무비 합계 기준" },
+    { key: "retirementReserve", label: "퇴직공제", hint: "노무비 합계 기준" },
+    { key: "safetyHealth", label: "산업안전보건관리비", hint: "노무비+재료비+경비 기준" },
+    { key: "generalAdmin", label: "일반관리비", hint: "소계 기준" },
+    { key: "profit", label: "이윤", hint: "소계+일반관리비 기준" },
+    { key: "vat", label: "부가세", hint: "부가세전합계 기준" },
+  ];
+
+  return (
+    <div className="ceg-page">
+      {/* 상단 헤더 */}
+      <section className="page-hero">
+        <span className="eyebrow">업무자동화</span>
+        <h1>원가계산서 만들기</h1>
+        <p>파일 업로드 → 미리보기 편집 → 요율 설정 → Excel 다운로드 순서로 원가계산서를 생성합니다.</p>
+        <div className="ceg-step-bar">
+          <span className={step === "upload" ? "active" : "done"}>1. 파일 업로드</span>
+          <span className={step === "preview" ? "active" : step === "result" ? "done" : ""}>2. 미리보기·편집</span>
+          <span className={step === "result" ? "active" : ""}>3. 결과·다운로드</span>
+        </div>
+      </section>
+
+      {/* STEP 1: 업로드 */}
+      {step === "upload" ? (
+        <section className="card ceg-upload-section">
+          <div className="ceg-upload-mode-toggle">
+            <button
+              type="button"
+              className={uploadMode === "separate" ? "active" : ""}
+              onClick={() => setUploadMode("separate")}
+            >
+              개별 파일 3개
+            </button>
+            <button
+              type="button"
+              className={uploadMode === "unified" ? "active" : ""}
+              onClick={() => setUploadMode("unified")}
+            >
+              통합 Excel 1개
+            </button>
+          </div>
+
+          {uploadMode === "separate" ? (
+            <div className="ceg-file-grid">
+              <CegFileInput
+                label="단가대비표"
+                hint=".xlsx / .xls / .csv"
+                file={file1}
+                onChange={setFile1}
+              />
+              <CegFileInput
+                label="일위대가표"
+                hint=".xlsx / .xls / .csv"
+                file={file2}
+                onChange={setFile2}
+              />
+              <CegFileInput
+                label="내역서"
+                hint=".xlsx / .xls / .csv"
+                file={file3}
+                onChange={setFile3}
+              />
+            </div>
+          ) : (
+            <div className="ceg-file-grid ceg-file-grid--single">
+              <CegFileInput
+                label="통합 Excel"
+                hint=".xlsx / .xls (모든 시트 포함)"
+                file={unifiedFile}
+                onChange={setUnifiedFile}
+              />
+            </div>
+          )}
+
+          <p className="ceg-upload-note">
+            ※ 파일을 업로드하면 샘플 데이터가 미리보기 테이블에 표시됩니다. (1차 프로토타입)
+          </p>
+
+          <div className="ceg-upload-actions">
+            <button
+              className="primary-btn"
+              type="button"
+              disabled={!canProceed}
+              onClick={handleUploadProceed}
+            >
+              <ChevronRight size={15} />
+              미리보기로 이동
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {/* STEP 2 & 3: 미리보기 + 요율 + 결과 */}
+      {step === "preview" || step === "result" ? (
+        <>
+          <section className="card ceg-preview-section">
+            <div className="ceg-panel-head">
+              <div>
+                <span className="eyebrow">Preview</span>
+                <h2>내역서 미리보기</h2>
+                <p>행을 편집·추가·삭제하여 원가 항목을 조정하세요.</p>
+              </div>
+              <button className="secondary-btn" type="button" onClick={handleAddRow}>
+                + 행 추가
+              </button>
+            </div>
+
+            <div className="ceg-table-wrap">
+              <table className="table ceg-table">
+                <thead>
+                  <tr>
+                    <th>항목코드</th>
+                    <th>비목</th>
+                    <th>규격</th>
+                    <th>단위</th>
+                    <th className="num">수량</th>
+                    <th className="num">단가</th>
+                    <th className="num">금액</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calculated.map((row) =>
+                    editingId === row.id && editDraft ? (
+                      <tr key={row.id} className="editing">
+                        <td><input className="input ceg-input" value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} /></td>
+                        <td>
+                          <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value })}>
+                            <option value="">선택</option>
+                            <option>직접노무비</option>
+                            <option>재료비</option>
+                            <option>경비</option>
+                          </select>
+                        </td>
+                        <td><input className="input ceg-input" value={editDraft.spec} onChange={(e) => setEditDraft({ ...editDraft, spec: e.target.value })} /></td>
+                        <td><input className="input ceg-input" value={editDraft.unit} style={{ width: 52 }} onChange={(e) => setEditDraft({ ...editDraft, unit: e.target.value })} /></td>
+                        <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
+                        <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
+                        <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
+                        <td className="ceg-row-actions">
+                          <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
+                          <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={row.id}>
+                        <td>{row.code}</td>
+                        <td>{row.category}</td>
+                        <td>{row.spec}</td>
+                        <td>{row.unit}</td>
+                        <td className="num">{row.qty}</td>
+                        <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
+                        <td className="num">{formatMoney(row.amount)}</td>
+                        <td className="ceg-row-actions">
+                          <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
+                          <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                  {rows.length === 0 ? (
+                    <tr><td colSpan={8} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
+                  ) : null}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
+                    <td className="num" style={{ fontWeight: 700 }}>{formatMoney(calculated.reduce((s, r) => s + r.amount, 0))}</td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="ceg-next-row">
+              <button
+                className="primary-btn"
+                type="button"
+                onClick={() => setStep("result")}
+              >
+                <ChevronRight size={15} />
+                요율 설정 및 원가계산서 생성
+              </button>
+              <button className="ghost-btn" type="button" onClick={() => setStep("upload")}>
+                <ChevronLeft size={15} />
+                다시 업로드
+              </button>
+            </div>
+          </section>
+
+          {step === "result" ? (
+            <div className="ceg-result-grid">
+              {/* 요율 설정 패널 */}
+              <section className="card ceg-rates-panel">
+                <span className="eyebrow">요율 설정</span>
+                <h2>비율 설정</h2>
+                <p>기본값을 사용하거나 프로젝트에 맞게 수정하세요.</p>
+                <div className="ceg-rates-list">
+                  {rateLabels.map(({ key, label, hint }) => (
+                    <label key={key} className="ceg-rate-row">
+                      <div>
+                        <strong>{label}</strong>
+                        <span>{hint}</span>
+                      </div>
+                      <div className="ceg-rate-input-wrap">
+                        <input
+                          className="input ceg-rate-input"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={rates[key]}
+                          onChange={(e) => handleRateChange(key, e.target.value)}
+                        />
+                        <span>%</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              {/* 원가계산서 결과 */}
+              <section className="card ceg-result-panel">
+                <span className="eyebrow">원가계산서</span>
+                <h2>계산 결과</h2>
+                <div className="ceg-summary-table">
+                  <div className="ceg-summary-row"><span>직접노무비</span><strong>{formatMoney(summary.directLabor)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>간접노무비 ({rates.indirectLabor}%)</span><strong>{formatMoney(summary.indirectLaborAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>노무비 계</span><strong>{formatMoney(summary.totalLabor)} 원</strong></div>
+                  <div className="ceg-summary-row"><span>재료비</span><strong>{formatMoney(summary.materials)} 원</strong></div>
+                  <div className="ceg-summary-row"><span>경비</span><strong>{formatMoney(summary.expense)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>4대보험 ({rates.insurance}%)</span><strong>{formatMoney(summary.insuranceAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>퇴직공제 ({rates.retirementReserve}%)</span><strong>{formatMoney(summary.retirementAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>산업안전보건관리비 ({rates.safetyHealth}%)</span><strong>{formatMoney(summary.safetyAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>소계</span><strong>{formatMoney(summary.subtotal)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>일반관리비 ({rates.generalAdmin}%)</span><strong>{formatMoney(summary.generalAdminAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>이윤 ({rates.profit}%)</span><strong>{formatMoney(summary.profitAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>부가세 전 합계</span><strong>{formatMoney(summary.preVat)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>부가세 ({rates.vat}%)</span><strong>{formatMoney(summary.vatAmt)} 원</strong></div>
+                  <div className="ceg-summary-row grand"><span>최종 합계</span><strong>{formatMoney(summary.total)} 원</strong></div>
+                </div>
+
+                <div className="ceg-download-area">
+                  <label className="ceg-project-label">
+                    <span>프로젝트명 (선택)</span>
+                    <input
+                      className="input"
+                      type="text"
+                      placeholder="예: 2026년 원가계산 용역"
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
+                    />
+                  </label>
+                  <button className="primary-btn ceg-download-btn" type="button" onClick={handleDownload}>
+                    <Database size={16} />
+                    원가계산서 Excel 다운로드
+                    <span className="ceg-sheet-badge">5개 시트</span>
+                  </button>
+                  <p className="ceg-download-note">
+                    원가계산서 · 집계표 · 산출근거 · 요율표 · 검증로그가 하나의 파일에 포함됩니다.
+                  </p>
+                </div>
+              </section>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {/* 관련 페이지 */}
+      <section className="ceg-related-section">
+        <button className="ghost-btn" type="button" onClick={() => go("/cost-guide/practice")}>
+          원가계산실무 안내 →
+        </button>
+        <button className="ghost-btn" type="button" onClick={() => go("/support/contact")}>
+          상담 및 문의 →
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function CegFileInput({
+  label,
+  hint,
+  file,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  onChange: (file: File | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className={`ceg-file-box ${file ? "has-file" : ""}`}>
+      <button
+        type="button"
+        className="ceg-file-drop"
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+      >
+        <FileText size={28} />
+        <strong>{label}</strong>
+        <span>{file ? file.name : hint}</span>
+        {!file ? <span className="ceg-file-cta">클릭하여 파일 선택</span> : null}
+      </button>
+      {file ? (
+        <button
+          className="ghost-btn ceg-file-clear"
+          type="button"
+          aria-label={`${label} 파일 제거`}
+          onClick={() => onChange(null)}
+        >
+          <X size={14} />
+        </button>
+      ) : null}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        style={{ display: "none" }}
+        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+      />
+    </div>
+  );
 }
 
 function escapeHtml(value: string) {
