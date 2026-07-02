@@ -242,6 +242,13 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "상담 및 문의", href: "/support/contact", icon: "help" },
           ],
         },
+        {
+          label: "업무자동화",
+          icon: "task",
+          children: [
+            { label: "원가계산서 만들기", href: "/automation/cost-estimate-generator", icon: "doc", badge: "NEW" },
+          ],
+        },
       ],
     },
   ],
@@ -369,6 +376,7 @@ const titles: Record<string, string> = {
   "/erp/analytics/bigquery": "BigQuery 통계",
   "/erp/system/firebase": "Firebase 운영",
   "/erp/settings": "ERP 설정",
+  "/automation/cost-estimate-generator": "원가계산서 만들기",
 };
 
 type KibaPageDetail = {
@@ -434,6 +442,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/support/news": page("고객센터", "공지사항&새소식", "기관 공지, 사업 안내, 주요 계약·성과 소식을 게시하는 페이지입니다.", ["공지 목록", "중요 공지", "새소식"], ["게시판", "상단 고정", "첨부파일"], ["/support/resources", "/support/contact"]),
   "/support/resources": page("고객센터", "자료실", "법령, 서식, 참고자료, 보고서 파일을 관리하는 자료실입니다.", ["서식", "참고자료", "보고서"], ["파일 업로드", "카테고리", "다운로드 통계"], ["/cost-guide/laws", "/support/news"]),
   "/support/contact": page("고객센터", "상담 및 문의", "원가계산, 계약금액조정, 개발부담금 상담을 접수하는 페이지입니다.", ["문의 유형", "담당자 배정", "답변 상태"], ["상담 폼", "CRM 전환", "알림 연동"], ["/intro/location", "/performance/costing"]),
+  "/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
 };
 
 function page(
@@ -1649,6 +1658,9 @@ function UserSitePage({ route, go }: { route: string; go: (route: string) => voi
   if (route === "/performance/costing" || route === "/performance/settlement" || route === "/performance/research") {
     return <KibaPerformancePage route={route} go={go} />;
   }
+  if (route === "/automation/cost-estimate-generator") {
+    return <KibaCostEstimateGeneratorPage go={go} />;
+  }
 
   const detail = kibaPageDetails[route] ?? kibaPageDetails["/dashboard"];
   const pageData = kibaSeedPagesByRoute[route];
@@ -1922,6 +1934,24 @@ function KibaHome({ go }: { go: (route: string) => void }) {
               문의 페이지로 이동
             </button>
           </div>
+        </div>
+      </section>
+
+      <section className="public-section">
+        <div className="public-section-head">
+          <span className="eyebrow">업무자동화</span>
+          <h2>원가계산서 만들기</h2>
+          <p>단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성합니다.</p>
+        </div>
+        <div className="automation-cta-banner">
+          <div className="automation-cta-text">
+            <strong>파일 업로드 한 번으로 원가계산서 완성</strong>
+            <p>간접노무비·4대보험·퇴직공제·산업안전·일반관리비·이윤·부가세가 요율표 기준으로 자동 계산됩니다.</p>
+          </div>
+          <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+            <FileText size={16} />
+            원가계산서 만들기 시작
+          </button>
         </div>
       </section>
     </div>
@@ -2693,6 +2723,18 @@ function KibaDetailPage({
               상담 및 문의
             </button>
           </div>
+
+          {route === "/cost-guide/practice" ? (
+            <div className="side-card automation-cta-side">
+              <span className="eyebrow">업무자동화</span>
+              <h3>원가계산서 만들기</h3>
+              <p>파일 업로드만으로 원가계산서·집계표·산출근거를 포함한 Excel을 자동 생성합니다.</p>
+              <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+                <FileText size={14} />
+                바로가기
+              </button>
+            </div>
+          ) : null}
         </aside>
       </div>
     </div>
@@ -3445,6 +3487,597 @@ function downloadBlob(filename: string, type: string, content: string) {
 
 function todayStamp() {
   return new Date().toISOString().slice(0, 10);
+}
+
+// ─── 원가계산서 만들기 ──────────────────────────────────────────────────────
+
+type CestStep = "upload" | "preview" | "result";
+type CestUploadMode = "unified" | "separate";
+
+type CostRow = {
+  id: string;
+  code: string;
+  category: string;
+  spec: string;
+  unit: string;
+  qty: string;
+  unitPrice: string;
+};
+
+type CostRates = {
+  indirectLabor: string;
+  insurance: string;
+  retirementReserve: string;
+  safetyHealth: string;
+  generalAdmin: string;
+  profit: string;
+  vat: string;
+};
+
+const DEFAULT_RATES: CostRates = {
+  indirectLabor: "10.0",
+  insurance: "9.23",
+  retirementReserve: "1.0",
+  safetyHealth: "1.86",
+  generalAdmin: "6.0",
+  profit: "15.0",
+  vat: "10.0",
+};
+
+const DEMO_ROWS: CostRow[] = [
+  { id: "r1", code: "L001", category: "직접노무비", spec: "원가분석사", unit: "인일", qty: "30", unitPrice: "250000" },
+  { id: "r2", code: "L002", category: "직접노무비", spec: "보조원", unit: "인일", qty: "15", unitPrice: "150000" },
+  { id: "r3", code: "M001", category: "재료비", spec: "인쇄·제본", unit: "식", qty: "1", unitPrice: "120000" },
+  { id: "r4", code: "M002", category: "재료비", spec: "소모품", unit: "식", qty: "1", unitPrice: "50000" },
+  { id: "r5", code: "E001", category: "경비", spec: "교통비", unit: "식", qty: "1", unitPrice: "80000" },
+  { id: "r6", code: "E002", category: "경비", spec: "통신비", unit: "식", qty: "1", unitPrice: "30000" },
+];
+
+function newCostRow(): CostRow {
+  return { id: `r${Date.now()}`, code: "", category: "", spec: "", unit: "식", qty: "1", unitPrice: "0" };
+}
+
+function parseMoney(v: string) {
+  return Math.max(0, Number(v.replace(/[^0-9.]/g, "")) || 0);
+}
+
+function formatMoney(v: number) {
+  return v.toLocaleString("ko-KR");
+}
+
+function calcRows(rows: CostRow[]) {
+  return rows.map((row) => ({
+    ...row,
+    amount: parseMoney(row.qty) * parseMoney(row.unitPrice),
+  }));
+}
+
+function calcCostSummary(rows: CostRow[], rates: CostRates) {
+  const calculated = calcRows(rows);
+  const directLabor = calculated.filter((r) => r.category === "직접노무비").reduce((s, r) => s + r.amount, 0);
+  const materials = calculated.filter((r) => r.category === "재료비").reduce((s, r) => s + r.amount, 0);
+  const expense = calculated.filter((r) => r.category === "경비").reduce((s, r) => s + r.amount, 0);
+
+  const indirectLaborAmt = Math.round(directLabor * (parseMoney(rates.indirectLabor) / 100));
+  const totalLabor = directLabor + indirectLaborAmt;
+  const insuranceAmt = Math.round(totalLabor * (parseMoney(rates.insurance) / 100));
+  const retirementAmt = Math.round(totalLabor * (parseMoney(rates.retirementReserve) / 100));
+  const safetyAmt = Math.round((totalLabor + materials + expense) * (parseMoney(rates.safetyHealth) / 100));
+  const subtotal = totalLabor + materials + expense + insuranceAmt + retirementAmt + safetyAmt;
+  const generalAdminAmt = Math.round(subtotal * (parseMoney(rates.generalAdmin) / 100));
+  const profitAmt = Math.round((subtotal + generalAdminAmt) * (parseMoney(rates.profit) / 100));
+  const preVat = subtotal + generalAdminAmt + profitAmt;
+  const vatAmt = Math.round(preVat * (parseMoney(rates.vat) / 100));
+  const total = preVat + vatAmt;
+
+  return {
+    directLabor,
+    indirectLaborAmt,
+    totalLabor,
+    materials,
+    expense,
+    insuranceAmt,
+    retirementAmt,
+    safetyAmt,
+    subtotal,
+    generalAdminAmt,
+    profitAmt,
+    preVat,
+    vatAmt,
+    total,
+  };
+}
+
+function buildCostEstimateXml(rows: CostRow[], rates: CostRates, projectName: string) {
+  const summary = calcCostSummary(rows, rates);
+  const calculated = calcRows(rows);
+  const stamp = todayStamp();
+
+  function xmlCell(value: string | number, type: "String" | "Number" = "String") {
+    const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return `<Cell><Data ss:Type="${type}">${escaped}</Data></Cell>`;
+  }
+
+  function xmlRow(...cells: string[]) {
+    return `<Row>${cells.join("")}</Row>`;
+  }
+
+  function sheet(name: string, rows: string[]) {
+    return `<Worksheet ss:Name="${name}"><Table>${rows.join("")}</Table></Worksheet>`;
+  }
+
+  const costStatementRows = [
+    xmlRow(xmlCell(`원가계산서 — ${projectName || "프로젝트"}`), xmlCell(stamp)),
+    xmlRow(xmlCell("비목"), xmlCell("금액 (원)"), xmlCell("비고")),
+    xmlRow(xmlCell("직접노무비"), xmlCell(summary.directLabor, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell(summary.indirectLaborAmt, "Number"), xmlCell("직접노무비 기준")),
+    xmlRow(xmlCell("노무비 계"), xmlCell(summary.totalLabor, "Number"), xmlCell("")),
+    xmlRow(xmlCell("재료비"), xmlCell(summary.materials, "Number"), xmlCell("")),
+    xmlRow(xmlCell("경비"), xmlCell(summary.expense, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`4대보험 (${rates.insurance}%)`), xmlCell(summary.insuranceAmt, "Number"), xmlCell("노무비 기준")),
+    xmlRow(xmlCell(`퇴직공제 (${rates.retirementReserve}%)`), xmlCell(summary.retirementAmt, "Number"), xmlCell("노무비 기준")),
+    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell(summary.safetyAmt, "Number"), xmlCell("(노무비+재료비+경비) 기준")),
+    xmlRow(xmlCell("소계"), xmlCell(summary.subtotal, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell(summary.generalAdminAmt, "Number"), xmlCell("소계 기준")),
+    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell(summary.profitAmt, "Number"), xmlCell("(소계+일반관리비) 기준")),
+    xmlRow(xmlCell("부가세 전 합계"), xmlCell(summary.preVat, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`부가세 (${rates.vat}%)`), xmlCell(summary.vatAmt, "Number"), xmlCell("")),
+    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number"), xmlCell("")),
+  ];
+
+  const summaryRows = [
+    xmlRow(xmlCell("집계표"), xmlCell(stamp)),
+    xmlRow(xmlCell("비목"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액")),
+    ...calculated.map((r) =>
+      xmlRow(xmlCell(`[${r.code}] ${r.category} — ${r.spec}`), xmlCell(r.qty, "Number"), xmlCell(r.unitPrice, "Number"), xmlCell(r.amount, "Number")),
+    ),
+    xmlRow(xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(calculated.reduce((s, r) => s + r.amount, 0), "Number")),
+  ];
+
+  const basisRows = [
+    xmlRow(xmlCell("산출근거"), xmlCell(stamp)),
+    xmlRow(xmlCell("항목코드"), xmlCell("비목"), xmlCell("규격"), xmlCell("단위"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액"), xmlCell("산출식")),
+    ...calculated.map((r) =>
+      xmlRow(
+        xmlCell(r.code),
+        xmlCell(r.category),
+        xmlCell(r.spec),
+        xmlCell(r.unit),
+        xmlCell(r.qty, "Number"),
+        xmlCell(r.unitPrice, "Number"),
+        xmlCell(r.amount, "Number"),
+        xmlCell(`${r.qty} × ${r.unitPrice}`),
+      ),
+    ),
+  ];
+
+  const rateRows = [
+    xmlRow(xmlCell("요율표"), xmlCell(stamp)),
+    xmlRow(xmlCell("항목"), xmlCell("요율 (%)"), xmlCell("기준")),
+    xmlRow(xmlCell("간접노무비"), xmlCell(rates.indirectLabor, "Number"), xmlCell("직접노무비")),
+    xmlRow(xmlCell("4대보험"), xmlCell(rates.insurance, "Number"), xmlCell("노무비 합계")),
+    xmlRow(xmlCell("퇴직공제"), xmlCell(rates.retirementReserve, "Number"), xmlCell("노무비 합계")),
+    xmlRow(xmlCell("산업안전보건관리비"), xmlCell(rates.safetyHealth, "Number"), xmlCell("노무비+재료비+경비")),
+    xmlRow(xmlCell("일반관리비"), xmlCell(rates.generalAdmin, "Number"), xmlCell("소계")),
+    xmlRow(xmlCell("이윤"), xmlCell(rates.profit, "Number"), xmlCell("소계+일반관리비")),
+    xmlRow(xmlCell("부가세"), xmlCell(rates.vat, "Number"), xmlCell("부가세전합계")),
+  ];
+
+  const logRows = [
+    xmlRow(xmlCell("검증로그"), xmlCell(stamp)),
+    xmlRow(xmlCell("구분"), xmlCell("내용")),
+    xmlRow(xmlCell("입력 행 수"), xmlCell(String(rows.length), "Number")),
+    xmlRow(xmlCell("총 직접노무비"), xmlCell(summary.directLabor, "Number")),
+    xmlRow(xmlCell("총 재료비"), xmlCell(summary.materials, "Number")),
+    xmlRow(xmlCell("총 경비"), xmlCell(summary.expense, "Number")),
+    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number")),
+    xmlRow(xmlCell("생성일시"), xmlCell(stamp)),
+    xmlRow(xmlCell("프로젝트명"), xmlCell(projectName || "(미입력)")),
+  ];
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  ${sheet("원가계산서", costStatementRows)}
+  ${sheet("집계표", summaryRows)}
+  ${sheet("산출근거", basisRows)}
+  ${sheet("요율표", rateRows)}
+  ${sheet("검증로그", logRows)}
+</Workbook>`;
+}
+
+function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) {
+  const [step, setStep] = useState<CestStep>("upload");
+  const [uploadMode, setUploadMode] = useState<CestUploadMode>("separate");
+  const [unifiedFile, setUnifiedFile] = useState<File | null>(null);
+  const [file1, setFile1] = useState<File | null>(null);
+  const [file2, setFile2] = useState<File | null>(null);
+  const [file3, setFile3] = useState<File | null>(null);
+  const [rows, setRows] = useState<CostRow[]>(DEMO_ROWS);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<CostRow | null>(null);
+  const [rates, setRates] = useState<CostRates>(DEFAULT_RATES);
+  const [projectName, setProjectName] = useState("");
+
+  const canProceed =
+    uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
+
+  const summary = calcCostSummary(rows, rates);
+  const calculated = calcRows(rows);
+
+  function handleUploadProceed() {
+    setStep("preview");
+  }
+
+  function handleAddRow() {
+    const nr = newCostRow();
+    setRows((prev) => [...prev, nr]);
+    setEditingId(nr.id);
+    setEditDraft(nr);
+  }
+
+  function handleDeleteRow(id: string) {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+    if (editingId === id) {
+      setEditingId(null);
+      setEditDraft(null);
+    }
+  }
+
+  function handleEditStart(row: CostRow) {
+    setEditingId(row.id);
+    setEditDraft({ ...row });
+  }
+
+  function handleEditSave() {
+    if (!editDraft) return;
+    setRows((prev) => prev.map((r) => (r.id === editDraft.id ? editDraft : r)));
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function handleEditCancel() {
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function handleRateChange(key: keyof CostRates, value: string) {
+    setRates((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleDownload() {
+    const xml = buildCostEstimateXml(rows, rates, projectName);
+    downloadBlob(`원가계산서_${projectName || todayStamp()}.xls`, "application/vnd.ms-excel;charset=utf-8", xml);
+  }
+
+  const rateLabels: { key: keyof CostRates; label: string; hint: string }[] = [
+    { key: "indirectLabor", label: "간접노무비", hint: "직접노무비 기준" },
+    { key: "insurance", label: "4대보험", hint: "노무비 합계 기준" },
+    { key: "retirementReserve", label: "퇴직공제", hint: "노무비 합계 기준" },
+    { key: "safetyHealth", label: "산업안전보건관리비", hint: "노무비+재료비+경비 기준" },
+    { key: "generalAdmin", label: "일반관리비", hint: "소계 기준" },
+    { key: "profit", label: "이윤", hint: "소계+일반관리비 기준" },
+    { key: "vat", label: "부가세", hint: "부가세전합계 기준" },
+  ];
+
+  return (
+    <div className="ceg-page">
+      {/* 상단 헤더 */}
+      <section className="page-hero">
+        <span className="eyebrow">업무자동화</span>
+        <h1>원가계산서 만들기</h1>
+        <p>파일 업로드 → 미리보기 편집 → 요율 설정 → Excel 다운로드 순서로 원가계산서를 생성합니다.</p>
+        <div className="ceg-step-bar">
+          <span className={step === "upload" ? "active" : "done"}>1. 파일 업로드</span>
+          <span className={step === "preview" ? "active" : step === "result" ? "done" : ""}>2. 미리보기·편집</span>
+          <span className={step === "result" ? "active" : ""}>3. 결과·다운로드</span>
+        </div>
+      </section>
+
+      {/* STEP 1: 업로드 */}
+      {step === "upload" ? (
+        <section className="card ceg-upload-section">
+          <div className="ceg-upload-mode-toggle">
+            <button
+              type="button"
+              className={uploadMode === "separate" ? "active" : ""}
+              onClick={() => setUploadMode("separate")}
+            >
+              개별 파일 3개
+            </button>
+            <button
+              type="button"
+              className={uploadMode === "unified" ? "active" : ""}
+              onClick={() => setUploadMode("unified")}
+            >
+              통합 Excel 1개
+            </button>
+          </div>
+
+          {uploadMode === "separate" ? (
+            <div className="ceg-file-grid">
+              <CegFileInput
+                label="단가대비표"
+                hint=".xlsx / .xls / .csv"
+                file={file1}
+                onChange={setFile1}
+              />
+              <CegFileInput
+                label="일위대가표"
+                hint=".xlsx / .xls / .csv"
+                file={file2}
+                onChange={setFile2}
+              />
+              <CegFileInput
+                label="내역서"
+                hint=".xlsx / .xls / .csv"
+                file={file3}
+                onChange={setFile3}
+              />
+            </div>
+          ) : (
+            <div className="ceg-file-grid ceg-file-grid--single">
+              <CegFileInput
+                label="통합 Excel"
+                hint=".xlsx / .xls (모든 시트 포함)"
+                file={unifiedFile}
+                onChange={setUnifiedFile}
+              />
+            </div>
+          )}
+
+          <p className="ceg-upload-note">
+            ※ 파일을 업로드하면 샘플 데이터가 미리보기 테이블에 표시됩니다. (1차 프로토타입)
+          </p>
+
+          <div className="ceg-upload-actions">
+            <button
+              className="primary-btn"
+              type="button"
+              disabled={!canProceed}
+              onClick={handleUploadProceed}
+            >
+              <ChevronRight size={15} />
+              미리보기로 이동
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {/* STEP 2 & 3: 미리보기 + 요율 + 결과 */}
+      {step === "preview" || step === "result" ? (
+        <>
+          <section className="card ceg-preview-section">
+            <div className="ceg-panel-head">
+              <div>
+                <span className="eyebrow">Preview</span>
+                <h2>내역서 미리보기</h2>
+                <p>행을 편집·추가·삭제하여 원가 항목을 조정하세요.</p>
+              </div>
+              <button className="secondary-btn" type="button" onClick={handleAddRow}>
+                + 행 추가
+              </button>
+            </div>
+
+            <div className="ceg-table-wrap">
+              <table className="table ceg-table">
+                <thead>
+                  <tr>
+                    <th>항목코드</th>
+                    <th>비목</th>
+                    <th>규격</th>
+                    <th>단위</th>
+                    <th className="num">수량</th>
+                    <th className="num">단가</th>
+                    <th className="num">금액</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calculated.map((row) =>
+                    editingId === row.id && editDraft ? (
+                      <tr key={row.id} className="editing">
+                        <td><input className="input ceg-input" value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} /></td>
+                        <td>
+                          <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value })}>
+                            <option value="">선택</option>
+                            <option>직접노무비</option>
+                            <option>재료비</option>
+                            <option>경비</option>
+                          </select>
+                        </td>
+                        <td><input className="input ceg-input" value={editDraft.spec} onChange={(e) => setEditDraft({ ...editDraft, spec: e.target.value })} /></td>
+                        <td><input className="input ceg-input" value={editDraft.unit} style={{ width: 52 }} onChange={(e) => setEditDraft({ ...editDraft, unit: e.target.value })} /></td>
+                        <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
+                        <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
+                        <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
+                        <td className="ceg-row-actions">
+                          <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
+                          <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={row.id}>
+                        <td>{row.code}</td>
+                        <td>{row.category}</td>
+                        <td>{row.spec}</td>
+                        <td>{row.unit}</td>
+                        <td className="num">{row.qty}</td>
+                        <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
+                        <td className="num">{formatMoney(row.amount)}</td>
+                        <td className="ceg-row-actions">
+                          <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
+                          <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                  {rows.length === 0 ? (
+                    <tr><td colSpan={8} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
+                  ) : null}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
+                    <td className="num" style={{ fontWeight: 700 }}>{formatMoney(calculated.reduce((s, r) => s + r.amount, 0))}</td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div className="ceg-next-row">
+              <button
+                className="primary-btn"
+                type="button"
+                onClick={() => setStep("result")}
+              >
+                <ChevronRight size={15} />
+                요율 설정 및 원가계산서 생성
+              </button>
+              <button className="ghost-btn" type="button" onClick={() => setStep("upload")}>
+                <ChevronLeft size={15} />
+                다시 업로드
+              </button>
+            </div>
+          </section>
+
+          {step === "result" ? (
+            <div className="ceg-result-grid">
+              {/* 요율 설정 패널 */}
+              <section className="card ceg-rates-panel">
+                <span className="eyebrow">요율 설정</span>
+                <h2>비율 설정</h2>
+                <p>기본값을 사용하거나 프로젝트에 맞게 수정하세요.</p>
+                <div className="ceg-rates-list">
+                  {rateLabels.map(({ key, label, hint }) => (
+                    <label key={key} className="ceg-rate-row">
+                      <div>
+                        <strong>{label}</strong>
+                        <span>{hint}</span>
+                      </div>
+                      <div className="ceg-rate-input-wrap">
+                        <input
+                          className="input ceg-rate-input"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={rates[key]}
+                          onChange={(e) => handleRateChange(key, e.target.value)}
+                        />
+                        <span>%</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              {/* 원가계산서 결과 */}
+              <section className="card ceg-result-panel">
+                <span className="eyebrow">원가계산서</span>
+                <h2>계산 결과</h2>
+                <div className="ceg-summary-table">
+                  <div className="ceg-summary-row"><span>직접노무비</span><strong>{formatMoney(summary.directLabor)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>간접노무비 ({rates.indirectLabor}%)</span><strong>{formatMoney(summary.indirectLaborAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>노무비 계</span><strong>{formatMoney(summary.totalLabor)} 원</strong></div>
+                  <div className="ceg-summary-row"><span>재료비</span><strong>{formatMoney(summary.materials)} 원</strong></div>
+                  <div className="ceg-summary-row"><span>경비</span><strong>{formatMoney(summary.expense)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>4대보험 ({rates.insurance}%)</span><strong>{formatMoney(summary.insuranceAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>퇴직공제 ({rates.retirementReserve}%)</span><strong>{formatMoney(summary.retirementAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>산업안전보건관리비 ({rates.safetyHealth}%)</span><strong>{formatMoney(summary.safetyAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>소계</span><strong>{formatMoney(summary.subtotal)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>일반관리비 ({rates.generalAdmin}%)</span><strong>{formatMoney(summary.generalAdminAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>이윤 ({rates.profit}%)</span><strong>{formatMoney(summary.profitAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>부가세 전 합계</span><strong>{formatMoney(summary.preVat)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>부가세 ({rates.vat}%)</span><strong>{formatMoney(summary.vatAmt)} 원</strong></div>
+                  <div className="ceg-summary-row grand"><span>최종 합계</span><strong>{formatMoney(summary.total)} 원</strong></div>
+                </div>
+
+                <div className="ceg-download-area">
+                  <label className="ceg-project-label">
+                    <span>프로젝트명 (선택)</span>
+                    <input
+                      className="input"
+                      type="text"
+                      placeholder="예: 2026년 원가계산 용역"
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
+                    />
+                  </label>
+                  <button className="primary-btn ceg-download-btn" type="button" onClick={handleDownload}>
+                    <Database size={16} />
+                    원가계산서 Excel 다운로드
+                    <span className="ceg-sheet-badge">5개 시트</span>
+                  </button>
+                  <p className="ceg-download-note">
+                    원가계산서 · 집계표 · 산출근거 · 요율표 · 검증로그가 하나의 파일에 포함됩니다.
+                  </p>
+                </div>
+              </section>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {/* 관련 페이지 */}
+      <section className="ceg-related-section">
+        <button className="ghost-btn" type="button" onClick={() => go("/cost-guide/practice")}>
+          원가계산실무 안내 →
+        </button>
+        <button className="ghost-btn" type="button" onClick={() => go("/support/contact")}>
+          상담 및 문의 →
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function CegFileInput({
+  label,
+  hint,
+  file,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  file: File | null;
+  onChange: (file: File | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className={`ceg-file-box ${file ? "has-file" : ""}`}>
+      <button
+        type="button"
+        className="ceg-file-drop"
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
+      >
+        <FileText size={28} />
+        <strong>{label}</strong>
+        <span>{file ? file.name : hint}</span>
+        {!file ? <span className="ceg-file-cta">클릭하여 파일 선택</span> : null}
+      </button>
+      {file ? (
+        <button
+          className="ghost-btn ceg-file-clear"
+          type="button"
+          aria-label={`${label} 파일 제거`}
+          onClick={() => onChange(null)}
+        >
+          <X size={14} />
+        </button>
+      ) : null}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        style={{ display: "none" }}
+        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+      />
+    </div>
+  );
 }
 
 function escapeHtml(value: string) {
