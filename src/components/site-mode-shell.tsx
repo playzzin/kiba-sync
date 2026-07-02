@@ -43,6 +43,13 @@ import {
   type CostEstimateTemplateId,
   type CostItemTemplate,
 } from "@/lib/cost-estimate/templates";
+import {
+  loadCostEstimateDraft,
+  saveCostEstimateDraft,
+  type CostEstimateDraftData,
+  type CostEstimateDraftFileNames,
+} from "@/lib/cost-estimate/firebase-draft";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 import professionalStaffData from "@/lib/kiba/professional-staff-data.json";
 import { kibaSeedPagesByRoute, kibaSeedSummary, type KibaSeedPage } from "@/lib/kiba/source-content";
 
@@ -4166,6 +4173,7 @@ function todayStamp() {
 type CestStep = "upload" | "preview" | "result";
 type CestUploadMode = "unified" | "separate";
 type CostCategory = "material" | "labor" | "expense";
+type CestDraftStatus = { kind: "success" | "error"; message: string } | null;
 
 type CostRow = {
   id: string;
@@ -4613,7 +4621,64 @@ function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: strin
   ]);
 }
 
+function sanitizeDraftRows(value: unknown): CostRow[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((row, index) => {
+      if (!row || typeof row !== "object") {
+        return null;
+      }
+      const current = row as Partial<CostRow>;
+      const category: CostCategory = current.category === "labor" || current.category === "expense" ? current.category : "material";
+      return {
+        id: typeof current.id === "string" && current.id ? current.id : `draft-${index + 1}`,
+        code: typeof current.code === "string" ? current.code : "",
+        category,
+        itemName: typeof current.itemName === "string" ? current.itemName : "",
+        spec: typeof current.spec === "string" ? current.spec : "",
+        unit: typeof current.unit === "string" ? current.unit : "식",
+        qty: typeof current.qty === "string" ? current.qty : "0",
+        unitPrice: typeof current.unitPrice === "string" ? current.unitPrice : "0",
+        sourceRow: typeof current.sourceRow === "number" ? current.sourceRow : undefined,
+        section: typeof current.section === "string" ? current.section : undefined,
+      };
+    })
+    .filter((row): row is CostRow => row !== null);
+}
+
+function sanitizeDraftRates(value: unknown): CostRates {
+  const defaults = { ...DEFAULT_RATES };
+  if (!value || typeof value !== "object") {
+    return defaults;
+  }
+
+  const current = value as Partial<CostRates>;
+  for (const key of Object.keys(defaults) as Array<keyof CostRates>) {
+    if (typeof current[key] === "string") {
+      defaults[key] = current[key];
+    }
+  }
+  return defaults;
+}
+
+function sanitizeDraftFileNames(value: unknown): CostEstimateDraftFileNames | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const current = value as Partial<CostEstimateDraftFileNames>;
+  return {
+    unified: typeof current.unified === "string" ? current.unified : undefined,
+    priceCompare: typeof current.priceCompare === "string" ? current.priceCompare : undefined,
+    unitPrice: typeof current.unitPrice === "string" ? current.unitPrice : undefined,
+    detail: typeof current.detail === "string" ? current.detail : undefined,
+  };
+}
+
 function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) {
+  const firebaseEnabled = isFirebaseConfigured();
   const [step, setStep] = useState<CestStep>("upload");
   const [uploadMode, setUploadMode] = useState<CestUploadMode>("separate");
   const [unifiedFile, setUnifiedFile] = useState<File | null>(null);
@@ -4625,6 +4690,9 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   const [editDraft, setEditDraft] = useState<CostRow | null>(null);
   const [rates, setRates] = useState<CostRates>(DEFAULT_RATES);
   const [projectName, setProjectName] = useState("");
+  const [draftStatus, setDraftStatus] = useState<CestDraftStatus>(null);
+  const [savedFileNames, setSavedFileNames] = useState<CostEstimateDraftFileNames | null>(null);
+  const [syncingDraft, setSyncingDraft] = useState(false);
 
   const canProceed =
     uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
@@ -4680,6 +4748,77 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
     downloadBlob(`원가계산서_산출근거_${fileBase}.xls`, "application/vnd.ms-excel;charset=utf-8", basisXml);
   }
 
+  async function handleSaveDraft() {
+    if (!firebaseEnabled) {
+      setDraftStatus({ kind: "error", message: "Firebase 설정이 없어 초안을 저장할 수 없습니다." });
+      return;
+    }
+
+    setSyncingDraft(true);
+    setDraftStatus(null);
+    try {
+      const fileNames: CostEstimateDraftFileNames = {
+        unified: unifiedFile?.name,
+        priceCompare: file1?.name,
+        unitPrice: file2?.name,
+        detail: file3?.name,
+      };
+      const draftData: CostEstimateDraftData = {
+        mode: uploadMode,
+        projectName,
+        rows,
+        rates,
+        fileNames,
+      };
+      await saveCostEstimateDraft(draftData);
+      setSavedFileNames(fileNames);
+      setDraftStatus({ kind: "success", message: "Firebase DB/Storage에 초안을 저장했습니다." });
+    } catch (error) {
+      setDraftStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Firebase 초안 저장에 실패했습니다.",
+      });
+    } finally {
+      setSyncingDraft(false);
+    }
+  }
+
+  async function handleLoadDraft() {
+    if (!firebaseEnabled) {
+      setDraftStatus({ kind: "error", message: "Firebase 설정이 없어 저장된 초안을 불러올 수 없습니다." });
+      return;
+    }
+
+    setSyncingDraft(true);
+    setDraftStatus(null);
+    try {
+      const draft = await loadCostEstimateDraft();
+      if (!draft) {
+        setDraftStatus({ kind: "error", message: "저장된 Firebase 초안이 없습니다." });
+        return;
+      }
+
+      setUploadMode(draft.mode === "unified" ? "unified" : "separate");
+      setRows(sanitizeDraftRows(draft.rows));
+      setRates(sanitizeDraftRates(draft.rates));
+      setProjectName(typeof draft.projectName === "string" ? draft.projectName : "");
+      setSavedFileNames(sanitizeDraftFileNames(draft.fileNames));
+      setUnifiedFile(null);
+      setFile1(null);
+      setFile2(null);
+      setFile3(null);
+      setStep("preview");
+      setDraftStatus({ kind: "success", message: "Firebase 초안을 불러와 미리보기에 반영했습니다." });
+    } catch (error) {
+      setDraftStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Firebase 초안 불러오기에 실패했습니다.",
+      });
+    } finally {
+      setSyncingDraft(false);
+    }
+  }
+
   return (
     <div className="ceg-page">
       {/* 상단 헤더 */}
@@ -4692,6 +4831,19 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
           <span className={step === "preview" ? "active" : step === "result" ? "done" : ""}>2. 미리보기·편집</span>
           <span className={step === "result" ? "active" : ""}>3. 결과·다운로드</span>
         </div>
+        {firebaseEnabled ? (
+          <div className="ceg-download-area">
+            <button className="ghost-btn" type="button" onClick={handleLoadDraft} disabled={syncingDraft}>
+              Firebase 초안 불러오기
+            </button>
+            <button className="primary-btn" type="button" onClick={handleSaveDraft} disabled={syncingDraft}>
+              Firebase 초안 저장
+            </button>
+          </div>
+        ) : (
+          <p className="ceg-upload-note">Firebase 환경변수가 없으면 배포 페이지에서 DB/서버 동기화 기능을 사용할 수 없습니다.</p>
+        )}
+        {draftStatus ? <p className="ceg-upload-note">{draftStatus.message}</p> : null}
       </section>
 
       {/* STEP 1: 업로드 */}
@@ -4749,6 +4901,14 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
           <p className="ceg-upload-note">
             ※ 1차 반영에서는 ver2 내역서 9~68행 기준 샘플 데이터가 미리보기 테이블에 표시됩니다.
           </p>
+          {savedFileNames ? (
+            <p className="ceg-upload-note">
+              최근 Firebase 초안 파일:
+              {[savedFileNames.unified, savedFileNames.priceCompare, savedFileNames.unitPrice, savedFileNames.detail]
+                .filter((name): name is string => Boolean(name))
+                .join(", ") || "파일명 없음"}
+            </p>
+          ) : null}
 
           <div className="ceg-upload-actions">
             <button
