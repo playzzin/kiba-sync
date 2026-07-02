@@ -82,6 +82,10 @@ service cloud.firestore {
       allow read, update, delete: if (signedIn() && resource.data.ownerId == request.auth.uid) || isStaff();
     }
 
+    match /costEstimateDrafts/{userId} {
+      allow create, read, update, delete: if isOwner(userId) || isStaff();
+    }
+
     match /auditLogs/{auditId} {
       allow create: if signedIn() && request.resource.data.actorId == request.auth.uid;
       allow read: if isStaff();
