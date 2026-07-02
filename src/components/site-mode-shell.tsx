@@ -273,12 +273,14 @@ const menus: Record<Mode, MenuGroup[]> = {
           icon: "folder",
           children: [
             { label: "전문인력 통합DB", href: "/erp/workforce/professionals", icon: "users", badge: "PDF/XLS" },
+            { label: "협회 공지사항", href: "/erp/association/notices", icon: "bell" },
             { label: "원가계산서 생성", href: "/erp/cost-estimates/new", icon: "database", badge: "NEW" },
           ],
         },
         {
           label: "CMS 구성",
           icon: "doc",
+          hidden: true,
           children: [
             { label: "페이지 관리", href: "/erp/cms/pages", icon: "doc" },
             { label: "메뉴·폴더 관리", href: "/erp/cms/navigation", icon: "folder" },
@@ -288,6 +290,7 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "회계·통계",
           icon: "chart",
+          hidden: true,
           children: [
             { label: "회계 항목", href: "/erp/accounting/items", icon: "database" },
             { label: "BigQuery 통계", href: "/erp/analytics/bigquery", icon: "chart" },
@@ -296,6 +299,7 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "시스템 설정",
           icon: "settings",
+          hidden: true,
           children: [
             { label: "Firebase 운영", href: "/erp/system/firebase", icon: "server", badge: "Live", badgeType: "success" },
             { label: "실무 설정", href: "/erp/settings", icon: "settings" },
@@ -381,6 +385,7 @@ const titles: Record<string, string> = {
   "/admin/reports": "Operation Stats",
   "/erp/dashboard": "실무 대시보드",
   "/erp/workforce/professionals": "전문인력 통합DB",
+  "/erp/association/notices": "협회 공지사항",
   "/erp/cost-estimates/new": "원가계산서 생성",
   "/erp/cms/pages": "페이지 관리",
   "/erp/cms/navigation": "메뉴·폴더 관리",
@@ -1252,7 +1257,7 @@ export function SiteModeShell() {
   const [toast, setToast] = useState({ show: false, message: "Ready" });
   const [tooltip, setTooltip] = useState({ show: false, label: "", left: 0, top: 0 });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const visibleModeTabs: Mode[] = ["user", "erp", "admin"];
+  const visibleModeTabs: Mode[] = ["user", "erp"];
 
   const title = titles[shell.route] || "Dashboard";
   const userPage = kibaPageDetails[shell.route] ?? kibaPageDetails["/dashboard"];
@@ -1530,7 +1535,7 @@ export function SiteModeShell() {
         </nav>
 
         <div className="footer">
-          <div className="footer-banner">
+          <div className="footer-banner mock-hidden">
             <strong>KIBA Site Map</strong>
             <span>8 categories / 33 public pages</span>
           </div>
@@ -1597,7 +1602,7 @@ export function SiteModeShell() {
             {shell.mode === "admin" ? (
               <AdminDashboard />
             ) : shell.mode === "erp" ? (
-              <ErpDashboard route={shell.route} />
+              <ErpDashboard route={shell.route} go={go} />
             ) : (
               <>
                 <UserSitePage route={shell.route} go={go} />
@@ -1953,7 +1958,9 @@ function KibaHome({ go }: { go: (route: string) => void }) {
         </div>
       </section>
 
-      <SwPricingModule go={go} />
+      <div className="mock-hidden">
+        <SwPricingModule go={go} />
+      </div>
 
       <section className="public-section">
         <div className="split-showcase">
@@ -3637,9 +3644,12 @@ function CostEstimateBuilderPage() {
   );
 }
 
-function ErpDashboard({ route }: { route: string }) {
+function ErpDashboard({ route, go }: { route: string; go: (route: string) => void }) {
   if (route === "/erp/workforce/professionals") {
     return <ProfessionalWorkforceDashboard />;
+  }
+  if (route === "/erp/association/notices") {
+    return <AssociationNoticePage go={go} />;
   }
   if (route === "/erp/cost-estimates/new") {
     return <CostEstimateBuilderPage />;
@@ -3736,6 +3746,14 @@ function ErpDashboard({ route }: { route: string }) {
         </div>
       </div>
     </>
+  );
+}
+
+function AssociationNoticePage({ go }: { go: (route: string) => void }) {
+  return (
+    <div className="association-notice-page">
+      <SwPricingModule go={go} />
+    </div>
   );
 }
 
