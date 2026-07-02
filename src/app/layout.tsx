@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KIBA ERP CRM CMS",
-  description: "KIBA Firebase based ERP, CRM, and CMS admin system",
+  title: "(사)한국경영분석연구원",
+  description: "정부공인 원가계산·검토전문기관 한국경영분석연구원",
 };
 
 export default function RootLayout({
