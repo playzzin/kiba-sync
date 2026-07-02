@@ -6102,6 +6102,7 @@ body.mobile-lock {
 /* 업로드 섹션 */
 .ceg-upload-section {
   margin-top: 28px;
+  margin-bottom: 42px;
   display: grid;
   gap: 22px;
 }
@@ -6224,7 +6225,7 @@ body.mobile-lock {
 
 /* 미리보기 섹션 */
 .ceg-preview-section {
-  margin-top: 28px;
+  margin-top: 42px;
   display: grid;
   gap: 18px;
 }
@@ -6256,7 +6257,7 @@ body.mobile-lock {
 }
 
 .ceg-table {
-  min-width: 820px;
+  min-width: 1180px;
 }
 
 .ceg-table .num {
@@ -6318,7 +6319,7 @@ body.mobile-lock {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 32px;
   align-items: start;
 }
 

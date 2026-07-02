@@ -4165,48 +4165,163 @@ function todayStamp() {
 
 type CestStep = "upload" | "preview" | "result";
 type CestUploadMode = "unified" | "separate";
+type CostCategory = "material" | "labor" | "expense";
 
 type CostRow = {
   id: string;
   code: string;
-  category: string;
+  category: CostCategory;
+  itemName: string;
   spec: string;
   unit: string;
   qty: string;
   unitPrice: string;
+  sourceRow?: number;
+  section?: string;
 };
 
 type CostRates = {
   indirectLabor: string;
-  insurance: string;
-  retirementReserve: string;
+  industrialAccident: string;
+  employment: string;
+  health: string;
+  pension: string;
+  longTermCare: string;
+  asbestos: string;
+  wageClaim: string;
+  retirement: string;
   safetyHealth: string;
+  miscExpense: string;
   generalAdmin: string;
   profit: string;
   vat: string;
 };
 
+const COST_CATEGORY_LABELS: Record<CostCategory, string> = {
+  material: "재료비",
+  labor: "직접노무비",
+  expense: "경비",
+};
+
 const DEFAULT_RATES: CostRates = {
-  indirectLabor: "10.0",
-  insurance: "9.23",
-  retirementReserve: "1.0",
-  safetyHealth: "1.86",
-  generalAdmin: "6.0",
+  indirectLabor: "14",
+  industrialAccident: "3.56",
+  employment: "1.01",
+  health: "3.595",
+  pension: "4.75",
+  longTermCare: "13.14",
+  asbestos: "0.006",
+  wageClaim: "0.09",
+  retirement: "2.3",
+  safetyHealth: "3.11",
+  miscExpense: "4.6",
+  generalAdmin: "8",
   profit: "15.0",
   vat: "10.0",
 };
 
-const DEMO_ROWS: CostRow[] = [
-  { id: "r1", code: "L001", category: "직접노무비", spec: "원가분석사", unit: "인일", qty: "30", unitPrice: "250000" },
-  { id: "r2", code: "L002", category: "직접노무비", spec: "보조원", unit: "인일", qty: "15", unitPrice: "150000" },
-  { id: "r3", code: "M001", category: "재료비", spec: "인쇄·제본", unit: "식", qty: "1", unitPrice: "120000" },
-  { id: "r4", code: "M002", category: "재료비", spec: "소모품", unit: "식", qty: "1", unitPrice: "50000" },
-  { id: "r5", code: "E001", category: "경비", spec: "교통비", unit: "식", qty: "1", unitPrice: "80000" },
-  { id: "r6", code: "E002", category: "경비", spec: "통신비", unit: "식", qty: "1", unitPrice: "30000" },
+const REFERENCE_DETAIL_ROWS = [
+  [9, "material", "SHELL PLATE-STS304", "t6*5'*9200", "SH", "2", "3400000", ""],
+  [10, "material", "SHELL PLATE-STS304", "t5*5'*9200", "SH", "1", "2877200", ""],
+  [11, "material", "BOTTOM CONE PLATE-STS304", "t8*5'*10'", "SH", "2", "1898000", ""],
+  [12, "material", "ROOF PLATE-STS304", "t4*5'*10'", "SH", "2", "621600", ""],
+  [13, "material", "TOP ANGLE-STS304", "L-65*65*t6", "M", "12", "75000", ""],
+  [14, "material", "LEG-SS400", "H-150*150", "M", "10", "65000", ""],
+  [15, "material", "LOADCELL FRAME-SS400", "H-150*150", "M", "10", "65000", ""],
+  [16, "material", "LOAD CELL", "ULKS (ALL SUS)", "EA", "4", "1100000", ""],
+  [17, "material", "인디케이터", "AD510A", "EA", "1", "500000", ""],
+  [18, "material", "전기판넬", "ADIP-SUS 외함", "EA", "1", "420000", ""],
+  [19, "material", "Summing Box", "AD310(4P)", "EA", "1", "150000", ""],
+  [20, "material", "외부표시기", "8915C", "EA", "1", "550000", ""],
+  [21, "material", "MAN HOLE-STS304", "Φ500", "SET", "1", "1400000", ""],
+  [22, "material", "BREATH VALVE-STS304", "80A*10K", "EA", "1", "1450000", ""],
+  [23, "material", "INSULATIN ANGLE-SS400", "L-50*50*t6", "본", "10", "135000", ""],
+  [24, "material", "HAND RAIL-SGP", "32A", "본", "2", "30000", ""],
+  [25, "material", "HAND RAIL-SGP", "25A", "본", "5", "25000", ""],
+  [26, "material", "LADDER-SS400", "FB-50*t9", "본", "3", "30000", ""],
+  [27, "material", "LADDER-SS400", "FB-50*t6", "본", "3", "20000", ""],
+  [28, "material", "LADDER-SS400", "FB-38*t6", "본", "5", "15000", ""],
+  [29, "material", "ROUND BAR-SS400", "Φ19", "본", "1.5", "28000", ""],
+  [30, "material", "INTERNAL LADDER-STS304", "Φ18", "본", "3", "83000", ""],
+  [31, "material", "LEVEL GAUGE-STS304", "FLOT TYPE", "SET", "1", "700000", ""],
+  [32, "material", "LIFT LUG-STS304", "t20", "EA", "4", "50000", ""],
+  [33, "material", "NOZZLE-STS304", "50A,80A", "LOT", "1", "500000", ""],
+  [34, "material", "기타잡자재비", "자재비의", "%", "2", "29237400", ""],
+  [36, "material", "가공비", "", "LOT", "1", "2500000", "2. 제작비"],
+  [37, "material", "제작비", "", "LOT", "1", "15000000", "2. 제작비"],
+  [38, "material", "PAINTING비", "", "LOT", "1", "1700000", "2. 제작비"],
+  [39, "expense", "용접부 비파괴검사", "COLOR CHECK", "LOT", "1", "2700000", "2. 제작비"],
+  [40, "expense", "산세척비", "", "LOT", "1", "3500000", "2. 제작비"],
+  [41, "expense", "충수검사", "FULL WATER", "LOT", "1", "1500000", "2. 제작비"],
+  [43, "material", "PIPE-STS304", "50A*S10", "본", "2", "150000", "3. 배관공사"],
+  [44, "material", "BALL VALVE-STS304", "50A*10K", "EA", "4", "300000", "3. 배관공사"],
+  [45, "material", "용접TEE-STS304", "50A*S10", "EA", "1", "16000", "3. 배관공사"],
+  [46, "material", "용접ELBOW-STS304", "50A*S10", "EA", "10", "15000", "3. 배관공사"],
+  [47, "material", "FLANGE-STS304", "50A*10K", "EA", "13", "24000", "3. 배관공사"],
+  [48, "material", "GASKET-EPDM", "50A", "EA", "12", "2000", "3. 배관공사"],
+  [49, "material", "FLEXIBLE-STS304", "50A*L300", "EA", "2", "90000", "3. 배관공사"],
+  [50, "material", "HEX.B/N-STS304", "M16", "LOT", "1", "80000", "3. 배관공사"],
+  [51, "material", "Q-COUPLING-STS304", "2\"", "SET", "2", "80000", "3. 배관공사"],
+  [52, "material", "현장배관공사비", "", "M", "12", "494", "3. 배관공사"],
+  [52, "labor", "현장배관공사비", "", "M", "12", "24724", "3. 배관공사"],
+  [54, "material", "HEATING CABLE", "30W", "M", "400", "7000", "4.HEATING CABLE설치공사"],
+  [55, "material", "CONTROL PANNEL(온도CONTROLLER)", "", "SET", "1", "3000000", "4.HEATING CABLE설치공사"],
+  [56, "labor", "현장설치비", "", "M", "400", "5140", "4.HEATING CABLE설치공사"],
+  [58, "material", "GLASS WOOL", "t50", "LOT", "1", "800000", "5. INSULATION 공사비"],
+  [59, "material", "COLOR SHEET", "", "LOT", "1", "1200000", "5. INSULATION 공사비"],
+  [60, "labor", "보온 인건비", "보온공", "인", "10", "217012", "5. INSULATION 공사비"],
+  [61, "material", "배관보온공사비", "자재+인건비", "LOT", "1", "3000000", "5. INSULATION 공사비"],
+  [62, "labor", "비계설치및철거", "비계공", "인", "6", "281939", "5. INSULATION 공사비"],
+  [63, "labor", "보통인부", "", "인", "6", "172068", "5. INSULATION 공사비"],
+  [65, "labor", "기존TANK 철거", "", "대", "1", "3053237", "6. 현장설치및 기존철거"],
+  [66, "labor", "신규제작TANK 설치", "", "대", "1", "1526617", "6. 현장설치및 기존철거"],
+  [67, "expense", "운반비", "", "LOT", "1", "1200000", "6. 현장설치및 기존철거"],
+  [68, "expense", "장비사용료", "", "LOT", "1", "3000000", "6. 현장설치및 기존철거"],
+] as const;
+
+const DEMO_ROWS: CostRow[] = REFERENCE_DETAIL_ROWS.map(
+  ([sourceRow, category, itemName, spec, unit, qty, unitPrice, section], index) => ({
+    id: `ref-${index + 1}`,
+    code: `N${String(sourceRow).padStart(3, "0")}-${category === "material" ? "M" : category === "labor" ? "L" : "E"}`,
+    category: category as CostCategory,
+    itemName,
+    spec,
+    unit,
+    qty,
+    unitPrice,
+    sourceRow,
+    section,
+  }),
+);
+
+const RATE_LABELS: { key: keyof CostRates; label: string; hint: string; source: string }[] = [
+  { key: "indirectLabor", label: "간접노무비", hint: "직접노무비 기준", source: "원가계산서!J11, 간노비" },
+  { key: "industrialAccident", label: "산재보험료", hint: "노무비 계 기준", source: "원가계산서!J14, 산재" },
+  { key: "employment", label: "고용보험료", hint: "노무비 계 기준", source: "원가계산서!J15, 고용" },
+  { key: "health", label: "건강보험료", hint: "직접노무비 기준", source: "원가계산서!J16, 건강" },
+  { key: "pension", label: "연금보험료", hint: "직접노무비 기준", source: "원가계산서!J17, 연금" },
+  { key: "longTermCare", label: "노인장기요양보험료", hint: "건강보험료 기준", source: "원가계산서!J18, 장기" },
+  { key: "asbestos", label: "석면분담금", hint: "노무비 계 기준", source: "원가계산서!J19, 석면" },
+  { key: "wageClaim", label: "임금채권부담금", hint: "노무비 계 기준", source: "원가계산서!J20, 임금" },
+  { key: "retirement", label: "퇴직공제부금비", hint: "직접노무비 기준", source: "원가계산서!J21, 퇴공" },
+  { key: "safetyHealth", label: "산업안전보건관리비", hint: "재료비+직접노무비 기준", source: "원가계산서!J22, 안전" },
+  { key: "miscExpense", label: "기타경비", hint: "재료비+노무비 계 기준", source: "원가계산서!J23, 경비" },
+  { key: "generalAdmin", label: "일반관리비", hint: "재료비+노무비+경비 기준", source: "원가계산서!J32, 일반/일반비율" },
+  { key: "profit", label: "이윤", hint: "노무비+경비+일반관리비 기준", source: "원가계산서!J33, 이윤/이윤비율" },
+  { key: "vat", label: "부가세", hint: "총원가 기준", source: "원가계산서!J35" },
 ];
 
 function newCostRow(): CostRow {
-  return { id: `r${Date.now()}`, code: "", category: "", spec: "", unit: "식", qty: "1", unitPrice: "0" };
+  return {
+    id: `r${Date.now()}`,
+    code: "",
+    category: "material",
+    itemName: "",
+    spec: "",
+    unit: "식",
+    qty: "1",
+    unitPrice: "0",
+  };
 }
 
 function parseMoney(v: string) {
@@ -4226,137 +4341,276 @@ function calcRows(rows: CostRow[]) {
 
 function calcCostSummary(rows: CostRow[], rates: CostRates) {
   const calculated = calcRows(rows);
-  const directLabor = calculated.filter((r) => r.category === "직접노무비").reduce((s, r) => s + r.amount, 0);
-  const materials = calculated.filter((r) => r.category === "재료비").reduce((s, r) => s + r.amount, 0);
-  const expense = calculated.filter((r) => r.category === "경비").reduce((s, r) => s + r.amount, 0);
+  const directMaterials = calculated.filter((r) => r.category === "material").reduce((s, r) => s + r.amount, 0);
+  const directLabor = calculated.filter((r) => r.category === "labor").reduce((s, r) => s + r.amount, 0);
+  const machineExpense = calculated.filter((r) => r.category === "expense").reduce((s, r) => s + r.amount, 0);
 
-  const indirectLaborAmt = Math.round(directLabor * (parseMoney(rates.indirectLabor) / 100));
+  const indirectLaborAmt = Math.trunc(directLabor * (parseMoney(rates.indirectLabor) / 100));
   const totalLabor = directLabor + indirectLaborAmt;
-  const insuranceAmt = Math.round(totalLabor * (parseMoney(rates.insurance) / 100));
-  const retirementAmt = Math.round(totalLabor * (parseMoney(rates.retirementReserve) / 100));
-  const safetyAmt = Math.round((totalLabor + materials + expense) * (parseMoney(rates.safetyHealth) / 100));
-  const subtotal = totalLabor + materials + expense + insuranceAmt + retirementAmt + safetyAmt;
-  const generalAdminAmt = Math.round(subtotal * (parseMoney(rates.generalAdmin) / 100));
-  const profitAmt = Math.round((subtotal + generalAdminAmt) * (parseMoney(rates.profit) / 100));
-  const preVat = subtotal + generalAdminAmt + profitAmt;
-  const vatAmt = Math.round(preVat * (parseMoney(rates.vat) / 100));
-  const total = preVat + vatAmt;
+  const industrialAccidentAmt = Math.trunc(totalLabor * (parseMoney(rates.industrialAccident) / 100));
+  const employmentAmt = Math.trunc(totalLabor * (parseMoney(rates.employment) / 100));
+  const healthAmt = Math.trunc(directLabor * (parseMoney(rates.health) / 100));
+  const pensionAmt = Math.trunc(directLabor * (parseMoney(rates.pension) / 100));
+  const longTermCareAmt = Math.trunc(healthAmt * (parseMoney(rates.longTermCare) / 100));
+  const asbestosAmt = Math.trunc(totalLabor * (parseMoney(rates.asbestos) / 100));
+  const wageClaimAmt = Math.trunc(totalLabor * (parseMoney(rates.wageClaim) / 100));
+  const retirementAmt = Math.trunc(directLabor * (parseMoney(rates.retirement) / 100));
+  const safetyAmt = Math.trunc((directMaterials + directLabor) * (parseMoney(rates.safetyHealth) / 100));
+  const miscExpenseAmt = Math.trunc((directMaterials + totalLabor) * (parseMoney(rates.miscExpense) / 100));
+  const expenseSubtotal =
+    machineExpense +
+    industrialAccidentAmt +
+    employmentAmt +
+    healthAmt +
+    pensionAmt +
+    longTermCareAmt +
+    asbestosAmt +
+    wageClaimAmt +
+    retirementAmt +
+    safetyAmt +
+    miscExpenseAmt;
+  const directSubtotal = directMaterials + directLabor + machineExpense;
+  const pureCost = directMaterials + totalLabor + expenseSubtotal;
+  const generalAdminAmt = Math.trunc(pureCost * (parseMoney(rates.generalAdmin) / 100));
+  const profitAmt = Math.trunc((totalLabor + expenseSubtotal + generalAdminAmt) * (parseMoney(rates.profit) / 100));
+  const totalCost = pureCost + generalAdminAmt + profitAmt;
+  const vatAmt = Math.trunc(totalCost * (parseMoney(rates.vat) / 100));
+  const grandTotal = Math.trunc((totalCost + vatAmt) / 1000) * 1000;
 
   return {
+    directMaterials,
     directLabor,
     indirectLaborAmt,
     totalLabor,
-    materials,
-    expense,
-    insuranceAmt,
+    machineExpense,
+    industrialAccidentAmt,
+    employmentAmt,
+    healthAmt,
+    pensionAmt,
+    longTermCareAmt,
+    asbestosAmt,
+    wageClaimAmt,
     retirementAmt,
     safetyAmt,
-    subtotal,
+    miscExpenseAmt,
+    expenseSubtotal,
+    directSubtotal,
+    pureCost,
     generalAdminAmt,
     profitAmt,
-    preVat,
+    totalCost,
     vatAmt,
-    total,
+    grandTotal,
   };
 }
 
-function buildCostEstimateXml(rows: CostRow[], rates: CostRates, projectName: string) {
+function costCategoryLabel(category: CostCategory) {
+  return COST_CATEGORY_LABELS[category];
+}
+
+function sourceFormula(row: CostRow) {
+  const unitPriceCol = row.category === "material" ? "E" : row.category === "labor" ? "G" : "I";
+  return row.sourceRow ? `내역서!D${row.sourceRow}*${unitPriceCol}${row.sourceRow}` : `${row.qty}*${row.unitPrice}`;
+}
+
+function sourceAmountCell(row: CostRow) {
+  const amountCol = row.category === "material" ? "F" : row.category === "labor" ? "H" : "J";
+  return row.sourceRow ? `내역서!${amountCol}${row.sourceRow}` : "사용자 입력";
+}
+
+function sourceBasis(row: CostRow) {
+  return row.section ? `${row.section} / ${sourceAmountCell(row)}` : sourceAmountCell(row);
+}
+
+function xmlCell(value: string | number, type: "String" | "Number" = "String") {
+  const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return `<Cell><Data ss:Type="${type}">${escaped}</Data></Cell>`;
+}
+
+function xmlRow(...cells: string[]) {
+  return `<Row>${cells.join("")}</Row>`;
+}
+
+function xmlSheet(name: string, rows: string[]) {
+  return `<Worksheet ss:Name="${name}"><Table>${rows.join("")}</Table></Worksheet>`;
+}
+
+function xmlWorkbook(sheets: string[]) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  ${sheets.join("")}
+</Workbook>`;
+}
+
+function buildMainCostEstimateXml(rows: CostRow[], rates: CostRates, projectName: string) {
   const summary = calcCostSummary(rows, rates);
   const calculated = calcRows(rows);
   const stamp = todayStamp();
 
-  function xmlCell(value: string | number, type: "String" | "Number" = "String") {
-    const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    return `<Cell><Data ss:Type="${type}">${escaped}</Data></Cell>`;
-  }
-
-  function xmlRow(...cells: string[]) {
-    return `<Row>${cells.join("")}</Row>`;
-  }
-
-  function sheet(name: string, rows: string[]) {
-    return `<Worksheet ss:Name="${name}"><Table>${rows.join("")}</Table></Worksheet>`;
-  }
-
   const costStatementRows = [
-    xmlRow(xmlCell(`원가계산서 — ${projectName || "프로젝트"}`), xmlCell(stamp)),
-    xmlRow(xmlCell("비목"), xmlCell("금액 (원)"), xmlCell("비고")),
-    xmlRow(xmlCell("직접노무비"), xmlCell(summary.directLabor, "Number"), xmlCell("")),
-    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell(summary.indirectLaborAmt, "Number"), xmlCell("직접노무비 기준")),
-    xmlRow(xmlCell("노무비 계"), xmlCell(summary.totalLabor, "Number"), xmlCell("")),
-    xmlRow(xmlCell("재료비"), xmlCell(summary.materials, "Number"), xmlCell("")),
-    xmlRow(xmlCell("경비"), xmlCell(summary.expense, "Number"), xmlCell("")),
-    xmlRow(xmlCell(`4대보험 (${rates.insurance}%)`), xmlCell(summary.insuranceAmt, "Number"), xmlCell("노무비 기준")),
-    xmlRow(xmlCell(`퇴직공제 (${rates.retirementReserve}%)`), xmlCell(summary.retirementAmt, "Number"), xmlCell("노무비 기준")),
-    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell(summary.safetyAmt, "Number"), xmlCell("(노무비+재료비+경비) 기준")),
-    xmlRow(xmlCell("소계"), xmlCell(summary.subtotal, "Number"), xmlCell("")),
-    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell(summary.generalAdminAmt, "Number"), xmlCell("소계 기준")),
-    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell(summary.profitAmt, "Number"), xmlCell("(소계+일반관리비) 기준")),
-    xmlRow(xmlCell("부가세 전 합계"), xmlCell(summary.preVat, "Number"), xmlCell("")),
-    xmlRow(xmlCell(`부가세 (${rates.vat}%)`), xmlCell(summary.vatAmt, "Number"), xmlCell("")),
-    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number"), xmlCell("")),
+    xmlRow(xmlCell(`공사원가계산서 - ${projectName || "탱크 설비"}`), xmlCell(stamp)),
+    xmlRow(xmlCell("비목"), xmlCell("산식/구성비"), xmlCell("금액 (원)"), xmlCell("근거")),
+    xmlRow(xmlCell("직접재료비"), xmlCell("집계표!E19"), xmlCell(summary.directMaterials, "Number"), xmlCell("내역서!F9:F68")),
+    xmlRow(xmlCell("간접재료비"), xmlCell("0%"), xmlCell(0, "Number"), xmlCell("ver2 기준 미적용")),
+    xmlRow(xmlCell("재료비 소계"), xmlCell("직접재료비+간접재료비"), xmlCell(summary.directMaterials, "Number"), xmlCell("원가계산서!E9")),
+    xmlRow(xmlCell("직접노무비"), xmlCell("집계표!G19"), xmlCell(summary.directLabor, "Number"), xmlCell("내역서!H9:H68")),
+    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell("직접노무비*14%"), xmlCell(summary.indirectLaborAmt, "Number"), xmlCell("원가계산서!E11")),
+    xmlRow(xmlCell("노무비 계"), xmlCell("직접노무비+간접노무비"), xmlCell(summary.totalLabor, "Number"), xmlCell("원가계산서!E12")),
+    xmlRow(xmlCell("기계경비"), xmlCell("집계표!I19"), xmlCell(summary.machineExpense, "Number"), xmlCell("내역서!J9:J68")),
+    xmlRow(xmlCell(`산재보험료 (${rates.industrialAccident}%)`), xmlCell("노무비 계*3.56%"), xmlCell(summary.industrialAccidentAmt, "Number"), xmlCell("산재")),
+    xmlRow(xmlCell(`고용보험료 (${rates.employment}%)`), xmlCell("노무비 계*1.01%"), xmlCell(summary.employmentAmt, "Number"), xmlCell("고용")),
+    xmlRow(xmlCell(`건강보험료 (${rates.health}%)`), xmlCell("직접노무비*3.595%"), xmlCell(summary.healthAmt, "Number"), xmlCell("건강")),
+    xmlRow(xmlCell(`연금보험료 (${rates.pension}%)`), xmlCell("직접노무비*4.75%"), xmlCell(summary.pensionAmt, "Number"), xmlCell("연금")),
+    xmlRow(xmlCell(`노인장기요양보험료 (${rates.longTermCare}%)`), xmlCell("건강보험료*13.14%"), xmlCell(summary.longTermCareAmt, "Number"), xmlCell("장기")),
+    xmlRow(xmlCell(`석면분담금 (${rates.asbestos}%)`), xmlCell("노무비 계*0.006%"), xmlCell(summary.asbestosAmt, "Number"), xmlCell("석면")),
+    xmlRow(xmlCell(`임금채권부담금 (${rates.wageClaim}%)`), xmlCell("노무비 계*0.09%"), xmlCell(summary.wageClaimAmt, "Number"), xmlCell("임금")),
+    xmlRow(xmlCell(`퇴직공제부금비 (${rates.retirement}%)`), xmlCell("직접노무비*2.3%"), xmlCell(summary.retirementAmt, "Number"), xmlCell("퇴공")),
+    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell("(재료비+직접노무비)*3.11%"), xmlCell(summary.safetyAmt, "Number"), xmlCell("안전")),
+    xmlRow(xmlCell(`기타경비 (${rates.miscExpense}%)`), xmlCell("(재료비+노무비 계)*4.6%"), xmlCell(summary.miscExpenseAmt, "Number"), xmlCell("경비")),
+    xmlRow(xmlCell("경비 소계"), xmlCell("기계경비+보험료+기타경비"), xmlCell(summary.expenseSubtotal, "Number"), xmlCell("원가계산서!E30")),
+    xmlRow(xmlCell("순공사원가"), xmlCell("재료비+노무비+경비"), xmlCell(summary.pureCost, "Number"), xmlCell("원가계산서!E31")),
+    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell("순공사원가*8%"), xmlCell(summary.generalAdminAmt, "Number"), xmlCell("일반/일반비율")),
+    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell("(노무비+경비+일반관리비)*15%"), xmlCell(summary.profitAmt, "Number"), xmlCell("이윤/이윤비율")),
+    xmlRow(xmlCell("총원가"), xmlCell("순공사원가+일반관리비+이윤"), xmlCell(summary.totalCost, "Number"), xmlCell("원가계산서!E34")),
+    xmlRow(xmlCell(`부가가치세 (${rates.vat}%)`), xmlCell("총원가*10%"), xmlCell(summary.vatAmt, "Number"), xmlCell("원가계산서!E35")),
+    xmlRow(xmlCell("합계"), xmlCell("총원가+부가세, 천원미만 절사"), xmlCell(summary.grandTotal, "Number"), xmlCell("원가계산서!E36")),
   ];
 
   const summaryRows = [
-    xmlRow(xmlCell("집계표"), xmlCell(stamp)),
-    xmlRow(xmlCell("비목"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액")),
-    ...calculated.map((r) =>
-      xmlRow(xmlCell(`[${r.code}] ${r.category} — ${r.spec}`), xmlCell(r.qty, "Number"), xmlCell(r.unitPrice, "Number"), xmlCell(r.amount, "Number")),
+    xmlRow(xmlCell("공사집계표"), xmlCell(stamp)),
+    xmlRow(xmlCell("품명"), xmlCell("단위"), xmlCell("수량"), xmlCell("재료비"), xmlCell("노무비"), xmlCell("경비"), xmlCell("합계"), xmlCell("근거")),
+    xmlRow(
+      xmlCell("탱크 설비"),
+      xmlCell("식"),
+      xmlCell(1, "Number"),
+      xmlCell(summary.directMaterials, "Number"),
+      xmlCell(summary.directLabor, "Number"),
+      xmlCell(summary.machineExpense, "Number"),
+      xmlCell(summary.directSubtotal, "Number"),
+      xmlCell("내역서!F69/H69/J69"),
     ),
-    xmlRow(xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(calculated.reduce((s, r) => s + r.amount, 0), "Number")),
+    xmlRow(
+      xmlCell("합계"),
+      xmlCell(""),
+      xmlCell(""),
+      xmlCell(summary.directMaterials, "Number"),
+      xmlCell(summary.directLabor, "Number"),
+      xmlCell(summary.machineExpense, "Number"),
+      xmlCell(summary.directSubtotal, "Number"),
+      xmlCell("집계표!E19/G19/I19/K19"),
+    ),
   ];
 
-  const basisRows = [
-    xmlRow(xmlCell("산출근거"), xmlCell(stamp)),
-    xmlRow(xmlCell("항목코드"), xmlCell("비목"), xmlCell("규격"), xmlCell("단위"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액"), xmlCell("산출식")),
+  const detailRows = [
+    xmlRow(xmlCell("공사내역서"), xmlCell(stamp)),
+    xmlRow(xmlCell("항목코드"), xmlCell("비목"), xmlCell("품명"), xmlCell("규격"), xmlCell("단위"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액"), xmlCell("원본"), xmlCell("산식")),
     ...calculated.map((r) =>
       xmlRow(
         xmlCell(r.code),
-        xmlCell(r.category),
+        xmlCell(costCategoryLabel(r.category)),
+        xmlCell(r.itemName),
         xmlCell(r.spec),
         xmlCell(r.unit),
         xmlCell(r.qty, "Number"),
         xmlCell(r.unitPrice, "Number"),
         xmlCell(r.amount, "Number"),
-        xmlCell(`${r.qty} × ${r.unitPrice}`),
+        xmlCell(sourceBasis(r)),
+        xmlCell(sourceFormula(r)),
       ),
     ),
+    xmlRow(xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(summary.directSubtotal, "Number"), xmlCell("내역서!F9:J68"), xmlCell("집계표!K19")),
   ];
 
-  const rateRows = [
-    xmlRow(xmlCell("요율표"), xmlCell(stamp)),
-    xmlRow(xmlCell("항목"), xmlCell("요율 (%)"), xmlCell("기준")),
-    xmlRow(xmlCell("간접노무비"), xmlCell(rates.indirectLabor, "Number"), xmlCell("직접노무비")),
-    xmlRow(xmlCell("4대보험"), xmlCell(rates.insurance, "Number"), xmlCell("노무비 합계")),
-    xmlRow(xmlCell("퇴직공제"), xmlCell(rates.retirementReserve, "Number"), xmlCell("노무비 합계")),
-    xmlRow(xmlCell("산업안전보건관리비"), xmlCell(rates.safetyHealth, "Number"), xmlCell("노무비+재료비+경비")),
-    xmlRow(xmlCell("일반관리비"), xmlCell(rates.generalAdmin, "Number"), xmlCell("소계")),
-    xmlRow(xmlCell("이윤"), xmlCell(rates.profit, "Number"), xmlCell("소계+일반관리비")),
-    xmlRow(xmlCell("부가세"), xmlCell(rates.vat, "Number"), xmlCell("부가세전합계")),
+  const unitPriceListRows = [
+    xmlRow(xmlCell("일위대가목록"), xmlCell(stamp)),
+    xmlRow(xmlCell("호표"), xmlCell("품명"), xmlCell("규격"), xmlCell("단위"), xmlCell("재료비"), xmlCell("노무비"), xmlCell("경비"), xmlCell("합계")),
+    xmlRow(xmlCell("일위 1호"), xmlCell("강관 용접 배관"), xmlCell("D50"), xmlCell("M"), xmlCell(494, "Number"), xmlCell(24724, "Number"), xmlCell(0, "Number"), xmlCell(25218, "Number")),
+    xmlRow(xmlCell("일위 2호"), xmlCell("발열선 설치"), xmlCell(""), xmlCell("M"), xmlCell(0, "Number"), xmlCell(5140, "Number"), xmlCell(0, "Number"), xmlCell(5140, "Number")),
+    xmlRow(xmlCell("일위 3호"), xmlCell("탱크설치"), xmlCell(""), xmlCell("대"), xmlCell(0, "Number"), xmlCell(3053237, "Number"), xmlCell(0, "Number"), xmlCell(3053237, "Number")),
+    xmlRow(xmlCell("일위 4호"), xmlCell("탱크철거"), xmlCell(""), xmlCell("대"), xmlCell(0, "Number"), xmlCell(1526617, "Number"), xmlCell(0, "Number"), xmlCell(1526617, "Number")),
   ];
 
-  const logRows = [
-    xmlRow(xmlCell("검증로그"), xmlCell(stamp)),
-    xmlRow(xmlCell("구분"), xmlCell("내용")),
-    xmlRow(xmlCell("입력 행 수"), xmlCell(String(rows.length), "Number")),
-    xmlRow(xmlCell("총 직접노무비"), xmlCell(summary.directLabor, "Number")),
-    xmlRow(xmlCell("총 재료비"), xmlCell(summary.materials, "Number")),
-    xmlRow(xmlCell("총 경비"), xmlCell(summary.expense, "Number")),
-    xmlRow(xmlCell("총 합계"), xmlCell(summary.total, "Number")),
-    xmlRow(xmlCell("생성일시"), xmlCell(stamp)),
-    xmlRow(xmlCell("프로젝트명"), xmlCell(projectName || "(미입력)")),
+  const priceCompareRows = [
+    xmlRow(xmlCell("단가대비표"), xmlCell("조사기준 : 2026년 6월")),
+    xmlRow(xmlCell("품명"), xmlCell("규격"), xmlCell("단위"), xmlCell("적용단가"), xmlCell("비목"), xmlCell("원본")),
+    ...calculated
+      .filter((r) => r.category === "material")
+      .map((r) =>
+        xmlRow(
+          xmlCell(r.itemName),
+          xmlCell(r.spec),
+          xmlCell(r.unit),
+          xmlCell(r.unitPrice, "Number"),
+          xmlCell(costCategoryLabel(r.category)),
+          xmlCell(sourceBasis(r)),
+        ),
+      ),
   ];
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-  ${sheet("원가계산서", costStatementRows)}
-  ${sheet("집계표", summaryRows)}
-  ${sheet("산출근거", basisRows)}
-  ${sheet("요율표", rateRows)}
-  ${sheet("검증로그", logRows)}
-</Workbook>`;
+  return xmlWorkbook([
+    xmlSheet("원가계산서", costStatementRows),
+    xmlSheet("집계표", summaryRows),
+    xmlSheet("내역서", detailRows),
+    xmlSheet("일위대가목록", unitPriceListRows),
+    xmlSheet("단가대비표", priceCompareRows),
+  ]);
+}
+
+function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: string) {
+  const summary = calcCostSummary(rows, rates);
+  const stamp = todayStamp();
+
+  function rateRows(title: string, body: Array<Array<string | number>>) {
+    return [
+      xmlRow(xmlCell(title), xmlCell(projectName || "탱크 설비"), xmlCell(stamp)),
+      xmlRow(xmlCell("비목"), xmlCell("적용대상액"), xmlCell("요율(%)"), xmlCell("금액"), xmlCell("근거")),
+      ...body.map(([name, base, rate, amount, source]) =>
+        xmlRow(
+          xmlCell(name),
+          typeof base === "number" ? xmlCell(base, "Number") : xmlCell(base),
+          typeof rate === "number" ? xmlCell(rate, "Number") : xmlCell(rate),
+          typeof amount === "number" ? xmlCell(amount, "Number") : xmlCell(amount),
+          xmlCell(source),
+        ),
+      ),
+    ];
+  }
+
+  return xmlWorkbook([
+    xmlSheet("간노비", rateRows("간접노무비율 산출표", [["간접노무비", summary.directLabor, parseMoney(rates.indirectLabor), summary.indirectLaborAmt, "직접노무비*14%, 원가계산서!J11"]])),
+    xmlSheet(
+      "경비",
+      rateRows("경비 산출표", [
+        ["기계경비", "집계표!I19", "", summary.machineExpense, "내역서!J9:J68"],
+        ["산재보험료", summary.totalLabor, parseMoney(rates.industrialAccident), summary.industrialAccidentAmt, "산재"],
+        ["고용보험료", summary.totalLabor, parseMoney(rates.employment), summary.employmentAmt, "고용"],
+        ["건강보험료", summary.directLabor, parseMoney(rates.health), summary.healthAmt, "건강"],
+        ["연금보험료", summary.directLabor, parseMoney(rates.pension), summary.pensionAmt, "연금"],
+        ["노인장기요양보험료", summary.healthAmt, parseMoney(rates.longTermCare), summary.longTermCareAmt, "장기"],
+        ["석면분담금", summary.totalLabor, parseMoney(rates.asbestos), summary.asbestosAmt, "석면"],
+        ["임금채권부담금", summary.totalLabor, parseMoney(rates.wageClaim), summary.wageClaimAmt, "임금"],
+        ["퇴직공제부금비", summary.directLabor, parseMoney(rates.retirement), summary.retirementAmt, "퇴공"],
+        ["산업안전보건관리비", summary.directMaterials + summary.directLabor, parseMoney(rates.safetyHealth), summary.safetyAmt, "안전"],
+        ["기타경비", summary.directMaterials + summary.totalLabor, parseMoney(rates.miscExpense), summary.miscExpenseAmt, "원가계산서!J23"],
+        ["계", "", "", summary.expenseSubtotal, "원가계산서!E30"],
+      ]),
+    ),
+    xmlSheet("산재", rateRows("산재보험료 산출표", [["산재보험료", summary.totalLabor, parseMoney(rates.industrialAccident), summary.industrialAccidentAmt, "조달청적용기준 비율"]])),
+    xmlSheet("고용", rateRows("고용보험료 산출표", [["고용보험료", summary.totalLabor, parseMoney(rates.employment), summary.employmentAmt, "조달청적용기준 비율"]])),
+    xmlSheet("건강", rateRows("건강보험료 산출표", [["건강보험료", summary.directLabor, parseMoney(rates.health), summary.healthAmt, "2026년 조달청 제비율 적용기준"]])),
+    xmlSheet("연금", rateRows("연금보험료 산출표", [["연금보험료", summary.directLabor, parseMoney(rates.pension), summary.pensionAmt, "2026년 조달청 제비율 적용기준"]])),
+    xmlSheet("석면", rateRows("석면분담금 산출표", [["석면분담금", summary.totalLabor, parseMoney(rates.asbestos), summary.asbestosAmt, "2026년 조달청 제비율 적용기준"]])),
+    xmlSheet("장기", rateRows("노인장기요양보험료 산출표", [["노인장기요양보험료", summary.healthAmt, parseMoney(rates.longTermCare), summary.longTermCareAmt, "건강보험료*13.14%"]])),
+    xmlSheet("임금", rateRows("임금채권부담금 산출표", [["임금채권부담금", summary.totalLabor, parseMoney(rates.wageClaim), summary.wageClaimAmt, "2026년 조달청 제비율 적용기준"]])),
+    xmlSheet("퇴공", rateRows("퇴직공제부금비 산출표", [["퇴직공제부금비", summary.directLabor, parseMoney(rates.retirement), summary.retirementAmt, "2026년 조달청 제비율 적용기준"]])),
+    xmlSheet("안전", rateRows("산업안전보건관리비 산출표", [["산업안전보건관리비", summary.directMaterials + summary.directLabor, parseMoney(rates.safetyHealth), summary.safetyAmt, "(재료비+직접노무비)*3.11%"]])),
+    xmlSheet("일반", rateRows("일반관리비 산출표", [["일반관리비", summary.pureCost, parseMoney(rates.generalAdmin), summary.generalAdminAmt, "순공사원가*8%"]])),
+    xmlSheet("일반비율", rateRows("일반관리비 비율표", [["전문,전기,정보통신,소방 및 그밖의 공사 5억원미만", "", 8, "", "일반비율!H8"], ["본조사적용비율", "", parseMoney(rates.generalAdmin), "", "일반비율!H14"]])),
+    xmlSheet("이윤", rateRows("이윤 산출표", [["이윤", summary.totalLabor + summary.expenseSubtotal + summary.generalAdminAmt, parseMoney(rates.profit), summary.profitAmt, "(노무비+경비+일반관리비)*15%"]])),
+    xmlSheet("이윤비율", rateRows("이윤 비율표", [["시설공사", "", 15, "", "이윤비율!F7"], ["본조사적용비율", "", parseMoney(rates.profit), "", "이윤비율"]])),
+  ]);
 }
 
 function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) {
@@ -4419,19 +4673,12 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   }
 
   function handleDownload() {
-    const xml = buildCostEstimateXml(rows, rates, projectName);
-    downloadBlob(`원가계산서_${projectName || todayStamp()}.xls`, "application/vnd.ms-excel;charset=utf-8", xml);
+    const fileBase = (projectName.trim() || todayStamp()).replace(/[\\/:*?"<>|]/g, "_");
+    const mainXml = buildMainCostEstimateXml(rows, rates, projectName);
+    const basisXml = buildRateBasisXml(rows, rates, projectName);
+    downloadBlob(`원가계산서_주계산_${fileBase}.xls`, "application/vnd.ms-excel;charset=utf-8", mainXml);
+    downloadBlob(`원가계산서_산출근거_${fileBase}.xls`, "application/vnd.ms-excel;charset=utf-8", basisXml);
   }
-
-  const rateLabels: { key: keyof CostRates; label: string; hint: string }[] = [
-    { key: "indirectLabor", label: "간접노무비", hint: "직접노무비 기준" },
-    { key: "insurance", label: "4대보험", hint: "노무비 합계 기준" },
-    { key: "retirementReserve", label: "퇴직공제", hint: "노무비 합계 기준" },
-    { key: "safetyHealth", label: "산업안전보건관리비", hint: "노무비+재료비+경비 기준" },
-    { key: "generalAdmin", label: "일반관리비", hint: "소계 기준" },
-    { key: "profit", label: "이윤", hint: "소계+일반관리비 기준" },
-    { key: "vat", label: "부가세", hint: "부가세전합계 기준" },
-  ];
 
   return (
     <div className="ceg-page">
@@ -4500,7 +4747,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
           )}
 
           <p className="ceg-upload-note">
-            ※ 파일을 업로드하면 샘플 데이터가 미리보기 테이블에 표시됩니다. (1차 프로토타입)
+            ※ 1차 반영에서는 ver2 내역서 9~68행 기준 샘플 데이터가 미리보기 테이블에 표시됩니다.
           </p>
 
           <div className="ceg-upload-actions">
@@ -4525,7 +4772,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
               <div>
                 <span className="eyebrow">Preview</span>
                 <h2>내역서 미리보기</h2>
-                <p>행을 편집·추가·삭제하여 원가 항목을 조정하세요.</p>
+                <p>ver2 내역서 합계 범위(9~68행)를 기준으로 수량·단가·금액을 확인하세요.</p>
               </div>
               <button className="secondary-btn" type="button" onClick={handleAddRow}>
                 + 행 추가
@@ -4538,11 +4785,13 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                   <tr>
                     <th>항목코드</th>
                     <th>비목</th>
+                    <th>품명</th>
                     <th>규격</th>
                     <th>단위</th>
                     <th className="num">수량</th>
                     <th className="num">단가</th>
                     <th className="num">금액</th>
+                    <th>근거</th>
                     <th>작업</th>
                   </tr>
                 </thead>
@@ -4552,18 +4801,19 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                       <tr key={row.id} className="editing">
                         <td><input className="input ceg-input" value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} /></td>
                         <td>
-                          <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value })}>
-                            <option value="">선택</option>
-                            <option>직접노무비</option>
-                            <option>재료비</option>
-                            <option>경비</option>
+                          <select className="input ceg-input" value={editDraft.category} onChange={(e) => setEditDraft({ ...editDraft, category: e.target.value as CostCategory })}>
+                            <option value="material">재료비</option>
+                            <option value="labor">직접노무비</option>
+                            <option value="expense">경비</option>
                           </select>
                         </td>
+                        <td><input className="input ceg-input" value={editDraft.itemName} onChange={(e) => setEditDraft({ ...editDraft, itemName: e.target.value })} /></td>
                         <td><input className="input ceg-input" value={editDraft.spec} onChange={(e) => setEditDraft({ ...editDraft, spec: e.target.value })} /></td>
                         <td><input className="input ceg-input" value={editDraft.unit} style={{ width: 52 }} onChange={(e) => setEditDraft({ ...editDraft, unit: e.target.value })} /></td>
                         <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
                         <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
                         <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
+                        <td>{sourceBasis(editDraft)}</td>
                         <td className="ceg-row-actions">
                           <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
                           <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
@@ -4572,12 +4822,14 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                     ) : (
                       <tr key={row.id}>
                         <td>{row.code}</td>
-                        <td>{row.category}</td>
+                        <td>{costCategoryLabel(row.category)}</td>
+                        <td>{row.itemName}</td>
                         <td>{row.spec}</td>
                         <td>{row.unit}</td>
                         <td className="num">{row.qty}</td>
                         <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
                         <td className="num">{formatMoney(row.amount)}</td>
+                        <td>{sourceBasis(row)}</td>
                         <td className="ceg-row-actions">
                           <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
                           <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
@@ -4586,13 +4838,14 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                     ),
                   )}
                   {rows.length === 0 ? (
-                    <tr><td colSpan={8} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
+                    <tr><td colSpan={10} style={{ textAlign: "center" }}>항목을 추가하세요.</td></tr>
                   ) : null}
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
+                    <td colSpan={7} style={{ textAlign: "right", fontWeight: 700 }}>직접 합계</td>
                     <td className="num" style={{ fontWeight: 700 }}>{formatMoney(calculated.reduce((s, r) => s + r.amount, 0))}</td>
+                    <td>집계표!K19</td>
                     <td />
                   </tr>
                 </tfoot>
@@ -4621,13 +4874,13 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
               <section className="card ceg-rates-panel">
                 <span className="eyebrow">요율 설정</span>
                 <h2>비율 설정</h2>
-                <p>기본값을 사용하거나 프로젝트에 맞게 수정하세요.</p>
+                <p>ver2 원가계산서와 산출표의 기본 요율을 사용합니다.</p>
                 <div className="ceg-rates-list">
-                  {rateLabels.map(({ key, label, hint }) => (
+                  {RATE_LABELS.map(({ key, label, hint, source }) => (
                     <label key={key} className="ceg-rate-row">
                       <div>
                         <strong>{label}</strong>
-                        <span>{hint}</span>
+                        <span>{hint} · {source}</span>
                       </div>
                       <div className="ceg-rate-input-wrap">
                         <input
@@ -4650,20 +4903,28 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                 <span className="eyebrow">원가계산서</span>
                 <h2>계산 결과</h2>
                 <div className="ceg-summary-table">
+                  <div className="ceg-summary-row"><span>직접재료비</span><strong>{formatMoney(summary.directMaterials)} 원</strong></div>
                   <div className="ceg-summary-row"><span>직접노무비</span><strong>{formatMoney(summary.directLabor)} 원</strong></div>
                   <div className="ceg-summary-row sub"><span>간접노무비 ({rates.indirectLabor}%)</span><strong>{formatMoney(summary.indirectLaborAmt)} 원</strong></div>
                   <div className="ceg-summary-row total"><span>노무비 계</span><strong>{formatMoney(summary.totalLabor)} 원</strong></div>
-                  <div className="ceg-summary-row"><span>재료비</span><strong>{formatMoney(summary.materials)} 원</strong></div>
-                  <div className="ceg-summary-row"><span>경비</span><strong>{formatMoney(summary.expense)} 원</strong></div>
-                  <div className="ceg-summary-row sub"><span>4대보험 ({rates.insurance}%)</span><strong>{formatMoney(summary.insuranceAmt)} 원</strong></div>
-                  <div className="ceg-summary-row sub"><span>퇴직공제 ({rates.retirementReserve}%)</span><strong>{formatMoney(summary.retirementAmt)} 원</strong></div>
+                  <div className="ceg-summary-row"><span>기계경비</span><strong>{formatMoney(summary.machineExpense)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>산재보험료 ({rates.industrialAccident}%)</span><strong>{formatMoney(summary.industrialAccidentAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>고용보험료 ({rates.employment}%)</span><strong>{formatMoney(summary.employmentAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>건강보험료 ({rates.health}%)</span><strong>{formatMoney(summary.healthAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>연금보험료 ({rates.pension}%)</span><strong>{formatMoney(summary.pensionAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>노인장기요양보험료 ({rates.longTermCare}%)</span><strong>{formatMoney(summary.longTermCareAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>석면분담금 ({rates.asbestos}%)</span><strong>{formatMoney(summary.asbestosAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>임금채권부담금 ({rates.wageClaim}%)</span><strong>{formatMoney(summary.wageClaimAmt)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>퇴직공제부금비 ({rates.retirement}%)</span><strong>{formatMoney(summary.retirementAmt)} 원</strong></div>
                   <div className="ceg-summary-row sub"><span>산업안전보건관리비 ({rates.safetyHealth}%)</span><strong>{formatMoney(summary.safetyAmt)} 원</strong></div>
-                  <div className="ceg-summary-row total"><span>소계</span><strong>{formatMoney(summary.subtotal)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>기타경비 ({rates.miscExpense}%)</span><strong>{formatMoney(summary.miscExpenseAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>경비 소계</span><strong>{formatMoney(summary.expenseSubtotal)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>순공사원가</span><strong>{formatMoney(summary.pureCost)} 원</strong></div>
                   <div className="ceg-summary-row sub"><span>일반관리비 ({rates.generalAdmin}%)</span><strong>{formatMoney(summary.generalAdminAmt)} 원</strong></div>
                   <div className="ceg-summary-row sub"><span>이윤 ({rates.profit}%)</span><strong>{formatMoney(summary.profitAmt)} 원</strong></div>
-                  <div className="ceg-summary-row total"><span>부가세 전 합계</span><strong>{formatMoney(summary.preVat)} 원</strong></div>
-                  <div className="ceg-summary-row sub"><span>부가세 ({rates.vat}%)</span><strong>{formatMoney(summary.vatAmt)} 원</strong></div>
-                  <div className="ceg-summary-row grand"><span>최종 합계</span><strong>{formatMoney(summary.total)} 원</strong></div>
+                  <div className="ceg-summary-row grand"><span>총원가</span><strong>{formatMoney(summary.totalCost)} 원</strong></div>
+                  <div className="ceg-summary-row sub"><span>부가가치세 ({rates.vat}%)</span><strong>{formatMoney(summary.vatAmt)} 원</strong></div>
+                  <div className="ceg-summary-row total"><span>합계(천원미만 절사)</span><strong>{formatMoney(summary.grandTotal)} 원</strong></div>
                 </div>
 
                 <div className="ceg-download-area">
@@ -4679,11 +4940,11 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                   </label>
                   <button className="primary-btn ceg-download-btn" type="button" onClick={handleDownload}>
                     <Database size={16} />
-                    원가계산서 Excel 다운로드
-                    <span className="ceg-sheet-badge">5개 시트</span>
+                    원가계산서 Excel 2종 다운로드
+                    <span className="ceg-sheet-badge">5시트 + 15시트</span>
                   </button>
                   <p className="ceg-download-note">
-                    원가계산서 · 집계표 · 산출근거 · 요율표 · 검증로그가 하나의 파일에 포함됩니다.
+                    주 계산 파일에는 원가계산서 · 집계표 · 내역서 · 일위대가목록 · 단가대비표가, 산출근거 파일에는 요율/보험료 산출표 15개 시트가 포함됩니다.
                   </p>
                 </div>
               </section>
