@@ -1856,7 +1856,7 @@ function SwPricingModule({ go }: { go: (route: string) => void }) {
           )}
         </div>
 
-        <aside className="sw-pricing-related">
+        <aside className="sw-pricing-related mock-hidden">
           <span className="eyebrow">Related</span>
           <h3 className="sw-pricing-related-title">관련 업무 및 자료</h3>
           <div className="sw-pricing-related-list">
@@ -4661,7 +4661,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
       ) : null}
 
       {/* 관련 페이지 */}
-      <section className="ceg-related-section">
+      <section className="ceg-related-section mock-hidden">
         <button className="ghost-btn" type="button" onClick={() => go("/cost-guide/practice")}>
           원가계산실무 안내 →
         </button>
