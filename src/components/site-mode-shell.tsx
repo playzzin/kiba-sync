@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Activity,
   BarChart3,
@@ -79,6 +80,8 @@ type MenuGroup = {
   group: string;
   items: MenuItem[];
 };
+
+const visibleModeTabs: Mode[] = ["user", "erp"];
 
 type ShellState = {
   mode: Mode;
@@ -253,9 +256,9 @@ const menus: Record<Mode, MenuGroup[]> = {
   ],
   erp: [
     {
-      group: "ERP",
+      group: "실무",
       items: [
-        { label: "ERP 대시보드", href: "/erp/dashboard", icon: "chart", badge: "ERP" },
+        { label: "실무 대시보드", href: "/erp/dashboard", icon: "chart", badge: "실무" },
         {
           label: "업무관리",
           icon: "folder",
@@ -286,7 +289,7 @@ const menus: Record<Mode, MenuGroup[]> = {
           icon: "settings",
           children: [
             { label: "Firebase 운영", href: "/erp/system/firebase", icon: "server", badge: "Live", badgeType: "success" },
-            { label: "ERP 설정", href: "/erp/settings", icon: "settings" },
+            { label: "실무 설정", href: "/erp/settings", icon: "settings" },
           ],
         },
       ],
@@ -366,7 +369,7 @@ const titles: Record<string, string> = {
   "/admin/security": "Security Policy",
   "/admin/settings": "Company Settings",
   "/admin/reports": "Operation Stats",
-  "/erp/dashboard": "ERP 대시보드",
+  "/erp/dashboard": "실무 대시보드",
   "/erp/workforce/professionals": "전문인력 통합DB",
   "/erp/cost-estimates/new": "원가계산서 생성",
   "/erp/cms/pages": "페이지 관리",
@@ -375,7 +378,7 @@ const titles: Record<string, string> = {
   "/erp/accounting/items": "회계 항목",
   "/erp/analytics/bigquery": "BigQuery 통계",
   "/erp/system/firebase": "Firebase 운영",
-  "/erp/settings": "ERP 설정",
+  "/erp/settings": "실무 설정",
 };
 
 type KibaPageDetail = {
@@ -402,7 +405,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
     section: "KIBA",
     title: "한국경영분석연구원",
     summary: "원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
-    points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "ERP/CRM/CMS 운영 확장"],
+    points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "실무/CRM/CMS 운영 확장"],
     deliverables: ["기관 소개와 전문업무를 분리한 정보 구조", "원가·계약·개발부담금 핵심 업무 바로가기", "고객센터 콘텐츠 운영 영역"],
     related: ["/cost-guide/government-contract", "/contract-adjustment/overview", "/development-charge/overview", "/support/contact"],
   },
@@ -483,7 +486,7 @@ const kibaSourceFacts: Record<string, KibaSourceFact> = {
   ], ["원본 이미지 자산: 14.jpg"]),
   "/intro/organization": sourceFact("ctg01/pg05.htm", "image", "본문 텍스트 없음, 조직도 GIF 이미지 기반", [
     "원본은 조직구성을 이미지 조직도로 제공하고 있습니다.",
-    "ERP/CRM 연결을 위해 부서, 담당 업무, 문의 연결 정보를 구조화 데이터로 나누는 구성이 적합합니다.",
+    "실무/CRM 연결을 위해 부서, 담당 업무, 문의 연결 정보를 구조화 데이터로 나누는 구성이 적합합니다.",
     "조직도 이미지는 원본 보존 영역과 반응형 텍스트 조직표를 함께 제공하는 방식으로 재구성했습니다.",
   ], ["원본 이미지 자산: 15.gif"]),
   "/intro/location": sourceFact("ctg01/pg06.htm", "text", "연락처 텍스트 8줄 확인", [
@@ -495,12 +498,12 @@ const kibaSourceFacts: Record<string, KibaSourceFact> = {
   "/performance/costing": sourceFact("ctg02/pg01.htm", "text", "주요실적 텍스트 542줄 확인", [
     "원본은 제조원가를 시작으로 용역명과 발주처를 표 형태로 나열합니다.",
     "실적 목록은 원가계산, 가격조사, 제작 원가, 물품 구매 검토 등 실무 과제를 중심으로 구성됩니다.",
-    "ERP 관점에서는 발주처, 용역명, 수행연도, 분야, 보고서 첨부를 필드화해야 검색성이 높아집니다.",
+    "실무 관점에서는 발주처, 용역명, 수행연도, 분야, 보고서 첨부를 필드화해야 검색성이 높아집니다.",
   ], ["과일 주스 생산라인 제작공사 원가계산용역", "교단환경 개선물품 구매를 위한 거래가격 가격조사", "교사용 교탁제작 원가계산"]),
   "/performance/settlement": sourceFact("ctg02/pg02.htm", "text", "사후정산 실적 텍스트 645줄 확인", [
     "원본은 개발부담금, 보조금, 행사비, 원가검토 등 사후 정산·검증 성격의 실적을 대량으로 제공합니다.",
     "정산 업무는 계약 이후 실제 투입비용과 증빙을 검토하는 흐름으로 분류됩니다.",
-    "상태값은 접수, 검토, 보완요청, 보고완료로 나눠 CRM/ERP 진행 관리와 연결하는 구성이 적합합니다.",
+    "상태값은 접수, 검토, 보완요청, 보고완료로 나눠 CRM/실무 진행 관리와 연결하는 구성이 적합합니다.",
   ], ["개발부담금 개발비용 산출내역 검토용역", "개발부담금 개발비용 산출명세서 검증 용역", "행사 보조금 정산검토와 사후원가검토 용역"]),
   "/performance/research": sourceFact("ctg02/pg03.htm", "text", "학술연구 실적 텍스트 384줄 확인", [
     "원본은 사업타당성 연구, 산업경영 연구, 각종 통계조사, 공공요금 산정, 민간위탁용역으로 실적을 구분합니다.",
@@ -1050,20 +1053,30 @@ function normalizeRoute(route: string) {
 
 function modeName(mode: Mode) {
   if (mode === "admin") {
-    return "ADMIN MODE";
+    return "관리자 페이지";
   }
   if (mode === "erp") {
-    return "ERP MODE";
+    return "직원 페이지";
   }
   return "USER MODE";
+}
+
+function modeTabLabel(mode: Mode) {
+  if (mode === "erp") {
+    return "실무";
+  }
+  if (mode === "admin") {
+    return "ADMIN";
+  }
+  return "USER";
 }
 
 function toMode(value: string | null): Mode {
   if (value === "developer" || value === "erp") {
     return "erp";
   }
-  if (value === "admin" || value === "user") {
-    return value;
+  if (value === "user") {
+    return "user";
   }
   return "user";
 }
@@ -1165,8 +1178,8 @@ export function SiteModeShell() {
       ? userPage.summary
       : shell.mode === "erp"
         ? shell.route === "/erp/workforce/professionals"
-          ? "전문인력 데이터를 검색하고 필요한 인력만 선택해 PDF와 엑셀 보고서로 정리하는 ERP 업무 화면입니다."
-          : "전문인력 DB, CMS, 회계·통계를 한 곳에서 구성하고 운영하는 KIBA ERP 업무 화면입니다."
+          ? "전문인력 데이터를 검색하고 필요한 인력만 선택해 PDF와 엑셀 보고서로 정리하는 직원 페이지입니다."
+          : "전문인력 DB, CMS, 회계·통계를 한 곳에서 구성하고 운영하는 KIBA 실무 화면입니다."
         : "사용자 권한, 보안 정책, 운영 리포트를 관리하는 KIBA 관리자 화면입니다.";
   const effectiveOpen = useMemo(() => {
     const next = new Set(shell.open);
@@ -1397,7 +1410,7 @@ export function SiteModeShell() {
           <button className="brand-btn" type="button" aria-label="Toggle sidebar" onClick={toggleCollapse}>
             <span className="logo">K</span>
             <span className="brand-text">
-              <strong>KIBA Admin</strong>
+              <strong>{shell.mode === "erp" ? "직원페이지" : shell.mode === "admin" ? "KIBA Admin" : "한국경영분석연구원"}</strong>
               <span>{modeName(shell.mode)}</span>
             </span>
             <span className="collapse-mark">
@@ -1466,7 +1479,7 @@ export function SiteModeShell() {
 
           <div className="header-right">
             <div className="mode-tabs" role="tablist" aria-label="Site mode selection">
-              {(["user", "erp", "admin"] as Mode[]).map((mode) => (
+              {visibleModeTabs.map((mode) => (
                 <button
                   key={mode}
                   className={`mode-tab ${shell.mode === mode ? "active" : ""}`}
@@ -1475,7 +1488,7 @@ export function SiteModeShell() {
                   aria-selected={shell.mode === mode}
                   onClick={() => setMode(mode)}
                 >
-                  {mode.toUpperCase()}
+                  {modeTabLabel(mode)}
                 </button>
               ))}
             </div>
@@ -1610,6 +1623,9 @@ function KibaHome({ go }: { go: (route: string) => void }) {
       <section className="public-hero">
         <div className="hero-copy">
           <span className="eyebrow">Korea Institute of Business Analysis & Development</span>
+          <div className="public-logo-card" aria-label="한국경영분석연구원 로고">
+            <Image src="/한국경영분석연구원로고.jpg" alt="한국경영분석연구원" width={576} height={120} priority />
+          </div>
           <h1>한국경영분석연구원</h1>
           <p>
             1998년 기획재정부 허가를 받은 원가계산전문기관의 소개서 자료를 바탕으로 공공예산 검증,
@@ -3329,7 +3345,7 @@ function ErpDashboard({ route }: { route: string }) {
     return <CostEstimateBuilderPage />;
   }
 
-  const pageTitle = titles[route] ?? "ERP 대시보드";
+  const pageTitle = titles[route] ?? "실무 대시보드";
   const erpPagePlan =
     {
       "/erp/cms/pages": ["공개 페이지", "초안", "검수", "배포 상태"],
@@ -3346,7 +3362,7 @@ function ErpDashboard({ route }: { route: string }) {
     { folder: "업무관리", pages: "전문인력 통합DB, 원가계산서 생성" },
     { folder: "CMS 구성", pages: "페이지 관리, 메뉴·폴더 관리, 자료실 관리" },
     { folder: "회계·통계", pages: "회계 항목, BigQuery 통계" },
-    { folder: "시스템 설정", pages: "Firebase 운영, ERP 설정" },
+    { folder: "시스템 설정", pages: "Firebase 운영, 실무 설정" },
   ];
 
   return (
@@ -3362,13 +3378,13 @@ function ErpDashboard({ route }: { route: string }) {
         <div className="card">
           <div className="section-title">
             <h2>{pageTitle} 구성</h2>
-            <span>ERP</span>
+            <span>실무</span>
           </div>
           <div className="related-list">
             {erpPagePlan.map((item) => (
               <div key={item} className="related-item">
                 <strong>{item}</strong>
-                <span>ERP 필드 및 화면 구성 항목</span>
+                <span>실무 필드 및 화면 구성 항목</span>
               </div>
             ))}
           </div>
@@ -3376,7 +3392,7 @@ function ErpDashboard({ route }: { route: string }) {
 
         <div className="card">
           <div className="section-title">
-            <h2>ERP 폴더 / 페이지</h2>
+            <h2>실무 폴더 / 페이지</h2>
             <span>Navigation</span>
           </div>
           <table className="table">
@@ -3399,14 +3415,14 @@ function ErpDashboard({ route }: { route: string }) {
       </div>
 
       <div className="grid grid2 gap-top">
-        <ChartCard title="ERP 업무 흐름" />
+        <ChartCard title="실무 업무 흐름" />
         <div className="card terminal">
           <div className="section-title">
-            <h2>Firebase ERP Runtime</h2>
+            <h2>Firebase 실무 Runtime</h2>
             <span>READY</span>
           </div>
           <p>
-            <span className="prefix">$</span>Auth roles mapped to ERP folders.
+            <span className="prefix">$</span>Auth roles mapped to staff folders.
           </p>
           <p>
             <span className="prefix">$</span>Firestore collections ready: professionalStaff, cmsPages, resources.
@@ -3415,7 +3431,7 @@ function ErpDashboard({ route }: { route: string }) {
             <span className="prefix">$</span>Storage paths ready for workforce reports and CMS files.
           </p>
           <p>
-            <span className="prefix">$</span>BigQuery export configured for ERP statistics.
+            <span className="prefix">$</span>BigQuery export configured for staff statistics.
           </p>
         </div>
       </div>
