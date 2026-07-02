@@ -86,6 +86,7 @@ type MenuItem = {
   badgeType?: BadgeType;
   disabled?: boolean;
   hidden?: boolean;
+  defaultOpen?: boolean;
   children?: MenuItem[];
 };
 
@@ -265,13 +266,6 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "상담 및 문의", href: "/support/contact", icon: "help" },
           ],
         },
-        {
-          label: "업무자동화",
-          icon: "task",
-          children: [
-            { label: "원가계산서 만들기", href: "/automation/cost-estimate-generator", icon: "doc", badge: "NEW" },
-          ],
-        },
       ],
     },
   ],
@@ -287,6 +281,15 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "전문인력 통합DB", href: "/erp/workforce/professionals", icon: "users", badge: "PDF/XLS" },
             { label: "협회 공지사항", href: "/erp/association/notices", icon: "bell" },
             { label: "원가계산서 생성", href: "/erp/cost-estimates/new", icon: "database", badge: "NEW" },
+          ],
+        },
+        {
+          label: "업무자동화",
+          icon: "task",
+          defaultOpen: true,
+          children: [
+            { label: "회의록 생성", href: "/erp/automation/meeting-minutes", icon: "doc", badge: "NEW" },
+            { label: "원가계산서 만들기", href: "/erp/automation/cost-estimate-generator", icon: "doc", badge: "NEW" },
           ],
         },
         {
@@ -406,7 +409,8 @@ const titles: Record<string, string> = {
   "/erp/analytics/bigquery": "BigQuery 통계",
   "/erp/system/firebase": "Firebase 운영",
   "/erp/settings": "실무 설정",
-  "/automation/cost-estimate-generator": "원가계산서 만들기",
+  "/erp/automation/cost-estimate-generator": "원가계산서 만들기",
+  "/erp/automation/meeting-minutes": "회의록 생성",
 };
 
 type KibaPageDetail = {
@@ -472,7 +476,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/support/news": page("고객센터", "공지사항&새소식", "기관 공지, 사업 안내, 주요 계약·성과 소식을 게시하는 페이지입니다.", ["공지 목록", "중요 공지", "새소식"], ["게시판", "상단 고정", "첨부파일"], ["/support/resources", "/support/contact"]),
   "/support/resources": page("고객센터", "자료실", "법령, 서식, 참고자료, 보고서 파일을 관리하는 자료실입니다.", ["서식", "참고자료", "보고서"], ["파일 업로드", "카테고리", "다운로드 통계"], ["/cost-guide/laws", "/support/news"]),
   "/support/contact": page("고객센터", "상담 및 문의", "원가계산, 계약금액조정, 개발부담금 상담을 접수하는 페이지입니다.", ["문의 유형", "담당자 배정", "답변 상태"], ["상담 폼", "CRM 전환", "알림 연동"], ["/intro/location", "/performance/costing"]),
-  "/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
+  "/erp/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
 };
 
 function page(
@@ -1144,6 +1148,9 @@ function normalizeRoute(route: string) {
   if (route.startsWith("/dev")) {
     return "/erp/dashboard";
   }
+  if (route === "/automation/cost-estimate-generator") {
+    return "/erp/automation/cost-estimate-generator";
+  }
   return route;
 }
 
@@ -1234,6 +1241,13 @@ function routeParentsFor(mode: Mode, route: string) {
   return parents;
 }
 
+function defaultOpenKeys(items: MenuItem[], mode: Mode, depth = 1): string[] {
+  return items.flatMap((item) => {
+    const current = item.defaultOpen ? [itemKey(mode, item, depth)] : [];
+    return item.children ? [...current, ...defaultOpenKeys(item.children, mode, depth + 1)] : current;
+  });
+}
+
 function visibleItems(items: MenuItem[], query: string): MenuItem[] {
   const candidates = items.filter((item) => !item.hidden);
 
@@ -1279,10 +1293,13 @@ export function SiteModeShell() {
       : shell.mode === "erp"
         ? shell.route === "/erp/workforce/professionals"
           ? "전문인력 데이터를 검색하고 필요한 인력만 선택해 PDF와 엑셀 보고서로 정리하는 직원 실무 화면입니다."
-          : "전문인력 DB와 원가계산서 생성 업무를 한 곳에서 구성하고 운영하는 KIBA 직원 실무 화면입니다."
+          : "전문인력 DB, 원가계산서 생성, 업무자동화 도구를 한 곳에서 구성하고 운영하는 KIBA 직원 실무 화면입니다."
         : "사용자 권한, 보안 정책, 운영 리포트를 관리하는 KIBA 관리자 화면입니다.";
   const effectiveOpen = useMemo(() => {
     const next = new Set(shell.open);
+    for (const group of menus[shell.mode]) {
+      defaultOpenKeys(group.items, shell.mode).forEach((id) => next.add(id));
+    }
     const activeParents = new Set<string>();
     for (const group of menus[shell.mode]) {
       const parents = findParents(group.items, shell.route, shell.mode);
@@ -1361,14 +1378,15 @@ export function SiteModeShell() {
   }
 
   function go(route: string) {
-    const nextMode = routeMode(route);
-    const open = new Set(routeParentsFor(nextMode, route));
-    window.history.pushState({ route }, "", safeHash(route));
+    const nextRoute = normalizeRoute(route);
+    const nextMode = routeMode(nextRoute);
+    const open = new Set(routeParentsFor(nextMode, nextRoute));
+    window.history.pushState({ route: nextRoute }, "", safeHash(nextRoute));
     window.localStorage.setItem("mp_mode", nextMode);
     saveOpen(open);
     setMobileOpen(false);
-    setShell((previous) => ({ ...previous, route, mode: nextMode, open }));
-    showToast(`${titles[route] || route} opened`);
+    setShell((previous) => ({ ...previous, route: nextRoute, mode: nextMode, open }));
+    showToast(`${titles[nextRoute] || nextRoute} opened`);
   }
 
   function setMode(mode: Mode) {
@@ -1707,10 +1725,6 @@ function UserSitePage({ route, go }: { route: string; go: (route: string) => voi
   if (route === "/performance/costing" || route === "/performance/settlement" || route === "/performance/research") {
     return <KibaPerformancePage route={route} go={go} />;
   }
-  if (route === "/automation/cost-estimate-generator") {
-    return <KibaCostEstimateGeneratorPage go={go} />;
-  }
-
   const detail = kibaPageDetails[route] ?? kibaPageDetails["/dashboard"];
   const pageData = kibaSeedPagesByRoute[route];
   return <KibaDetailPage detail={detail} page={pageData} route={route} go={go} />;
@@ -2011,7 +2025,7 @@ function KibaHome({ go }: { go: (route: string) => void }) {
             <strong>파일 업로드 한 번으로 원가계산서 완성</strong>
             <p>간접노무비·4대보험·퇴직공제·산업안전·일반관리비·이윤·부가세가 요율표 기준으로 자동 계산됩니다.</p>
           </div>
-          <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+          <button className="primary-btn" type="button" onClick={() => go("/erp/automation/cost-estimate-generator")}>
             <FileText size={16} />
             원가계산서 만들기 시작
           </button>
@@ -2844,7 +2858,7 @@ function KibaDetailPage({
               <span className="eyebrow">업무자동화</span>
               <h3>원가계산서 만들기</h3>
               <p>파일 업로드만으로 원가계산서·집계표·산출근거를 포함한 Excel을 자동 생성합니다.</p>
-              <button className="primary-btn" type="button" onClick={() => go("/automation/cost-estimate-generator")}>
+              <button className="primary-btn" type="button" onClick={() => go("/erp/automation/cost-estimate-generator")}>
                 <FileText size={14} />
                 바로가기
               </button>
@@ -3673,6 +3687,9 @@ function ErpDashboard({ route, go }: { route: string; go: (route: string) => voi
   if (route === "/erp/cost-estimates/new") {
     return <CostEstimateBuilderPage />;
   }
+  if (route === "/erp/automation/cost-estimate-generator") {
+    return <KibaCostEstimateGeneratorPage go={go} />;
+  }
 
   const pageTitle = titles[route] ?? "실무 대시보드";
   const erpPagePlan =
@@ -3685,10 +3702,12 @@ function ErpDashboard({ route, go }: { route: string; go: (route: string) => voi
       "/erp/analytics/bigquery": ["업무 통계", "상담 전환", "정산 기간", "월별 리포트"],
       "/erp/system/firebase": ["Auth", "Firestore", "Storage", "Functions"],
       "/erp/settings": ["기관 정보", "업무 코드", "알림", "권한 기본값"],
+      "/erp/automation/meeting-minutes": ["회의 자료", "참석자·안건", "요약·결정사항", "회의록 출력"],
     }[route] ?? ["전문인력", "자격 등록", "업무분류", "원가계산서"];
 
   const erpFolders = [
     { folder: "업무관리", pages: "전문인력 통합DB, 원가계산서 생성" },
+    { folder: "업무자동화", pages: "회의록 생성, 원가계산서 만들기" },
     { folder: "CMS 구성", pages: "페이지 관리, 메뉴·폴더 관리, 자료실 관리" },
     { folder: "회계·통계", pages: "회계 항목, BigQuery 통계" },
     { folder: "시스템 설정", pages: "Firebase 운영, 실무 설정" },
