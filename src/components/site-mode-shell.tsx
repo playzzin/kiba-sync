@@ -49,6 +49,11 @@ import {
   type CostEstimateDraftData,
   type CostEstimateDraftFileNames,
 } from "@/lib/cost-estimate/firebase-draft";
+import {
+  parseNaeyeokseo,
+  parseDangaDaebiPyo,
+  parseUnifiedWorkbook,
+} from "@/lib/cost-estimate/excel-parser";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import professionalStaffData from "@/lib/kiba/professional-staff-data.json";
 import { kibaSeedPagesByRoute, kibaSeedSummary, type KibaSeedPage } from "@/lib/kiba/source-content";
@@ -4174,6 +4179,7 @@ type CestStep = "upload" | "preview" | "result";
 type CestUploadMode = "unified" | "separate";
 type CostCategory = "material" | "labor" | "expense";
 type CestDraftStatus = { kind: "success" | "error"; message: string } | null;
+type CestParseStatus = { kind: "success" | "error" | "info"; messages: string[] } | null;
 
 type CostRow = {
   id: string;
@@ -4430,9 +4436,14 @@ function sourceBasis(row: CostRow) {
   return row.section ? `${row.section} / ${sourceAmountCell(row)}` : sourceAmountCell(row);
 }
 
-function xmlCell(value: string | number, type: "String" | "Number" = "String") {
-  const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  return `<Cell><Data ss:Type="${type}">${escaped}</Data></Cell>`;
+function xmlCell(value: string | number, type: "String" | "Number" = "String", formula?: string) {
+  // Escape for XML attribute value (preserves single quotes used in sheet-name references)
+  const escapedVal = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const escapedFormula = formula
+    ? formula.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+    : null;
+  const fAttr = escapedFormula ? ` ss:Formula="${escapedFormula}"` : "";
+  return `<Cell${fAttr}><Data ss:Type="${type}">${escapedVal}</Data></Cell>`;
 }
 
 function xmlRow(...cells: string[]) {
@@ -4457,65 +4468,120 @@ function buildMainCostEstimateXml(rows: CostRow[], rates: CostRates, projectName
   const calculated = calcRows(rows);
   const stamp = todayStamp();
 
+  // Rate values used in formula expressions
+  const rIL = parseMoney(rates.indirectLabor);
+  const rIA = parseMoney(rates.industrialAccident);
+  const rEM = parseMoney(rates.employment);
+  const rHL = parseMoney(rates.health);
+  const rPN = parseMoney(rates.pension);
+  const rLC = parseMoney(rates.longTermCare);
+  const rAB = parseMoney(rates.asbestos);
+  const rWC = parseMoney(rates.wageClaim);
+  const rRT = parseMoney(rates.retirement);
+  const rSH = parseMoney(rates.safetyHealth);
+  const rME = parseMoney(rates.miscExpense);
+  const rGA = parseMoney(rates.generalAdmin);
+  const rPR = parseMoney(rates.profit);
+  const rVT = parseMoney(rates.vat);
+
+  // ── 원가계산서 sheet ──
+  // Row layout: A=비목  B=산식/구성비  C=금액  D=근거
+  // Rows: 1=title  2=headers  3..26=비목 rows
   const costStatementRows = [
     xmlRow(xmlCell(`공사원가계산서 - ${projectName || "탱크 설비"}`), xmlCell(stamp)),
     xmlRow(xmlCell("비목"), xmlCell("산식/구성비"), xmlCell("금액 (원)"), xmlCell("근거")),
-    xmlRow(xmlCell("직접재료비"), xmlCell("집계표!E19"), xmlCell(summary.directMaterials, "Number"), xmlCell("내역서!F9:F68")),
-    xmlRow(xmlCell("간접재료비"), xmlCell("0%"), xmlCell(0, "Number"), xmlCell("ver2 기준 미적용")),
-    xmlRow(xmlCell("재료비 소계"), xmlCell("직접재료비+간접재료비"), xmlCell(summary.directMaterials, "Number"), xmlCell("원가계산서!E9")),
-    xmlRow(xmlCell("직접노무비"), xmlCell("집계표!G19"), xmlCell(summary.directLabor, "Number"), xmlCell("내역서!H9:H68")),
-    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell("직접노무비*14%"), xmlCell(summary.indirectLaborAmt, "Number"), xmlCell("원가계산서!E11")),
-    xmlRow(xmlCell("노무비 계"), xmlCell("직접노무비+간접노무비"), xmlCell(summary.totalLabor, "Number"), xmlCell("원가계산서!E12")),
-    xmlRow(xmlCell("기계경비"), xmlCell("집계표!I19"), xmlCell(summary.machineExpense, "Number"), xmlCell("내역서!J9:J68")),
-    xmlRow(xmlCell(`산재보험료 (${rates.industrialAccident}%)`), xmlCell("노무비 계*3.56%"), xmlCell(summary.industrialAccidentAmt, "Number"), xmlCell("산재")),
-    xmlRow(xmlCell(`고용보험료 (${rates.employment}%)`), xmlCell("노무비 계*1.01%"), xmlCell(summary.employmentAmt, "Number"), xmlCell("고용")),
-    xmlRow(xmlCell(`건강보험료 (${rates.health}%)`), xmlCell("직접노무비*3.595%"), xmlCell(summary.healthAmt, "Number"), xmlCell("건강")),
-    xmlRow(xmlCell(`연금보험료 (${rates.pension}%)`), xmlCell("직접노무비*4.75%"), xmlCell(summary.pensionAmt, "Number"), xmlCell("연금")),
-    xmlRow(xmlCell(`노인장기요양보험료 (${rates.longTermCare}%)`), xmlCell("건강보험료*13.14%"), xmlCell(summary.longTermCareAmt, "Number"), xmlCell("장기")),
-    xmlRow(xmlCell(`석면분담금 (${rates.asbestos}%)`), xmlCell("노무비 계*0.006%"), xmlCell(summary.asbestosAmt, "Number"), xmlCell("석면")),
-    xmlRow(xmlCell(`임금채권부담금 (${rates.wageClaim}%)`), xmlCell("노무비 계*0.09%"), xmlCell(summary.wageClaimAmt, "Number"), xmlCell("임금")),
-    xmlRow(xmlCell(`퇴직공제부금비 (${rates.retirement}%)`), xmlCell("직접노무비*2.3%"), xmlCell(summary.retirementAmt, "Number"), xmlCell("퇴공")),
-    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell("(재료비+직접노무비)*3.11%"), xmlCell(summary.safetyAmt, "Number"), xmlCell("안전")),
-    xmlRow(xmlCell(`기타경비 (${rates.miscExpense}%)`), xmlCell("(재료비+노무비 계)*4.6%"), xmlCell(summary.miscExpenseAmt, "Number"), xmlCell("경비")),
-    xmlRow(xmlCell("경비 소계"), xmlCell("기계경비+보험료+기타경비"), xmlCell(summary.expenseSubtotal, "Number"), xmlCell("원가계산서!E30")),
-    xmlRow(xmlCell("순공사원가"), xmlCell("재료비+노무비+경비"), xmlCell(summary.pureCost, "Number"), xmlCell("원가계산서!E31")),
-    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell("순공사원가*8%"), xmlCell(summary.generalAdminAmt, "Number"), xmlCell("일반/일반비율")),
-    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell("(노무비+경비+일반관리비)*15%"), xmlCell(summary.profitAmt, "Number"), xmlCell("이윤/이윤비율")),
-    xmlRow(xmlCell("총원가"), xmlCell("순공사원가+일반관리비+이윤"), xmlCell(summary.totalCost, "Number"), xmlCell("원가계산서!E34")),
-    xmlRow(xmlCell(`부가가치세 (${rates.vat}%)`), xmlCell("총원가*10%"), xmlCell(summary.vatAmt, "Number"), xmlCell("원가계산서!E35")),
-    xmlRow(xmlCell("합계"), xmlCell("총원가+부가세, 천원미만 절사"), xmlCell(summary.grandTotal, "Number"), xmlCell("원가계산서!E36")),
+    // R3: 직접재료비  ← 집계표!D4
+    xmlRow(xmlCell("직접재료비"), xmlCell("='집계표'!D4"), xmlCell(summary.directMaterials, "Number", "='집계표'!D4"), xmlCell("내역서!F열 합계")),
+    // R4: 간접재료비
+    xmlRow(xmlCell("간접재료비"), xmlCell("0%"), xmlCell(0, "Number"), xmlCell("기준 미적용")),
+    // R5: 재료비 소계
+    xmlRow(xmlCell("재료비 소계"), xmlCell("C3+C4"), xmlCell(summary.directMaterials, "Number", "=C3+C4"), xmlCell("원가계산서!C5")),
+    // R6: 직접노무비  ← 집계표!E4
+    xmlRow(xmlCell("직접노무비"), xmlCell("='집계표'!E4"), xmlCell(summary.directLabor, "Number", "='집계표'!E4"), xmlCell("내역서!H열 합계")),
+    // R7: 간접노무비
+    xmlRow(xmlCell(`간접노무비 (${rates.indirectLabor}%)`), xmlCell(`C6*${rIL}%`), xmlCell(summary.indirectLaborAmt, "Number", `=TRUNC(C6*${rIL}/100,0)`), xmlCell("간노비")),
+    // R8: 노무비 계
+    xmlRow(xmlCell("노무비 계"), xmlCell("C6+C7"), xmlCell(summary.totalLabor, "Number", "=C6+C7"), xmlCell("원가계산서!C8")),
+    // R9: 기계경비  ← 집계표!F4
+    xmlRow(xmlCell("기계경비"), xmlCell("='집계표'!F4"), xmlCell(summary.machineExpense, "Number", "='집계표'!F4"), xmlCell("내역서!J열 합계")),
+    // R10: 산재보험료
+    xmlRow(xmlCell(`산재보험료 (${rates.industrialAccident}%)`), xmlCell(`C8*${rIA}%`), xmlCell(summary.industrialAccidentAmt, "Number", `=TRUNC(C8*${rIA}/100,0)`), xmlCell("산재")),
+    // R11: 고용보험료
+    xmlRow(xmlCell(`고용보험료 (${rates.employment}%)`), xmlCell(`C8*${rEM}%`), xmlCell(summary.employmentAmt, "Number", `=TRUNC(C8*${rEM}/100,0)`), xmlCell("고용")),
+    // R12: 건강보험료
+    xmlRow(xmlCell(`건강보험료 (${rates.health}%)`), xmlCell(`C6*${rHL}%`), xmlCell(summary.healthAmt, "Number", `=TRUNC(C6*${rHL}/100,0)`), xmlCell("건강")),
+    // R13: 연금보험료
+    xmlRow(xmlCell(`연금보험료 (${rates.pension}%)`), xmlCell(`C6*${rPN}%`), xmlCell(summary.pensionAmt, "Number", `=TRUNC(C6*${rPN}/100,0)`), xmlCell("연금")),
+    // R14: 노인장기요양보험료
+    xmlRow(xmlCell(`노인장기요양보험료 (${rates.longTermCare}%)`), xmlCell(`C12*${rLC}%`), xmlCell(summary.longTermCareAmt, "Number", `=TRUNC(C12*${rLC}/100,0)`), xmlCell("장기")),
+    // R15: 석면분담금
+    xmlRow(xmlCell(`석면분담금 (${rates.asbestos}%)`), xmlCell(`C8*${rAB}%`), xmlCell(summary.asbestosAmt, "Number", `=TRUNC(C8*${rAB}/100,0)`), xmlCell("석면")),
+    // R16: 임금채권부담금
+    xmlRow(xmlCell(`임금채권부담금 (${rates.wageClaim}%)`), xmlCell(`C8*${rWC}%`), xmlCell(summary.wageClaimAmt, "Number", `=TRUNC(C8*${rWC}/100,0)`), xmlCell("임금")),
+    // R17: 퇴직공제부금비
+    xmlRow(xmlCell(`퇴직공제부금비 (${rates.retirement}%)`), xmlCell(`C6*${rRT}%`), xmlCell(summary.retirementAmt, "Number", `=TRUNC(C6*${rRT}/100,0)`), xmlCell("퇴공")),
+    // R18: 산업안전보건관리비
+    xmlRow(xmlCell(`산업안전보건관리비 (${rates.safetyHealth}%)`), xmlCell(`(C3+C6)*${rSH}%`), xmlCell(summary.safetyAmt, "Number", `=TRUNC((C3+C6)*${rSH}/100,0)`), xmlCell("안전")),
+    // R19: 기타경비
+    xmlRow(xmlCell(`기타경비 (${rates.miscExpense}%)`), xmlCell(`(C3+C8)*${rME}%`), xmlCell(summary.miscExpenseAmt, "Number", `=TRUNC((C3+C8)*${rME}/100,0)`), xmlCell("경비")),
+    // R20: 경비 소계
+    xmlRow(xmlCell("경비 소계"), xmlCell("C9+C10+…+C19"), xmlCell(summary.expenseSubtotal, "Number", "=C9+C10+C11+C12+C13+C14+C15+C16+C17+C18+C19"), xmlCell("원가계산서!C20")),
+    // R21: 순공사원가
+    xmlRow(xmlCell("순공사원가"), xmlCell("C5+C8+C20"), xmlCell(summary.pureCost, "Number", "=C5+C8+C20"), xmlCell("원가계산서!C21")),
+    // R22: 일반관리비
+    xmlRow(xmlCell(`일반관리비 (${rates.generalAdmin}%)`), xmlCell(`C21*${rGA}%`), xmlCell(summary.generalAdminAmt, "Number", `=TRUNC(C21*${rGA}/100,0)`), xmlCell("일반/일반비율")),
+    // R23: 이윤
+    xmlRow(xmlCell(`이윤 (${rates.profit}%)`), xmlCell(`(C8+C20+C22)*${rPR}%`), xmlCell(summary.profitAmt, "Number", `=TRUNC((C8+C20+C22)*${rPR}/100,0)`), xmlCell("이윤/이윤비율")),
+    // R24: 총원가
+    xmlRow(xmlCell("총원가"), xmlCell("C21+C22+C23"), xmlCell(summary.totalCost, "Number", "=C21+C22+C23"), xmlCell("원가계산서!C24")),
+    // R25: 부가가치세
+    xmlRow(xmlCell(`부가가치세 (${rates.vat}%)`), xmlCell(`C24*${rVT}%`), xmlCell(summary.vatAmt, "Number", `=TRUNC(C24*${rVT}/100,0)`), xmlCell("원가계산서!C25")),
+    // R26: 합계 (천원미만 절사)
+    xmlRow(xmlCell("합계"), xmlCell("(C24+C25) 천원미만 절사"), xmlCell(summary.grandTotal, "Number", "=TRUNC((C24+C25)/1000,0)*1000"), xmlCell("원가계산서!C26")),
   ];
 
+  // ── 집계표 sheet ──
+  // Row layout: A=품명  B=단위  C=수량  D=재료비  E=노무비  F=경비  G=합계  H=근거
+  // Rows: 1=title  2=headers  3=data  4=합계
   const summaryRows = [
     xmlRow(xmlCell("공사집계표"), xmlCell(stamp)),
     xmlRow(xmlCell("품명"), xmlCell("단위"), xmlCell("수량"), xmlCell("재료비"), xmlCell("노무비"), xmlCell("경비"), xmlCell("합계"), xmlCell("근거")),
     xmlRow(
-      xmlCell("탱크 설비"),
+      xmlCell(projectName || "탱크 설비"),
       xmlCell("식"),
       xmlCell(1, "Number"),
-      xmlCell(summary.directMaterials, "Number"),
-      xmlCell(summary.directLabor, "Number"),
-      xmlCell(summary.machineExpense, "Number"),
-      xmlCell(summary.directSubtotal, "Number"),
-      xmlCell("내역서!F69/H69/J69"),
+      // D3 = SUMIF from 내역서 B col (비목) and H col (금액)
+      xmlCell(summary.directMaterials, "Number", "=SUMIF('내역서'!$B:$B,\"재료비\",'내역서'!$H:$H)"),
+      xmlCell(summary.directLabor, "Number", "=SUMIF('내역서'!$B:$B,\"직접노무비\",'내역서'!$H:$H)"),
+      xmlCell(summary.machineExpense, "Number", "=SUMIF('내역서'!$B:$B,\"경비\",'내역서'!$H:$H)"),
+      xmlCell(summary.directSubtotal, "Number", "=D3+E3+F3"),
+      xmlCell("내역서 집계"),
     ),
     xmlRow(
       xmlCell("합계"),
       xmlCell(""),
       xmlCell(""),
-      xmlCell(summary.directMaterials, "Number"),
-      xmlCell(summary.directLabor, "Number"),
-      xmlCell(summary.machineExpense, "Number"),
-      xmlCell(summary.directSubtotal, "Number"),
-      xmlCell("집계표!E19/G19/I19/K19"),
+      xmlCell(summary.directMaterials, "Number", "=D3"),
+      xmlCell(summary.directLabor, "Number", "=E3"),
+      xmlCell(summary.machineExpense, "Number", "=F3"),
+      xmlCell(summary.directSubtotal, "Number", "=G3"),
+      xmlCell("집계표!D4:G4"),
     ),
   ];
+
+  // ── 내역서 sheet ──
+  // Row layout: A=항목코드  B=비목  C=품명  D=규격  E=단위  F=수량  G=단가  H=금액  I=원본  J=산식
+  // Rows: 1=title  2=headers  3..N=data  N+1=합계
+  const dataStartRow = 3; // data rows begin at Excel row 3
+  const lastDataRow = dataStartRow + calculated.length - 1;
+  const totalRow = lastDataRow + 1;
 
   const detailRows = [
     xmlRow(xmlCell("공사내역서"), xmlCell(stamp)),
     xmlRow(xmlCell("항목코드"), xmlCell("비목"), xmlCell("품명"), xmlCell("규격"), xmlCell("단위"), xmlCell("수량"), xmlCell("단가"), xmlCell("금액"), xmlCell("원본"), xmlCell("산식")),
-    ...calculated.map((r) =>
-      xmlRow(
+    ...calculated.map((r, idx) => {
+      const excelRow = dataStartRow + idx;
+      return xmlRow(
         xmlCell(r.code),
         xmlCell(costCategoryLabel(r.category)),
         xmlCell(r.itemName),
@@ -4523,12 +4589,18 @@ function buildMainCostEstimateXml(rows: CostRow[], rates: CostRates, projectName
         xmlCell(r.unit),
         xmlCell(r.qty, "Number"),
         xmlCell(r.unitPrice, "Number"),
-        xmlCell(r.amount, "Number"),
+        // H = 금액 = 수량(F) × 단가(G)
+        xmlCell(r.amount, "Number", `=F${excelRow}*G${excelRow}`),
         xmlCell(sourceBasis(r)),
         xmlCell(sourceFormula(r)),
-      ),
+      );
+    }),
+    xmlRow(
+      xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""),
+      // H = SUM of all H data rows
+      xmlCell(summary.directSubtotal, "Number", `=SUM(H${dataStartRow}:H${lastDataRow})`),
+      xmlCell(`내역서!H${dataStartRow}:H${totalRow - 1}`), xmlCell("집계표!G4"),
     ),
-    xmlRow(xmlCell("합계"), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(""), xmlCell(summary.directSubtotal, "Number"), xmlCell("내역서!F9:J68"), xmlCell("집계표!K19")),
   ];
 
   const unitPriceListRows = [
@@ -4621,6 +4693,35 @@ function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: strin
   ]);
 }
 
+function toCostRow(
+  r: {
+    id: string;
+    code: string;
+    category: CostCategory;
+    itemName: string;
+    spec: string;
+    unit: string;
+    qty: string;
+    unitPrice: string;
+    sourceRow?: number;
+    section?: string;
+  }
+): CostRow {
+  const row: CostRow = {
+    id: r.id,
+    code: r.code,
+    category: r.category,
+    itemName: r.itemName,
+    spec: r.spec,
+    unit: r.unit,
+    qty: r.qty,
+    unitPrice: r.unitPrice,
+  };
+  if (r.sourceRow !== undefined) row.sourceRow = r.sourceRow;
+  if (r.section !== undefined) row.section = r.section;
+  return row;
+}
+
 function sanitizeDraftRows(value: unknown): CostRow[] {
   if (!Array.isArray(value)) {
     return [];
@@ -4633,7 +4734,7 @@ function sanitizeDraftRows(value: unknown): CostRow[] {
       }
       const current = row as Partial<CostRow>;
       const category: CostCategory = current.category === "labor" || current.category === "expense" ? current.category : "material";
-      return {
+      return toCostRow({
         id: typeof current.id === "string" && current.id ? current.id : `draft-${index + 1}`,
         code: typeof current.code === "string" ? current.code : "",
         category,
@@ -4644,7 +4745,7 @@ function sanitizeDraftRows(value: unknown): CostRow[] {
         unitPrice: typeof current.unitPrice === "string" ? current.unitPrice : "0",
         sourceRow: typeof current.sourceRow === "number" ? current.sourceRow : undefined,
         section: typeof current.section === "string" ? current.section : undefined,
-      };
+      });
     })
     .filter((row): row is CostRow => row !== null);
 }
@@ -4693,6 +4794,8 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   const [draftStatus, setDraftStatus] = useState<CestDraftStatus>(null);
   const [savedFileNames, setSavedFileNames] = useState<CostEstimateDraftFileNames | null>(null);
   const [syncingDraft, setSyncingDraft] = useState(false);
+  const [parseStatus, setParseStatus] = useState<CestParseStatus>(null);
+  const [parsing, setParsing] = useState(false);
 
   const canProceed =
     uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
@@ -4700,7 +4803,81 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   const summary = calcCostSummary(rows, rates);
   const calculated = calcRows(rows);
 
-  function handleUploadProceed() {
+  async function handleUploadProceed() {
+    if (!canProceed) {
+      setStep("preview");
+      return;
+    }
+
+    setParsing(true);
+    setParseStatus(null);
+
+    try {
+      let parsedRows: CostRow[] = [];
+      const allWarnings: string[] = [];
+
+      if (uploadMode === "unified" && unifiedFile) {
+        const result = await parseUnifiedWorkbook(unifiedFile);
+        allWarnings.push(...result.warnings);
+        if (result.data.rows.length > 0) {
+          parsedRows = result.data.rows.map((r) => toCostRow(r));
+        }
+      } else {
+        // Separate files: 내역서 (file3) is the primary source for cost rows
+        // 단가대비표 (file1) enriches unit prices when 내역서 is absent
+        if (file3) {
+          const result = await parseNaeyeokseo(file3);
+          allWarnings.push(...result.warnings);
+          parsedRows = result.data.map((r) => toCostRow(r));
+        }
+
+        if (parsedRows.length === 0 && file1) {
+          // Fall back: try to read 단가대비표 and construct basic rows
+          const result = await parseDangaDaebiPyo(file1);
+          allWarnings.push(...result.warnings);
+          if (result.data.length > 0) {
+            parsedRows = result.data.map((item, idx) => toCostRow({
+              id: `price-${idx + 1}`,
+              code: `P${String(item.sourceRow).padStart(3, "0")}-M`,
+              category: "material" as const,
+              itemName: item.itemName,
+              spec: item.spec,
+              unit: item.unit,
+              qty: "1",
+              unitPrice: String(item.appliedUnitPrice),
+              sourceRow: item.sourceRow,
+            }));
+          }
+        }
+      }
+
+      if (parsedRows.length > 0) {
+        setRows(parsedRows);
+        setParseStatus({ kind: "success", messages: allWarnings });
+      } else {
+        // No rows parsed – fall back to demo data with a notice
+        setRows(DEMO_ROWS);
+        setParseStatus({
+          kind: "info",
+          messages: [
+            ...allWarnings,
+            "업로드 파일에서 항목을 파싱하지 못해 샘플 데이터로 진행합니다.",
+          ],
+        });
+      }
+    } catch (err) {
+      setRows(DEMO_ROWS);
+      setParseStatus({
+        kind: "error",
+        messages: [
+          err instanceof Error ? err.message : "파일 파싱 중 오류가 발생했습니다.",
+          "샘플 데이터로 진행합니다.",
+        ],
+      });
+    } finally {
+      setParsing(false);
+    }
+
     setStep("preview");
   }
 
@@ -4899,7 +5076,8 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
           )}
 
           <p className="ceg-upload-note">
-            ※ 1차 반영에서는 ver2 내역서 9~68행 기준 샘플 데이터가 미리보기 테이블에 표시됩니다.
+            ※ 내역서(.xlsx)를 업로드하면 실제 행 데이터를 파싱하여 미리보기에 반영합니다.
+            파싱에 실패하거나 파일을 선택하지 않은 경우 샘플 데이터로 진행합니다.
           </p>
           {savedFileNames ? (
             <p className="ceg-upload-note">
@@ -4914,11 +5092,11 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
             <button
               className="primary-btn"
               type="button"
-              disabled={!canProceed}
+              disabled={!canProceed || parsing}
               onClick={handleUploadProceed}
             >
               <ChevronRight size={15} />
-              미리보기로 이동
+              {parsing ? "파일 파싱 중…" : "미리보기로 이동"}
             </button>
           </div>
         </section>
@@ -4927,12 +5105,19 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
       {/* STEP 2 & 3: 미리보기 + 요율 + 결과 */}
       {step === "preview" || step === "result" ? (
         <>
+          {parseStatus ? (
+            <section className={`card ceg-parse-status ceg-parse-status--${parseStatus.kind}`}>
+              {parseStatus.messages.map((msg, i) => (
+                <p key={i} className="ceg-upload-note">{msg}</p>
+              ))}
+            </section>
+          ) : null}
           <section className="card ceg-preview-section">
             <div className="ceg-panel-head">
               <div>
                 <span className="eyebrow">Preview</span>
                 <h2>내역서 미리보기</h2>
-                <p>ver2 내역서 합계 범위(9~68행)를 기준으로 수량·단가·금액을 확인하세요.</p>
+                <p>업로드 파일에서 파싱된 수량·단가·금액을 확인하고 편집하세요.</p>
               </div>
               <button className="secondary-btn" type="button" onClick={handleAddRow}>
                 + 행 추가
