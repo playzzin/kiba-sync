@@ -142,6 +142,8 @@ type ProfessionalStaffData = {
 };
 
 const professionalStaff = professionalStaffData as ProfessionalStaffData;
+const publicBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const kibaLogoSrc = `${publicBasePath}/한국경영분석연구원로고.jpg`;
 
 const icons: Record<IconKey, LucideIcon> = {
   activity: Activity,
@@ -277,7 +279,6 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "CMS 구성",
           icon: "doc",
-          hidden: true,
           children: [
             { label: "페이지 관리", href: "/erp/cms/pages", icon: "doc" },
             { label: "메뉴·폴더 관리", href: "/erp/cms/navigation", icon: "folder" },
@@ -287,7 +288,6 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "회계·통계",
           icon: "chart",
-          hidden: true,
           children: [
             { label: "회계 항목", href: "/erp/accounting/items", icon: "database" },
             { label: "BigQuery 통계", href: "/erp/analytics/bigquery", icon: "chart" },
@@ -296,7 +296,6 @@ const menus: Record<Mode, MenuGroup[]> = {
         {
           label: "시스템 설정",
           icon: "settings",
-          hidden: true,
           children: [
             { label: "Firebase 운영", href: "/erp/system/firebase", icon: "server", badge: "Live", badgeType: "success" },
             { label: "실무 설정", href: "/erp/settings", icon: "settings" },
@@ -417,7 +416,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
     section: "KIBA",
     title: "한국경영분석연구원",
     summary: "예린  원가계산, 계약금액조정, 개발부담금, 학술연구와 분쟁 검증 업무를 한 화면에서 탐색하도록 재구성한 공개 사이트형 대시보드입니다.",
-    points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "ERP/CRM/CMS 운영 확장"],
+    points: ["8개 대분류 메뉴", "34개 원본 하위 페이지", "공지사항·자료실·상담 접점", "실무/CRM/CMS 운영 확장"],
     deliverables: ["기관 소개와 전문업무를 분리한 정보 구조", "원가·계약·개발부담금 핵심 업무 바로가기", "고객센터 콘텐츠 운영 영역"],
     related: ["/cost-guide/government-contract", "/contract-adjustment/overview", "/development-charge/overview", "/support/contact"],
   },
@@ -500,7 +499,7 @@ const kibaSourceFacts: Record<string, KibaSourceFact> = {
   ], ["원본 이미지 자산: 14.jpg"]),
   "/intro/organization": sourceFact("ctg01/pg05.htm", "image", "본문 텍스트 없음, 조직도 GIF 이미지 기반", [
     "원본은 조직구성을 이미지 조직도로 제공하고 있습니다.",
-    "ERP/CRM 연결을 위해 부서, 담당 업무, 문의 연결 정보를 구조화 데이터로 나누는 구성이 적합합니다.",
+    "실무/CRM 연결을 위해 부서, 담당 업무, 문의 연결 정보를 구조화 데이터로 나누는 구성이 적합합니다.",
     "조직도 이미지는 원본 보존 영역과 반응형 텍스트 조직표를 함께 제공하는 방식으로 재구성했습니다.",
   ], ["원본 이미지 자산: 15.gif"]),
   "/intro/location": sourceFact("ctg01/pg06.htm", "text", "연락처 텍스트 8줄 확인", [
@@ -512,12 +511,12 @@ const kibaSourceFacts: Record<string, KibaSourceFact> = {
   "/performance/costing": sourceFact("ctg02/pg01.htm", "text", "주요실적 텍스트 542줄 확인", [
     "원본은 제조원가를 시작으로 용역명과 발주처를 표 형태로 나열합니다.",
     "실적 목록은 원가계산, 가격조사, 제작 원가, 물품 구매 검토 등 실무 과제를 중심으로 구성됩니다.",
-    "ERP 관점에서는 발주처, 용역명, 수행연도, 분야, 보고서 첨부를 필드화해야 검색성이 높아집니다.",
+    "실무 관점에서는 발주처, 용역명, 수행연도, 분야, 보고서 첨부를 필드화해야 검색성이 높아집니다.",
   ], ["과일 주스 생산라인 제작공사 원가계산용역", "교단환경 개선물품 구매를 위한 거래가격 가격조사", "교사용 교탁제작 원가계산"]),
   "/performance/settlement": sourceFact("ctg02/pg02.htm", "text", "사후정산 실적 텍스트 645줄 확인", [
     "원본은 개발부담금, 보조금, 행사비, 원가검토 등 사후 정산·검증 성격의 실적을 대량으로 제공합니다.",
     "정산 업무는 계약 이후 실제 투입비용과 증빙을 검토하는 흐름으로 분류됩니다.",
-    "상태값은 접수, 검토, 보완요청, 보고완료로 나눠 CRM/ERP 진행 관리와 연결하는 구성이 적합합니다.",
+    "상태값은 접수, 검토, 보완요청, 보고완료로 나눠 CRM/실무 진행 관리와 연결하는 구성이 적합합니다.",
   ], ["개발부담금 개발비용 산출내역 검토용역", "개발부담금 개발비용 산출명세서 검증 용역", "행사 보조금 정산검토와 사후원가검토 용역"]),
   "/performance/research": sourceFact("ctg02/pg03.htm", "text", "학술연구 실적 텍스트 384줄 확인", [
     "원본은 사업타당성 연구, 산업경영 연구, 각종 통계조사, 공공요금 산정, 민간위탁용역으로 실적을 구분합니다.",
@@ -1152,8 +1151,8 @@ function toMode(value: string | null): Mode {
   if (value === "developer" || value === "erp") {
     return "erp";
   }
-  if (value === "user") {
-    return "user";
+  if (value === "admin" || value === "user") {
+    return value;
   }
   return "user";
 }
@@ -1253,9 +1252,8 @@ export function SiteModeShell() {
   const [toast, setToast] = useState({ show: false, message: "Ready" });
   const [tooltip, setTooltip] = useState({ show: false, label: "", left: 0, top: 0 });
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const visibleModeTabs: Mode[] = ["user", "erp"];
+  const visibleModeTabs: Mode[] = ["user", "erp", "admin"];
 
-  const isPublicMode = shell.mode === "user";
   const title = titles[shell.route] || "Dashboard";
   const userPage = kibaPageDetails[shell.route] ?? kibaPageDetails["/dashboard"];
   const heroDescription =
@@ -1487,7 +1485,7 @@ export function SiteModeShell() {
   }
 
   return (
-    <div className={`app ${shell.dark ? "dark" : ""} ${isPublicMode ? "public-app" : ""}`}>
+    <div className={`app ${shell.dark ? "dark" : ""}`}>
       <div className={`overlay ${mobileOpen ? "show" : ""}`} aria-hidden="true" onClick={() => setMobileOpen(false)} />
 
       <aside className={`sidebar ${shell.collapsed ? "collapsed" : ""} ${mobileOpen ? "open" : ""}`} aria-label="Left navigation menu">
@@ -1495,7 +1493,7 @@ export function SiteModeShell() {
           <button className="brand-btn" type="button" aria-label="Toggle sidebar" onClick={toggleCollapse}>
             <span className="logo">K</span>
             <span className="brand-text">
-              <strong>{shell.mode === "erp" ? "직원 페이지" : "한국경영분석연구원"}</strong>
+              <strong>KIBA Admin</strong>
               <span>{modeName(shell.mode)}</span>
             </span>
             <span className="collapse-mark">
@@ -1532,7 +1530,7 @@ export function SiteModeShell() {
         </nav>
 
         <div className="footer">
-          <div className="footer-banner mock-hidden">
+          <div className="footer-banner">
             <strong>KIBA Site Map</strong>
             <span>8 categories / 33 public pages</span>
           </div>
@@ -1550,113 +1548,45 @@ export function SiteModeShell() {
       </aside>
 
       <section className={`shell ${shell.collapsed ? "collapsed" : ""}`}>
-        {isPublicMode ? (
-          <header className="public-masthead">
-            <div className="public-utility">
-              <div className="public-utility-inner">
-                <span>기획재정부 허가 원가계산용역기관</span>
-                <div className="public-utility-links" aria-label="상단 유틸리티">
-                  <button type="button" onClick={() => go("/dashboard")}>
-                    HOME
-                  </button>
-                  <button type="button" onClick={() => go("/support/contact")}>
-                    CONTACT US
-                  </button>
-                  <button type="button" onClick={() => showToast("즐겨찾기 기능은 브라우저에서 이용해 주세요")}>
-                    ADD FAVORITE
-                  </button>
-                  <button className="blog-link" type="button" onClick={() => showToast("Blog link is ready")}>
-                    blog
-                  </button>
-                </div>
-              </div>
+        <header className="header">
+          <div className="header-left">
+            <button className="icon-btn hamburger" type="button" aria-label="Open menu" onClick={() => setMobileOpen(true)}>
+              <Menu size={18} />
+            </button>
+            <div className="breadcrumb">
+              <span>KIBA</span>
+              <span className="breadcrumb-slash">/</span>
+              <strong>{title}</strong>
             </div>
+          </div>
 
-            <div className="public-brand-row">
-              <button className="icon-btn public-menu-trigger" type="button" aria-label="전체 메뉴 열기" onClick={() => setMobileOpen(true)}>
-                <Menu size={19} />
-              </button>
-              <button className="public-brand-link" type="button" aria-label="한국경영분석연구원 홈" onClick={() => go("/dashboard")}>
-                <Image
-                  className="public-brand-logo"
-                  src="/한국경영분석연구원로고.jpg"
-                  alt="한국경영분석연구원 로고"
-                  width={576}
-                  height={120}
-                  priority
-                />
-              </button>
-              <div className="public-header-tools">
-                <button className="public-work-btn" type="button" onClick={() => setMode("erp")}>
-                  실무
+          <div className="header-right">
+            <div className="mode-tabs" role="tablist" aria-label="Site mode selection">
+              {visibleModeTabs.map((mode) => (
+                <button
+                  key={mode}
+                  className={`mode-tab ${shell.mode === mode ? "active" : ""}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={shell.mode === mode}
+                  onClick={() => setMode(mode)}
+                >
+                  {modeTabLabel(mode)}
                 </button>
-                <button className="icon-btn" type="button" aria-label="테마 전환" onClick={toggleDark}>
-                  {shell.dark ? <Sun size={16} /> : <Moon size={16} />}
-                </button>
-                <button className="icon-btn" type="button" aria-label="알림" onClick={() => showToast("3 notifications pending")}>
-                  <Bell size={16} />
-                </button>
-              </div>
-            </div>
-
-            <nav className="public-main-nav" aria-label="한국경영분석연구원 주요 메뉴">
-              {topLevelUserMenus().map((item) => (
-                <div key={item.label} className={`public-nav-item ${itemActive(item, shell.route) ? "active" : ""}`}>
-                  <button type="button" onClick={() => go(menuLandingRoute(item))}>
-                    {item.label}
-                  </button>
-                  <div className="public-subnav">
-                    {flattenItems(item.children ?? []).map((child) => (
-                      <button key={child.href ?? child.label} type="button" onClick={() => child.href && go(child.href)}>
-                        {child.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               ))}
-            </nav>
-          </header>
-        ) : (
-          <header className="header">
-            <div className="header-left">
-              <button className="icon-btn hamburger" type="button" aria-label="Open menu" onClick={() => setMobileOpen(true)}>
-                <Menu size={18} />
-              </button>
-              <div className="breadcrumb">
-                <span>KIBA</span>
-                <span className="breadcrumb-slash">/</span>
-                <strong>{title}</strong>
-              </div>
             </div>
-
-            <div className="header-right">
-              <div className="mode-tabs" role="tablist" aria-label="Site mode selection">
-                {visibleModeTabs.map((mode) => (
-                  <button
-                    key={mode}
-                    className={`mode-tab ${shell.mode === mode ? "active" : ""}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={shell.mode === mode}
-                    onClick={() => setMode(mode)}
-                  >
-                    {modeTabLabel(mode)}
-                  </button>
-                ))}
-              </div>
-              <button className="icon-btn" type="button" aria-label="Toggle theme" onClick={toggleDark}>
-                {shell.dark ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
-              <button className="icon-btn" type="button" aria-label="Notifications" onClick={() => showToast("3 notifications pending")}>
-                <Bell size={16} />
-              </button>
-            </div>
-          </header>
-        )}
+            <button className="icon-btn" type="button" aria-label="Toggle theme" onClick={toggleDark}>
+              {shell.dark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <button className="icon-btn" type="button" aria-label="Notifications" onClick={() => showToast("3 notifications pending")}>
+              <Bell size={16} />
+            </button>
+          </div>
+        </header>
 
         <main className="main" tabIndex={-1}>
           <div className="container">
-            {!isPublicMode ? (
+            {!(shell.mode === "user" && shell.route === "/dashboard") ? (
               <section className="hero">
                 <small>{modeName(shell.mode)}</small>
                 <h1>{title}</h1>
@@ -1902,7 +1832,7 @@ function KibaHome({ go }: { go: (route: string) => void }) {
           <span className="eyebrow">정부공인 원가계산·검토전문기관</span>
           <h1>한국경영분석연구원</h1>
           <div className="public-logo-stage" aria-label="한국경영분석연구원 대표 로고">
-            <Image src="/한국경영분석연구원로고.jpg" alt="KIBA 한국경영분석연구원" width={960} height={200} priority />
+            <Image src={kibaLogoSrc} alt="KIBA 한국경영분석연구원" width={960} height={200} priority />
           </div>
           <p className="public-hero-lead">
             기획재정부 허가 원가계산용역기관으로서 공공예산 검증, 원가산정, 계약금액조정, 개발부담금,
@@ -2102,7 +2032,7 @@ function PublicSiteFooter({ go }: { go: (route: string) => void }) {
     <footer className="public-footer">
       <div className="public-footer-inner">
         <div className="public-footer-brand">
-          <Image src="/한국경영분석연구원로고.jpg" alt="한국경영분석연구원" width={384} height={80} />
+          <Image src={kibaLogoSrc} alt="한국경영분석연구원" width={384} height={80} />
           <p>정부공인 원가계산·검토전문기관으로 공공성과 전문성을 기준으로 업무를 수행합니다.</p>
         </div>
         <div className="public-footer-links" aria-label="하단 주요 메뉴">
@@ -3732,7 +3662,7 @@ function ErpDashboard({ route }: { route: string }) {
     { folder: "업무관리", pages: "전문인력 통합DB, 원가계산서 생성" },
     { folder: "CMS 구성", pages: "페이지 관리, 메뉴·폴더 관리, 자료실 관리" },
     { folder: "회계·통계", pages: "회계 항목, BigQuery 통계" },
-    { folder: "시스템 설정", pages: "Firebase 운영, ERP 설정" },
+    { folder: "시스템 설정", pages: "Firebase 운영, 실무 설정" },
   ];
 
   return (
@@ -3762,7 +3692,7 @@ function ErpDashboard({ route }: { route: string }) {
 
         <div className="card mock-hidden">
           <div className="section-title">
-            <h2>ERP 폴더 / 페이지</h2>
+            <h2>실무 폴더 / 페이지</h2>
             <span>Navigation</span>
           </div>
           <table className="table">
@@ -3785,14 +3715,14 @@ function ErpDashboard({ route }: { route: string }) {
       </div>
 
       <div className="grid grid2 gap-top mock-hidden">
-        <ChartCard title="ERP 업무 흐름" />
+        <ChartCard title="실무 업무 흐름" />
         <div className="card terminal">
           <div className="section-title">
-            <h2>Firebase ERP Runtime</h2>
+            <h2>Firebase 실무 Runtime</h2>
             <span>READY</span>
           </div>
           <p>
-            <span className="prefix">$</span>Auth roles mapped to ERP folders.
+            <span className="prefix">$</span>Auth roles mapped to 실무 folders.
           </p>
           <p>
             <span className="prefix">$</span>Firestore collections ready: professionalStaff, cmsPages, resources.
@@ -3801,7 +3731,7 @@ function ErpDashboard({ route }: { route: string }) {
             <span className="prefix">$</span>Storage paths ready for workforce reports and CMS files.
           </p>
           <p>
-            <span className="prefix">$</span>BigQuery export configured for ERP statistics.
+            <span className="prefix">$</span>BigQuery export configured for 실무 statistics.
           </p>
         </div>
       </div>
