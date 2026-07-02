@@ -200,6 +200,7 @@ const menus: Record<Mode, MenuGroup[]> = {
             { label: "예정가격", href: "/cost-guide/estimated-price", icon: "chart" },
             { label: "정부원가계산의 활용", href: "/cost-guide/application", icon: "task" },
             { label: "원가계산실무", href: "/cost-guide/practice", icon: "database" },
+            { label: "SW 대가산정", href: "/cost-guide/sw-pricing", icon: "code" },
           ],
         },
         {
@@ -336,6 +337,7 @@ const titles: Record<string, string> = {
   "/cost-guide/estimated-price": "예정가격",
   "/cost-guide/application": "정부원가계산의 활용",
   "/cost-guide/practice": "원가계산실무",
+  "/cost-guide/sw-pricing": "SW 대가산정",
   "/contract-adjustment/overview": "계약금액조정",
   "/contract-adjustment/price-change": "물가변동",
   "/contract-adjustment/design-change": "설계변경",
@@ -416,6 +418,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/cost-guide/estimated-price": page("원가계산안내", "예정가격", "예정가격 산정의 원칙, 구성, 검토 절차를 설명하는 페이지입니다.", ["가격 기준", "원가 구성", "검토 절차"], ["산정 흐름", "필수 서류", "사례 링크"], ["/performance/costing", "/cost-guide/practice"]),
   "/cost-guide/application": page("원가계산안내", "정부원가계산의 활용", "정부원가계산 결과를 계약·예산·정산 업무에 활용하는 방식을 안내합니다.", ["계약 활용", "예산 검토", "사후 관리"], ["활용 시나리오", "업무 체크리스트", "연계 서비스"], ["/performance/settlement", "/contract-adjustment/overview"]),
   "/cost-guide/practice": page("원가계산안내", "원가계산실무", "원가계산 실무자가 확인해야 할 자료, 절차, 산출물 기준을 정리합니다.", ["비목 분류", "증빙 검토", "계산서 작성"], ["실무 단계", "자료 목록", "검토 포인트"], ["/cost-guide/estimated-price", "/support/contact"]),
+  "/cost-guide/sw-pricing": page("원가계산안내", "SW 대가산정", "SW사업대가 산정 기준과 최신 변경 알림을 제공합니다. 개발·유지관리·운영·DB구축비 산정 방식을 안내합니다.", ["개발비 산정", "유지관리비", "운영비"], ["기준 고시", "템플릿 다운로드", "변경 이력"], ["/cost-guide/practice", "/support/resources"]),
   "/contract-adjustment/overview": page("계약금액조정", "계약금액조정", "계약 체결 후 조건 변화에 따른 금액 조정 업무를 안내하는 페이지입니다.", ["조정 사유", "검토 절차", "증빙 자료"], ["조정 신청 흐름", "필요 서류", "상담 CTA"], ["/contract-adjustment/price-change", "/contract-adjustment/design-change"]),
   "/contract-adjustment/price-change": page("계약금액조정", "물가변동", "물가 변동에 따른 계약금액 조정 기준과 검토 절차를 제공하는 페이지입니다.", ["지수조정", "품목조정", "기준일 검토"], ["변동률 검토", "산식 안내", "증빙 관리"], ["/contract-adjustment/overview", "/support/resources"]),
   "/contract-adjustment/design-change": page("계약금액조정", "설계변경", "설계 변경에 따른 수량·단가·금액 변경 검토를 안내합니다.", ["변경 사유", "수량 검토", "단가 검토"], ["변경 절차", "검토 표준", "프로젝트 연결"], ["/research/construction-management", "/contract-adjustment/etc"]),
@@ -663,6 +666,72 @@ const kibaNews = [
   "서울시 개발비용산정기관",
   "용인시 죽전동 공동주택 신축공사 분양가산정 관련 계약",
   "항공임무 외주정비 원가계산 검증용역 계약",
+];
+
+type SwPricingStatus = "confirmed" | "archived";
+
+const swPricingUpdates: {
+  id: string;
+  title: string;
+  year: number;
+  publishedAt: string;
+  sourceName: string;
+  sourceUrl: string;
+  attachmentUrl: string | null;
+  status: SwPricingStatus;
+  tags: string[];
+  summary: string;
+  relatedRoutes: string[];
+}[] = [
+  {
+    id: "2026-template",
+    title: "[사업대가] SW사업대가 산정 방식별 엑셀 템플릿 (2026)",
+    year: 2026,
+    publishedAt: "2026-01-15",
+    sourceName: "한국SW산업협회",
+    sourceUrl: "https://www.sw.or.kr/",
+    attachmentUrl: "#",
+    status: "confirmed",
+    tags: ["2026 기준", "첨부 있음", "최신 공지 확인 완료"],
+    summary:
+      "2026년도 SW사업대가 기준이 고시되었습니다. 개발비·유지관리비·운영비 산정 방식별 엑셀 템플릿이 포함됩니다.",
+    relatedRoutes: ["/cost-guide/sw-pricing", "/cost-guide/practice", "/support/resources"],
+  },
+  {
+    id: "2025-template",
+    title: "[사업대가] SW사업대가 산정 방식별 엑셀 템플릿 (2025)",
+    year: 2025,
+    publishedAt: "2025-01-20",
+    sourceName: "한국SW산업협회",
+    sourceUrl: "https://www.sw.or.kr/",
+    attachmentUrl: "#",
+    status: "confirmed",
+    tags: ["2025 기준", "첨부 있음"],
+    summary:
+      "2025년도 SW사업대가 기준이 반영된 산정 방식별 엑셀 템플릿입니다. 기능점수(FP), 투입공수(MM) 방식 모두 지원합니다.",
+    relatedRoutes: ["/cost-guide/sw-pricing", "/cost-guide/practice", "/support/resources"],
+  },
+  {
+    id: "2024-revision",
+    title: "SW사업 대가기준 개정 안내 (2024 하반기)",
+    year: 2024,
+    publishedAt: "2024-07-01",
+    sourceName: "과학기술정보통신부",
+    sourceUrl: "https://www.msit.go.kr/",
+    attachmentUrl: null,
+    status: "archived",
+    tags: ["2024 기준"],
+    summary:
+      "2024년 하반기 SW사업 대가기준 개정 내용입니다. 직접인건비 산정 기준과 간접원가 요율이 변경되었습니다.",
+    relatedRoutes: ["/cost-guide/practice"],
+  },
+];
+
+const swPricingRelatedWork = [
+  { label: "SW 대가산정 안내", route: "/cost-guide/sw-pricing" },
+  { label: "원가계산실무", route: "/cost-guide/practice" },
+  { label: "자료실", route: "/support/resources" },
+  { label: "공지사항&새소식", route: "/support/news" },
 ];
 
 const greetingExperts = [
@@ -1586,6 +1655,122 @@ function UserSitePage({ route, go }: { route: string; go: (route: string) => voi
   return <KibaDetailPage detail={detail} page={pageData} route={route} go={go} />;
 }
 
+function SwPricingModule({ go }: { go: (route: string) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleUpdates = expanded ? swPricingUpdates : swPricingUpdates.slice(0, 2);
+
+  return (
+    <section className="public-section">
+      <div className="public-section-head">
+        <span className="eyebrow">SW Pricing Updates</span>
+        <h2>SW 대가산정 기준 업데이트</h2>
+        <p>
+          최신 SW사업대가 기준과 변경 알림을 확인하세요. 자료 원문·첨부파일과 관련 업무 페이지로
+          바로 이동할 수 있습니다.
+        </p>
+      </div>
+
+      <div className="sw-pricing-layout">
+        <div className="sw-pricing-timeline">
+          {visibleUpdates.map((item) => (
+            <article key={item.id} className="sw-pricing-card">
+              <div className="sw-pricing-card-header">
+                <span className="sw-pricing-year">{item.year}</span>
+                <div className="sw-pricing-chips">
+                  {item.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={`sw-pricing-chip${item.status === "confirmed" && tag.includes("확인") ? " confirmed" : ""}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <strong className="sw-pricing-title">{item.title}</strong>
+              <p className="sw-pricing-summary">{item.summary}</p>
+              <div className="sw-pricing-meta">
+                <Clock size={12} />
+                <span>{item.publishedAt}</span>
+                <span className="sw-pricing-source">{item.sourceName}</span>
+              </div>
+              <div className="sw-pricing-actions">
+                <button
+                  className="sw-pricing-action-btn"
+                  type="button"
+                  onClick={() => go("/cost-guide/sw-pricing")}
+                >
+                  <Database size={13} />
+                  가이드 보기
+                </button>
+                {item.attachmentUrl ? (
+                  <button className="sw-pricing-action-btn" type="button" onClick={() => go("/support/resources")}>
+                    <FileText size={13} />
+                    첨부 다운로드
+                  </button>
+                ) : (
+                  <span className="sw-pricing-action-disabled">
+                    <FileText size={13} />
+                    첨부 없음
+                  </span>
+                )}
+                <a
+                  className="sw-pricing-action-btn"
+                  href={item.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={13} />
+                  공지 원문
+                </a>
+              </div>
+            </article>
+          ))}
+
+          {swPricingUpdates.length > 2 && (
+            <button
+              className="sw-pricing-expand-btn"
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+            >
+              {expanded ? "접기" : `더보기 (${swPricingUpdates.length - 2}건 더)`}
+              <ChevronRight
+                size={14}
+                style={{ transform: expanded ? "rotate(90deg)" : "none" }}
+              />
+            </button>
+          )}
+        </div>
+
+        <aside className="sw-pricing-related">
+          <span className="eyebrow">Related</span>
+          <h3 className="sw-pricing-related-title">관련 업무 및 자료</h3>
+          <div className="sw-pricing-related-list">
+            {swPricingRelatedWork.map((item) => (
+              <button
+                key={item.route}
+                className="sw-pricing-related-btn"
+                type="button"
+                onClick={() => go(item.route)}
+              >
+                <span>{item.label}</span>
+                <ChevronRight size={14} />
+              </button>
+            ))}
+          </div>
+          <div className="sw-pricing-note">
+            <ShieldCheck size={14} />
+            <span>
+              자료는 한국SW산업협회 및 과기정통부 고시 기준을 참조합니다. CMS 연동 시 자동
+              업데이트됩니다.
+            </span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 function KibaHome({ go }: { go: (route: string) => void }) {
   const featuredRoutes = [
     "/intro/greeting",
@@ -1711,6 +1896,8 @@ function KibaHome({ go }: { go: (route: string) => void }) {
           ))}
         </div>
       </section>
+
+      <SwPricingModule go={go} />
 
       <section className="public-section">
         <div className="split-showcase">
