@@ -36,6 +36,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  costEstimateTemplates,
+  defaultCostEstimateTemplateId,
+  type CostEstimateTemplate,
+  type CostEstimateTemplateId,
+  type CostItemTemplate,
+} from "@/lib/cost-estimate/templates";
 import professionalStaffData from "@/lib/kiba/professional-staff-data.json";
 import { kibaSeedPagesByRoute, kibaSeedSummary, type KibaSeedPage } from "@/lib/kiba/source-content";
 
@@ -263,6 +270,7 @@ const menus: Record<Mode, MenuGroup[]> = {
           icon: "folder",
           children: [
             { label: "전문인력 통합DB", href: "/erp/workforce/professionals", icon: "users", badge: "PDF/XLS" },
+            { label: "원가계산서 생성", href: "/erp/cost-estimates/new", icon: "database", badge: "NEW" },
           ],
         },
         {
@@ -370,6 +378,7 @@ const titles: Record<string, string> = {
   "/admin/reports": "Operation Stats",
   "/erp/dashboard": "ERP 대시보드",
   "/erp/workforce/professionals": "전문인력 통합DB",
+  "/erp/cost-estimates/new": "원가계산서 생성",
   "/erp/cms/pages": "페이지 관리",
   "/erp/cms/navigation": "메뉴·폴더 관리",
   "/erp/cms/resources": "자료실 관리",
@@ -3297,9 +3306,317 @@ function ProfessionalWorkforceDashboard() {
   );
 }
 
+type CostEstimateRowState = {
+  amount: string;
+  rate: string;
+};
+
+type CostEstimateMeta = {
+  title: string;
+  client: string;
+  manager: string;
+  note: string;
+};
+
+function CostEstimateBuilderPage() {
+  const [templateId, setTemplateId] = useState<CostEstimateTemplateId>(defaultCostEstimateTemplateId);
+  const template = useMemo(
+    () => costEstimateTemplates.find((item) => item.id === templateId) ?? costEstimateTemplates[0],
+    [templateId],
+  );
+  const [rows, setRows] = useState<Record<string, CostEstimateRowState>>(() => initialCostEstimateRows(template));
+  const [meta, setMeta] = useState<CostEstimateMeta>({
+    title: `${template.shortLabel} 원가계산서`,
+    client: "",
+    manager: "원가분석본부",
+    note: "",
+  });
+
+  const calculatedRows = useMemo(() => calculateCostEstimateRows(template, rows), [template, rows]);
+  const totalItem = lastCostItem(template, "total");
+  const supplyItem = template.items.find((item) => item.label === "공급가액");
+  const vatItem = template.items.find((item) => item.group === "tax");
+  const totalAmount = totalItem ? calculatedRows[totalItem.id] ?? 0 : 0;
+  const supplyAmount = supplyItem ? calculatedRows[supplyItem.id] ?? 0 : totalAmount;
+  const vatAmount = vatItem ? calculatedRows[vatItem.id] ?? 0 : 0;
+  const inputAmount = template.items
+    .filter((item) => item.kind === "amount")
+    .reduce((sum, item) => sum + (calculatedRows[item.id] ?? 0), 0);
+  const estimateNumber = `KIBA-${template.shortLabel}-${todayStamp().replace(/-/g, "")}`;
+
+  function updateRow(itemId: string, field: keyof CostEstimateRowState, value: string) {
+    const cleanValue = field === "rate" ? cleanRateInput(value) : cleanMoneyInput(value);
+    setRows((current) => ({
+      ...current,
+      [itemId]: {
+        amount: current[itemId]?.amount ?? "",
+        rate: current[itemId]?.rate ?? "",
+        [field]: cleanValue,
+      },
+    }));
+  }
+
+  function updateMeta(field: keyof CostEstimateMeta, value: string) {
+    setMeta((current) => ({ ...current, [field]: value }));
+  }
+
+  function selectTemplate(nextTemplate: CostEstimateTemplate) {
+    setTemplateId(nextTemplate.id);
+    setRows(initialCostEstimateRows(nextTemplate));
+    setMeta((current) => ({ ...current, title: `${nextTemplate.shortLabel} 원가계산서` }));
+  }
+
+  function printEstimate() {
+    const report = window.open("", "kiba-cost-estimate-report", "width=1120,height=820");
+    if (!report) {
+      return;
+    }
+
+    report.document.write(buildCostEstimatePrintHtml(template, meta, estimateNumber, rows, calculatedRows));
+    report.document.close();
+    report.focus();
+    window.setTimeout(() => report.print(), 200);
+  }
+
+  return (
+    <div className="cost-estimate-page">
+      <section className="card cost-estimate-hero">
+        <div>
+          <span className="eyebrow">Cost Estimate Builder</span>
+          <h2>원가계산서 생성</h2>
+          <p>계산 유형을 선택하면 적용 법령, 비목, 산식 템플릿이 함께 로딩되고 입력 금액에 따라 계산서 미리보기가 즉시 갱신됩니다.</p>
+        </div>
+        <div className="cost-estimate-actions">
+          <button className="secondary-btn" type="button" onClick={() => setRows(initialCostEstimateRows(template))}>
+            <X size={15} />
+            입력 초기화
+          </button>
+          <button className="primary-btn" type="button" onClick={printEstimate}>
+            <FileText size={15} />
+            PDF/인쇄 출력
+          </button>
+        </div>
+      </section>
+
+      <div className="grid grid4">
+        <StatCard title="계산 유형" value={String(costEstimateTemplates.length)} trend="템플릿" icon="database" />
+        <StatCard title="입력 비목" value={String(template.items.filter((item) => item.kind === "amount").length)} trend={template.shortLabel} icon="task" />
+        <StatCard title="입력 합계" value={`${formatWon(inputAmount)}원`} trend="직접 입력" icon="chart" />
+        <StatCard title="총원가" value={`${formatWon(totalAmount)}원`} trend="자동 계산" icon="shield" />
+      </div>
+
+      <div className="cost-estimate-layout gap-top">
+        <aside className="card cost-template-panel">
+          <div className="section-title">
+            <h2>계산 유형</h2>
+            <span>Template</span>
+          </div>
+          <div className="cost-template-list">
+            {costEstimateTemplates.map((item) => (
+              <button
+                key={item.id}
+                className={item.id === template.id ? "active" : ""}
+                type="button"
+                onClick={() => selectTemplate(item)}
+              >
+                <strong>{item.label}</strong>
+                <span>{item.description}</span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <main className="cost-estimate-workspace">
+          <section className="card cost-estimate-meta">
+            <div className="section-title">
+              <h2>계산서 정보</h2>
+              <span>{estimateNumber}</span>
+            </div>
+            <div className="cost-meta-grid">
+              <label>
+                <span>계산서명</span>
+                <input value={meta.title} onChange={(event) => updateMeta("title", event.target.value)} />
+              </label>
+              <label>
+                <span>의뢰기관</span>
+                <input value={meta.client} placeholder="발주기관 또는 고객사" onChange={(event) => updateMeta("client", event.target.value)} />
+              </label>
+              <label>
+                <span>담당부서</span>
+                <input value={meta.manager} onChange={(event) => updateMeta("manager", event.target.value)} />
+              </label>
+              <label>
+                <span>검토 메모</span>
+                <input value={meta.note} placeholder="증빙, 면세 여부, 특이사항" onChange={(event) => updateMeta("note", event.target.value)} />
+              </label>
+            </div>
+          </section>
+
+          <section className="card cost-standard-card">
+            <div className="section-title">
+              <h2>적용 기준</h2>
+              <span>{template.shortLabel}</span>
+            </div>
+            <div className="cost-standard-grid">
+              <div>
+                <strong>법령/기준</strong>
+                {template.legalBasis.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+              <div>
+                <strong>활용 업무</strong>
+                {template.useCases.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+              <div>
+                <strong>필요 자료</strong>
+                {template.requiredDocuments.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="card cost-items-card">
+            <div className="section-title">
+              <h2>비목 입력 및 산식</h2>
+              <span>{template.items.length} rows</span>
+            </div>
+            <div className="cost-items-table-wrap">
+              <table className="table cost-items-table">
+                <thead>
+                  <tr>
+                    <th>구분</th>
+                    <th>비목</th>
+                    <th>산출 기준</th>
+                    <th>요율</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {template.items.map((item) => (
+                    <tr key={item.id} className={item.kind !== "amount" ? "computed" : ""}>
+                      <td>
+                        <span className={`cost-group-pill ${item.group}`}>{costGroupName(item.group)}</span>
+                      </td>
+                      <td>
+                        <strong>{item.label}</strong>
+                        <span>{item.description}</span>
+                      </td>
+                      <td>{item.basis}</td>
+                      <td>
+                        {item.kind === "rate" ? (
+                          <label className="cost-rate-input">
+                            <input
+                              value={rows[item.id]?.rate ?? ""}
+                              aria-label={`${item.label} 요율`}
+                              onChange={(event) => updateRow(item.id, "rate", event.target.value)}
+                              disabled={!item.editableRate}
+                            />
+                            <span>%</span>
+                          </label>
+                        ) : (
+                          <span className="muted-text">{item.kind === "sum" ? "합계" : "-"}</span>
+                        )}
+                      </td>
+                      <td>
+                        {item.kind === "amount" ? (
+                          <label className="cost-money-input">
+                            <input
+                              value={rows[item.id]?.amount ?? ""}
+                              aria-label={`${item.label} 금액`}
+                              placeholder="0"
+                              onChange={(event) => updateRow(item.id, "amount", event.target.value)}
+                            />
+                            <span>원</span>
+                          </label>
+                        ) : (
+                          <strong className="cost-computed-amount">{formatWon(calculatedRows[item.id] ?? 0)}원</strong>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="card cost-preview-card">
+            <div className="section-title">
+              <h2>계산서 미리보기</h2>
+              <span>Preview</span>
+            </div>
+            <div className="cost-preview-sheet">
+              <div className="cost-preview-head">
+                <div>
+                  <span>{estimateNumber}</span>
+                  <h3>{meta.title || "원가계산서"}</h3>
+                  <p>{template.label}</p>
+                </div>
+                <dl>
+                  <div>
+                    <dt>작성일</dt>
+                    <dd>{todayStamp()}</dd>
+                  </div>
+                  <div>
+                    <dt>의뢰기관</dt>
+                    <dd>{meta.client || "-"}</dd>
+                  </div>
+                  <div>
+                    <dt>담당</dt>
+                    <dd>{meta.manager || "-"}</dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="cost-preview-summary">
+                <div>
+                  <span>공급가액</span>
+                  <strong>{formatWon(supplyAmount)}원</strong>
+                </div>
+                <div>
+                  <span>부가가치세</span>
+                  <strong>{formatWon(vatAmount)}원</strong>
+                </div>
+                <div>
+                  <span>총원가</span>
+                  <strong>{formatWon(totalAmount)}원</strong>
+                </div>
+              </div>
+              <table className="table cost-preview-table">
+                <thead>
+                  <tr>
+                    <th>비목</th>
+                    <th>산출 기준</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {template.items.map((item) => (
+                    <tr key={`preview-${item.id}`}>
+                      <td>{item.label}</td>
+                      <td>{item.basis}</td>
+                      <td>{formatWon(calculatedRows[item.id] ?? 0)}원</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {meta.note ? <p className="cost-preview-note">{meta.note}</p> : null}
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function ErpDashboard({ route }: { route: string }) {
   if (route === "/erp/workforce/professionals") {
     return <ProfessionalWorkforceDashboard />;
+  }
+  if (route === "/erp/cost-estimates/new") {
+    return <CostEstimateBuilderPage />;
   }
 
   const pageTitle = titles[route] ?? "ERP 대시보드";
@@ -3308,6 +3625,7 @@ function ErpDashboard({ route }: { route: string }) {
       "/erp/cms/pages": ["공개 페이지", "초안", "검수", "배포 상태"],
       "/erp/cms/navigation": ["상위 폴더", "하위 페이지", "노출 순서", "권한"],
       "/erp/cms/resources": ["자료 분류", "첨부파일", "다운로드", "개정일"],
+      "/erp/cost-estimates/new": ["계산 유형", "비목 템플릿", "산식 계산", "PDF 출력"],
       "/erp/accounting/items": ["매출 항목", "비용 항목", "세금계산서", "입금 상태"],
       "/erp/analytics/bigquery": ["업무 통계", "상담 전환", "정산 기간", "월별 리포트"],
       "/erp/system/firebase": ["Auth", "Firestore", "Storage", "Functions"],
@@ -3315,7 +3633,7 @@ function ErpDashboard({ route }: { route: string }) {
     }[route] ?? ["전문인력", "CMS", "회계", "통계"];
 
   const erpFolders = [
-    { folder: "업무관리", pages: "전문인력 통합DB" },
+    { folder: "업무관리", pages: "전문인력 통합DB, 원가계산서 생성" },
     { folder: "CMS 구성", pages: "페이지 관리, 메뉴·폴더 관리, 자료실 관리" },
     { folder: "회계·통계", pages: "회계 항목, BigQuery 통계" },
     { folder: "시스템 설정", pages: "Firebase 운영, ERP 설정" },
@@ -3393,6 +3711,171 @@ function ErpDashboard({ route }: { route: string }) {
       </div>
     </>
   );
+}
+
+function initialCostEstimateRows(template: CostEstimateTemplate) {
+  return template.items.reduce<Record<string, CostEstimateRowState>>((state, item) => {
+    state[item.id] = {
+      amount: "",
+      rate: item.defaultRate != null ? String(item.defaultRate) : "",
+    };
+    return state;
+  }, {});
+}
+
+function calculateCostEstimateRows(template: CostEstimateTemplate, rows: Record<string, CostEstimateRowState>) {
+  const calculated: Record<string, number> = {};
+
+  for (const item of template.items) {
+    if (item.kind === "amount") {
+      calculated[item.id] = parseCostInput(rows[item.id]?.amount);
+      continue;
+    }
+
+    const baseAmount = (item.baseItemIds ?? []).reduce((sum, itemId) => sum + (calculated[itemId] ?? 0), 0);
+    if (item.kind === "rate") {
+      const rate = parseCostInput(rows[item.id]?.rate || String(item.defaultRate ?? 0));
+      calculated[item.id] = (baseAmount * rate) / 100;
+      continue;
+    }
+
+    calculated[item.id] = baseAmount;
+  }
+
+  return calculated;
+}
+
+function lastCostItem(template: CostEstimateTemplate, group: CostItemTemplate["group"]) {
+  return [...template.items].reverse().find((item) => item.group === group);
+}
+
+function costGroupName(group: CostItemTemplate["group"]) {
+  const labels: Record<CostItemTemplate["group"], string> = {
+    material: "재료",
+    labor: "노무",
+    expense: "경비",
+    markup: "가산",
+    tax: "세액",
+    total: "합계",
+  };
+  return labels[group];
+}
+
+function cleanMoneyInput(value: string) {
+  return value.replace(/[^\d]/g, "");
+}
+
+function cleanRateInput(value: string) {
+  const normalized = value.replace(/[^\d.]/g, "");
+  const [whole, ...fractions] = normalized.split(".");
+  return fractions.length ? `${whole}.${fractions.join("").slice(0, 3)}` : whole;
+}
+
+function parseCostInput(value?: string) {
+  const parsed = Number(String(value ?? "").replace(/,/g, ""));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function formatWon(value: number) {
+  return new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(Math.round(value));
+}
+
+function buildCostEstimatePrintHtml(
+  template: CostEstimateTemplate,
+  meta: CostEstimateMeta,
+  estimateNumber: string,
+  rows: Record<string, CostEstimateRowState>,
+  calculatedRows: Record<string, number>,
+) {
+  const totalItem = lastCostItem(template, "total");
+  const totalAmount = totalItem ? calculatedRows[totalItem.id] ?? 0 : 0;
+  const legalBasis = template.legalBasis.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const requiredDocuments = template.requiredDocuments.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(meta.title || "원가계산서")}</title>
+  <style>
+    @page{size:A4;margin:12mm}
+    *{box-sizing:border-box}
+    body{font-family:"Malgun Gothic",Arial,sans-serif;color:#111827;margin:0}
+    header{border-bottom:2px solid #2563eb;margin-bottom:18px;padding-bottom:14px}
+    h1{font-size:25px;margin:0 0 8px}
+    h2{font-size:16px;margin:22px 0 10px}
+    p{margin:0;color:#475569;font-size:12px;line-height:1.65}
+    dl{display:grid;grid-template-columns:110px 1fr 110px 1fr;gap:8px 12px;margin:14px 0 0;font-size:12px}
+    dt{color:#64748b;font-weight:700}
+    dd{margin:0;color:#0f172a;font-weight:700}
+    ul{margin:0;padding-left:18px;color:#334155;font-size:11px;line-height:1.6}
+    table{border-collapse:collapse;width:100%;font-size:11px}
+    th{background:#eff6ff;color:#1d4ed8}
+    th,td{border:1px solid #cbd5e1;padding:7px;text-align:left;vertical-align:top}
+    td.amount{text-align:right;font-weight:700}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #cbd5e1;margin:18px 0}
+    .summary div{padding:12px;border-right:1px solid #cbd5e1}
+    .summary div:last-child{border-right:0}
+    .summary span{display:block;color:#64748b;font-size:11px;font-weight:700}
+    .summary strong{display:block;margin-top:5px;font-size:18px;color:#0f172a}
+    .note{margin-top:14px;border:1px solid #cbd5e1;background:#f8fafc;padding:10px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(meta.title || "원가계산서")}</h1>
+    <p>${escapeHtml(template.label)} · ${escapeHtml(estimateNumber)}</p>
+    <dl>
+      <dt>작성일</dt><dd>${escapeHtml(todayStamp())}</dd>
+      <dt>의뢰기관</dt><dd>${escapeHtml(meta.client || "-")}</dd>
+      <dt>담당부서</dt><dd>${escapeHtml(meta.manager || "-")}</dd>
+      <dt>계산유형</dt><dd>${escapeHtml(template.label)}</dd>
+    </dl>
+  </header>
+
+  <section class="summary">
+    <div><span>입력 비목</span><strong>${template.items.filter((item) => item.kind === "amount").length}</strong></div>
+    <div><span>적용 기준</span><strong>${escapeHtml(template.shortLabel)}</strong></div>
+    <div><span>총원가</span><strong>${formatWon(totalAmount)}원</strong></div>
+  </section>
+
+  <h2>적용 법령 및 기준</h2>
+  <ul>${legalBasis}</ul>
+
+  <h2>비목별 원가계산</h2>
+  ${costEstimateRowsTableHtml(template, rows, calculatedRows)}
+
+  <h2>필요 증빙 자료</h2>
+  <ul>${requiredDocuments}</ul>
+  ${meta.note ? `<p class="note">${escapeHtml(meta.note)}</p>` : ""}
+</body>
+</html>`;
+}
+
+function costEstimateRowsTableHtml(
+  template: CostEstimateTemplate,
+  rows: Record<string, CostEstimateRowState>,
+  calculatedRows: Record<string, number>,
+) {
+  return `<table>
+    <thead>
+      <tr><th>구분</th><th>비목</th><th>산출 기준</th><th>요율</th><th>금액</th></tr>
+    </thead>
+    <tbody>
+      ${template.items
+        .map((item) => {
+          const rate = item.kind === "rate" ? `${escapeHtml(rows[item.id]?.rate || String(item.defaultRate ?? 0))}%` : "-";
+          return `<tr>
+            <td>${escapeHtml(costGroupName(item.group))}</td>
+            <td>${escapeHtml(item.label)}</td>
+            <td>${escapeHtml(item.basis)}</td>
+            <td>${rate}</td>
+            <td class="amount">${formatWon(calculatedRows[item.id] ?? 0)}원</td>
+          </tr>`;
+        })
+        .join("")}
+    </tbody>
+  </table>`;
 }
 
 const professionalExportHeaders = ["직원코드", "성명", "부서", "직급", "자격수", "대표자격", "학력수", "학력", "업무수", "업무분류"] as const;

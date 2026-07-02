@@ -4097,6 +4097,425 @@ body.mobile-lock {
   background: var(--primary);
 }
 
+.cost-estimate-page {
+  display: grid;
+  gap: 0;
+}
+
+.cost-estimate-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.cost-estimate-hero h2 {
+  margin: 6px 0 8px;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.cost-estimate-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.cost-estimate-actions,
+.cost-estimate-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.cost-estimate-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cost-estimate-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.cost-template-panel {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 16px;
+}
+
+.cost-template-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cost-template-list button {
+  display: grid;
+  gap: 5px;
+  min-height: 88px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--text-soft);
+  padding: 13px;
+  text-align: left;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.cost-template-list button:hover,
+.cost-template-list button.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.cost-template-list strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.cost-template-list span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.cost-estimate-workspace {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.cost-estimate-meta,
+.cost-standard-card,
+.cost-items-card,
+.cost-preview-card {
+  display: grid;
+  gap: 16px;
+}
+
+.cost-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cost-meta-grid label,
+.cost-rate-input,
+.cost-money-input {
+  display: grid;
+  gap: 6px;
+}
+
+.cost-meta-grid label span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cost-meta-grid input,
+.cost-rate-input input,
+.cost-money-input input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel2);
+  color: var(--text);
+  outline: 0;
+  padding: 0 11px;
+  font-size: 13px;
+}
+
+.cost-meta-grid input:focus,
+.cost-rate-input input:focus,
+.cost-money-input input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.cost-standard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cost-standard-grid div {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel2);
+  padding: 14px;
+}
+
+.cost-standard-grid strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.cost-standard-grid span {
+  position: relative;
+  color: var(--text-soft);
+  padding-left: 14px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cost-standard-grid span::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+.cost-items-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.cost-items-table {
+  min-width: 980px;
+}
+
+.cost-items-table tbody tr.computed {
+  background: color-mix(in srgb, var(--panel2) 72%, var(--primary-light));
+}
+
+.cost-items-table td {
+  vertical-align: middle;
+}
+
+.cost-items-table td strong {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.cost-items-table td span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.cost-group-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  min-height: 26px;
+  border-radius: 999px;
+  background: var(--panel2);
+  color: var(--text-soft);
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.cost-group-pill.material {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.cost-group-pill.labor {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+
+.cost-group-pill.expense {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.cost-group-pill.markup {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4f46e5;
+}
+
+.cost-group-pill.tax {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.cost-group-pill.total {
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--text);
+}
+
+.cost-rate-input,
+.cost-money-input {
+  position: relative;
+  min-width: 120px;
+}
+
+.cost-rate-input input,
+.cost-money-input input {
+  padding-right: 34px;
+  text-align: right;
+  font-weight: 800;
+}
+
+.cost-rate-input span,
+.cost-money-input span {
+  position: absolute;
+  right: 10px;
+  bottom: 11px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.muted-text {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cost-computed-amount {
+  color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cost-preview-sheet {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel2);
+  padding: 20px;
+}
+
+.cost-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 16px;
+}
+
+.cost-preview-head span {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.cost-preview-head h3 {
+  margin: 4px 0 5px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.cost-preview-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cost-preview-head dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-width: 220px;
+  margin: 0;
+}
+
+.cost-preview-head dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cost-preview-head dt,
+.cost-preview-head dd {
+  margin: 0;
+  font-size: 12px;
+}
+
+.cost-preview-head dt {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.cost-preview-head dd {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.cost-preview-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cost-preview-summary div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+}
+
+.cost-preview-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.cost-preview-summary strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.cost-preview-table td:last-child {
+  color: var(--text);
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cost-preview-note {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text-soft);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
 .terminal {
   background: #0f172a;
   border-color: #1e293b;
@@ -4483,6 +4902,22 @@ body.mobile-lock {
     display: grid;
   }
 
+  .cost-estimate-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cost-template-panel {
+    position: static;
+  }
+
+  .cost-template-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cost-standard-grid {
+    grid-template-columns: 1fr;
+  }
+
   .workforce-download-actions {
     justify-content: flex-start;
   }
@@ -4676,13 +5111,16 @@ body.mobile-lock {
 
   .workforce-toolbar,
   .workforce-download-actions,
+  .cost-estimate-hero,
   .workforce-selection-list article {
     display: grid;
   }
 
   .workforce-toolbar .secondary-btn,
   .workforce-download-actions .primary-btn,
-  .workforce-download-actions .secondary-btn {
+  .workforce-download-actions .secondary-btn,
+  .cost-estimate-actions,
+  .cost-estimate-actions button {
     width: 100%;
   }
 
@@ -4693,8 +5131,19 @@ body.mobile-lock {
   }
 
   .workforce-summary-grid,
+  .cost-meta-grid,
+  .cost-preview-head,
+  .cost-preview-summary,
   .workforce-bar-row {
     grid-template-columns: 1fr;
+  }
+
+  .cost-template-list {
+    grid-template-columns: 1fr;
+  }
+
+  .cost-preview-head {
+    display: grid;
   }
 
   .location-consult-banner {
