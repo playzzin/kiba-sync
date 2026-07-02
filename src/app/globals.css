@@ -4142,16 +4142,16 @@ body.mobile-lock {
 
 .cost-estimate-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
 
 .cost-template-panel {
-  position: sticky;
-  top: 92px;
+  position: static;
   display: grid;
   gap: 16px;
+  align-self: start;
 }
 
 .cost-template-list {
@@ -4162,7 +4162,7 @@ body.mobile-lock {
 .cost-template-list button {
   display: grid;
   gap: 5px;
-  min-height: 88px;
+  min-height: 76px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel2);
@@ -4210,7 +4210,7 @@ body.mobile-lock {
 
 .cost-meta-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 12px;
 }
 
@@ -4235,7 +4235,7 @@ body.mobile-lock {
   height: 40px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel2);
+  background: var(--panel);
   color: var(--text);
   outline: 0;
   padding: 0 11px;
@@ -4297,14 +4297,38 @@ body.mobile-lock {
 }
 
 .cost-items-table {
-  min-width: 980px;
+  width: 100%;
+  min-width: 760px;
+  table-layout: fixed;
+}
+
+.cost-col-group {
+  width: 70px;
+}
+
+.cost-col-item {
+  width: 180px;
+}
+
+.cost-col-basis {
+  width: auto;
+}
+
+.cost-col-rate {
+  width: 112px;
+}
+
+.cost-col-amount {
+  width: 150px;
 }
 
 .cost-items-table tbody tr.computed {
   background: color-mix(in srgb, var(--panel2) 72%, var(--primary-light));
 }
 
+.cost-items-table th,
 .cost-items-table td {
+  padding: 12px;
   vertical-align: middle;
 }
 
@@ -4369,7 +4393,7 @@ body.mobile-lock {
 .cost-rate-input,
 .cost-money-input {
   position: relative;
-  min-width: 120px;
+  min-width: 0;
 }
 
 .cost-rate-input input,

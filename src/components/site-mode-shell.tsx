@@ -3357,13 +3357,8 @@ function CostEstimateBuilderPage() {
     () => costEstimateTemplates.find((item) => item.id === templateId) ?? costEstimateTemplates[0],
     [templateId],
   );
-  const [rows, setRows] = useState<Record<string, CostEstimateRowState>>(() => initialCostEstimateRows(template));
-  const [meta, setMeta] = useState<CostEstimateMeta>({
-    title: `${template.shortLabel} 원가계산서`,
-    client: "",
-    manager: "원가분석본부",
-    note: "",
-  });
+  const [rows, setRows] = useState<Record<string, CostEstimateRowState>>(() => sampleCostEstimateRows(template));
+  const [meta, setMeta] = useState<CostEstimateMeta>(() => sampleCostEstimateMeta(template));
 
   const calculatedRows = useMemo(() => calculateCostEstimateRows(template, rows), [template, rows]);
   const totalItem = lastCostItem(template, "total");
@@ -3395,8 +3390,13 @@ function CostEstimateBuilderPage() {
 
   function selectTemplate(nextTemplate: CostEstimateTemplate) {
     setTemplateId(nextTemplate.id);
-    setRows(initialCostEstimateRows(nextTemplate));
-    setMeta((current) => ({ ...current, title: `${nextTemplate.shortLabel} 원가계산서` }));
+    setRows(sampleCostEstimateRows(nextTemplate));
+    setMeta(sampleCostEstimateMeta(nextTemplate));
+  }
+
+  function restoreSample() {
+    setRows(sampleCostEstimateRows(template));
+    setMeta(sampleCostEstimateMeta(template));
   }
 
   function printEstimate() {
@@ -3420,9 +3420,9 @@ function CostEstimateBuilderPage() {
           <p>계산 유형을 선택하면 적용 법령, 비목, 산식 템플릿이 함께 로딩되고 입력 금액에 따라 계산서 미리보기가 즉시 갱신됩니다.</p>
         </div>
         <div className="cost-estimate-actions">
-          <button className="secondary-btn" type="button" onClick={() => setRows(initialCostEstimateRows(template))}>
+          <button className="secondary-btn" type="button" onClick={restoreSample}>
             <X size={15} />
-            입력 초기화
+            샘플값 복원
           </button>
           <button className="primary-btn" type="button" onClick={printEstimate}>
             <FileText size={15} />
@@ -3519,6 +3519,13 @@ function CostEstimateBuilderPage() {
             </div>
             <div className="cost-items-table-wrap">
               <table className="table cost-items-table">
+                <colgroup>
+                  <col className="cost-col-group" />
+                  <col className="cost-col-item" />
+                  <col className="cost-col-basis" />
+                  <col className="cost-col-rate" />
+                  <col className="cost-col-amount" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>구분</th>
@@ -3765,6 +3772,83 @@ function initialCostEstimateRows(template: CostEstimateTemplate) {
     };
     return state;
   }, {});
+}
+
+const costEstimateSampleAmounts: Record<CostEstimateTemplateId, Record<string, string>> = {
+  "manufacturing-purchase": {
+    directMaterial: "37280000",
+    indirectMaterial: "2850000",
+    directLabor: "18450000",
+    indirectLabor: "4130000",
+    expense: "6920000",
+  },
+  "construction-cost": {
+    directMaterial: "65800000",
+    indirectMaterial: "9240000",
+    directLabor: "41200000",
+    indirectLabor: "8350000",
+    expense: "18750000",
+  },
+  "academic-service": {
+    leadResearcher: "28400000",
+    researcher: "42300000",
+    assistant: "16500000",
+    travel: "4800000",
+    printing: "1650000",
+    dataProcessing: "3200000",
+    meeting: "2500000",
+  },
+  "software-fee": {
+    functionPointCost: "86500000",
+    inputLaborCost: "148000000",
+    directSoftwareExpense: "18500000",
+    databaseBuildCost: "27000000",
+  },
+};
+
+const costEstimateSampleMeta: Record<CostEstimateTemplateId, Pick<CostEstimateMeta, "client" | "note">> = {
+  "manufacturing-purchase": {
+    client: "한국산업기술진흥원",
+    note: "특수 규격 제조품 예정가격 검토용 샘플입니다.",
+  },
+  "construction-cost": {
+    client: "서울특별시 도시기반시설본부",
+    note: "기계설비 보수공사 설계내역 검토 기준 샘플입니다.",
+  },
+  "academic-service": {
+    client: "한국지방행정연구원",
+    note: "공공서비스 요금산정 연구용역 예산 검토 샘플입니다.",
+  },
+  "software-fee": {
+    client: "한국지능정보사회진흥원",
+    note: "기능점수와 투입공수 혼합 방식의 SW 개발비 샘플입니다.",
+  },
+};
+
+function sampleCostEstimateRows(template: CostEstimateTemplate) {
+  const rows = initialCostEstimateRows(template);
+  const samples = costEstimateSampleAmounts[template.id];
+
+  for (const item of template.items) {
+    if (item.kind === "amount" && samples[item.id]) {
+      rows[item.id] = {
+        ...rows[item.id],
+        amount: samples[item.id],
+      };
+    }
+  }
+
+  return rows;
+}
+
+function sampleCostEstimateMeta(template: CostEstimateTemplate): CostEstimateMeta {
+  const sample = costEstimateSampleMeta[template.id];
+  return {
+    title: `${template.shortLabel} 원가계산서`,
+    client: sample.client,
+    manager: "원가분석본부",
+    note: sample.note,
+  };
 }
 
 function calculateCostEstimateRows(template: CostEstimateTemplate, rows: Record<string, CostEstimateRowState>) {
