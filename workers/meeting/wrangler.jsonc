@@ -18,11 +18,6 @@
 		{
 			"binding": "MEETINGS",
 			"bucket_name": "kiba-meetings"
-		},
-		{
-			"bucket_name": "kiba-mettings",
-			"binding": "kiba_mettings",
-			"remote": true
 		}
 	],
 	"vars": {
