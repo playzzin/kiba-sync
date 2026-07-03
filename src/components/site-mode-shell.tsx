@@ -491,7 +491,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/support/resources": page("고객센터", "자료실", "법령, 서식, 참고자료, 보고서 파일을 관리하는 자료실입니다.", ["서식", "참고자료", "보고서"], ["파일 업로드", "카테고리", "다운로드 통계"], ["/cost-guide/laws", "/support/news"]),
   "/support/contact": page("고객센터", "상담 및 문의", "원가계산, 계약금액조정, 개발부담금 상담을 접수하는 페이지입니다.", ["문의 유형", "담당자 배정", "답변 상태"], ["상담 폼", "CRM 전환", "알림 연동"], ["/intro/location", "/performance/costing"]),
   "/erp/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
-  "/erp/automation/analysis": page("업무자동화", "수문조사 원가분석", "수문조사 예산·단가 DB를 기반으로 지점·권역·교통비를 Chart.js로 시각화한 원가분석 대시보드입니다.", ["지점별 필터", "권역 비교 차트", "교통비 상위 지점", "CSV/Excel 내보내기"], ["지점", "권역", "교통비", "장비·차량"], ["/erp/automation/cost-estimate-generator", "/support/contact"]),
+  "/erp/automation/analysis": page("업무자동화", "수문조사 원가분석", "비용=지점수×단가 모델(공식 총예산과 오차 0.1% 미만 검증)로 수문조사 원가를 분석하는 대시보드입니다. 1분 요약/10분 심화 두 뷰, 모든 수치 출처 표기.", ["1분 요약 / 10분 심화", "원가 모델·검증", "권역·교통비 분석", "장비·차량·임대 운영비"], ["지점", "권역", "교통비", "장비·차량"], ["/erp/automation/cost-estimate-generator", "/support/contact"]),
 };
 
 function page(
@@ -5251,8 +5251,10 @@ function HydrologyAnalysisPage() {
         <span className="eyebrow">업무자동화</span>
         <h1>수문조사 원가분석</h1>
         <p>
-          수문조사 예산·단가 DB를 기반으로 지점·권역·교통비를 <strong>Chart.js</strong>로 시각화한 원가분석
-          대시보드입니다. 지점별 필터, 권역 비교, 교통비 상위 지점, CSV/Excel 내보내기를 지원합니다.
+          한국수자원조사기술원 과업수행 자료(예산·단가·지점·교통비·운영비)를 기반으로 한 원가분석
+          대시보드입니다. 핵심 모델은 <strong>비용 = 지점수 × 단가</strong>이며, 공식 총예산과의 오차 0.1% 미만으로
+          검증됩니다. <strong>⚡ 1분 요약</strong>과 <strong>🔍 10분 심화</strong> 두 뷰를 토글로 제공하고, 모든 수치에
+          출처(citation)를 표기합니다.
         </p>
       </section>
 
