@@ -109,6 +109,26 @@ budget_krw = {y: num(hb[4][2+i]) for i,y in enumerate(YEARS)}
 w2.close()
 
 # ────────────────────────────────────────────────────────────
+# 1-1) v1 항목별 세부예산 → 인건비/여비 소계(실행예산, 원)
+# ────────────────────────────────────────────────────────────
+w1 = wb(F_V1)
+labor_travel = []
+for sheet in ["유량", "유사량", "토양수분량", "증발산량", "자동유량"]:
+    rs = rows(w1[sheet], 26)
+    for label, row_idx in [("인건비", 4), ("여비", 22)]:
+        r = rs[row_idx]
+        values = {y: num(r[3 + (i * 2)]) for i, y in enumerate(YEARS)}
+        labor_travel.append({
+            "item": sheet,
+            "budget": label,
+            "values": values,
+            "total": sum(v for v in values.values() if v is not None),
+            "source": f"v1 › {sheet} › {label} 소계",
+            "source_row": row_idx + 1,
+        })
+w1.close()
+
+# ────────────────────────────────────────────────────────────
 # 2) 조사지점 현황 → 권역(시도)별 지점수
 # ────────────────────────────────────────────────────────────
 wpt = wb(F_PT)
@@ -242,6 +262,7 @@ DATA = {
     "eq_total":eq_total,"equip":equip,"cal":cal,"cal_total":cal_total,
     "n_cars":n_cars,"car_rent_sum":car_rent_sum,"eco_cnt":OrderedDict(eco_cnt.most_common()),
     "fuel":fuel,"rent":rent,"cont_region":cont_region,
+    "labor_travel":labor_travel,
     "calc_total":calc_total,"official_total":official_total,
 }
 
