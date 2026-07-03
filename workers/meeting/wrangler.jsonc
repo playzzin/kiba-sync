@@ -29,7 +29,7 @@
 		// 콤마로 구분된 허용 origin 목록. 프론트가 배포된 origin을 넣는다.
 		"ALLOWED_ORIGINS": "https://playzzin.github.io",
 		"STT_MODEL": "@cf/openai/whisper",
-		"LLM_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+		"LLM_MODEL": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
 		"MAX_AUDIO_MB": "25",
 		"MAX_TEXT_MB": "2"
 	}

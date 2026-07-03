@@ -14,6 +14,7 @@ import {
   renderMeetingMarkdown,
   meetingFilename,
   meetingStampPrefix,
+  MEETING_JSON_SCHEMA,
   type MeetingMeta,
   type MeetingSections,
 } from "./summarize";
@@ -179,15 +180,21 @@ export default {
     let fallbackReason: string | undefined;
     try {
       const { system, user } = buildSummaryPrompt(normalized, meta);
-      const llmModel = env.LLM_MODEL || "@cf/meta/llama-3.1-8b-instruct";
+      const llmModel = env.LLM_MODEL || "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
       const llmResult = (await env.AI.run(llmModel, {
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-        max_tokens: 2048,
-      })) as { response?: string };
-      const parsed = parseLlmSections(String(llmResult?.response ?? ""));
+        // 한국어 회의록은 항목이 많아 JSON이 잘리기 쉬우므로 여유 있게 잡는다.
+        max_tokens: 4096,
+        // JSON 모드: 모델이 스키마에 맞는 순수 JSON만 반환하도록 강제해 파싱 실패를 줄인다.
+        response_format: { type: "json_schema", json_schema: MEETING_JSON_SCHEMA },
+      })) as { response?: string | Record<string, unknown> };
+      // JSON 모드는 response를 이미 파싱된 객체로 줄 수도, JSON 문자열로 줄 수도 있다.
+      const raw = llmResult?.response;
+      const responseText = typeof raw === "string" ? raw : JSON.stringify(raw ?? "");
+      const parsed = parseLlmSections(responseText);
       if (parsed) {
         sections = parsed;
         if (!parsed.excerpts.length) {
@@ -197,6 +204,8 @@ export default {
         sections = buildFallbackSections(normalized);
         usedFallback = true;
         fallbackReason = "요약 모델이 유효한 JSON을 반환하지 않았습니다.";
+        // 파싱 실패 원인 진단용: 실제 응답 앞부분을 로그로 남긴다.
+        console.error("LLM summary parse failed; using fallback. response head=", responseText.slice(0, 600));
       }
     } catch (error) {
       sections = buildFallbackSections(normalized);
