@@ -5365,13 +5365,16 @@ function MeetingMinutesToolPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function generateLocalDraft(current: MeetingSource) {
+  async function generateLocalDraft(current: MeetingSource, reason?: string) {
     const ext = transcriptExtFromName(current.name) ?? "txt";
     const raw = await (current.file as File).text();
     const normalized = normalizeTranscript(raw, ext);
     const sections = buildFallbackSections(normalized);
     const title = meetingTitle(date, time, topic);
-    const markdown = renderMeetingMarkdown(title, { date, time, topic }, sections, { draftNotice: true });
+    const markdown = renderMeetingMarkdown(title, { date, time, topic }, sections, {
+      draftNotice: true,
+      draftReason: reason,
+    });
     downloadBlob(meetingFilename(date, time, topic), "text/markdown;charset=utf-8", markdown);
   }
 
@@ -5408,7 +5411,16 @@ function MeetingMinutesToolPage() {
           password,
         });
         downloadBlob(result.filename, "text/markdown;charset=utf-8", result.markdown);
-        setStatus({ kind: "success", message: "회의록을 생성해 다운로드했습니다." });
+        if (result.usedFallback) {
+          setStatus({
+            kind: "info",
+            message: result.fallbackReason
+              ? `서버 요약이 실패해 원문 기반 초안으로 생성했습니다. 실패 원인: ${result.fallbackReason}`
+              : "서버 요약이 실패해 원문 기반 초안으로 생성했습니다. 검토 후 보완하세요.",
+          });
+        } else {
+          setStatus({ kind: "success", message: "회의록을 생성해 다운로드했습니다." });
+        }
       } else if (current.kind === "audio") {
         throw new Error(
           "오디오 STT는 서버 엔드포인트 설정(NEXT_PUBLIC_MEETING_SUMMARIZE_URL)이 필요합니다. 자막 텍스트(TXT/VTT/SRT)는 지금도 로컬 초안 생성이 가능합니다.",
@@ -5422,7 +5434,7 @@ function MeetingMinutesToolPage() {
       // 서버 실패이지만 텍스트 입력이면 로컬 초안으로 최소 결과를 제공한다.
       if (current.kind === "text") {
         try {
-          await generateLocalDraft(current);
+          await generateLocalDraft(current, message);
           setStatus({ kind: "info", message: `${message} 원문 기반 로컬 초안을 대신 생성했습니다.` });
         } catch {
           setStatus({ kind: "error", message });

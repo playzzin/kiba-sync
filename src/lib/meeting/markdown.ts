@@ -46,7 +46,7 @@ export function renderMeetingMarkdown(
   title: string,
   meta: { date: string; time?: string; topic?: string },
   sections: MeetingMinutesSections,
-  options?: { draftNotice?: boolean },
+  options?: { draftNotice?: boolean; draftReason?: string },
 ): string {
   const lines: string[] = [];
   lines.push(`# ${title}`, "");
@@ -54,7 +54,11 @@ export function renderMeetingMarkdown(
   if (meta.topic?.trim()) lines.push(`- **주제**: ${meta.topic.trim()}`);
   lines.push("");
   if (options?.draftNotice) {
-    lines.push("> ⚠️ 서버 요약을 사용하지 못해 원문 기반 로컬 초안으로 생성되었습니다. 검토 후 보완하세요.", "");
+    lines.push("> ⚠️ 서버 요약을 사용하지 못해 원문 기반 로컬 초안으로 생성되었습니다. 검토 후 보완하세요.");
+    if (options.draftReason?.trim()) {
+      lines.push(`> 실패 원인: ${options.draftReason.trim()}`);
+    }
+    lines.push("");
   }
   lines.push("## 요약", renderSectionList(sections.summary, "요약 내용이 없습니다."));
   lines.push("## 결정 사항", renderSectionList(sections.decisions, "기록된 결정 사항이 없습니다."));
