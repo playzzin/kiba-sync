@@ -175,3 +175,21 @@ export function buildSummaryPrompt(transcript: string, meta: MeetingMeta): { sys
     `전사 내용:\n"""\n${clipped}\n"""`;
   return { system, user };
 }
+
+/**
+ * Workers AI JSON 모드(response_format)용 스키마.
+ * 모델이 스키마에 맞는 순수 JSON만 반환하도록 강제해 파싱 실패를 줄인다.
+ * 프로퍼티 이름은 parseLlmSections가 우선 인식하는 camelCase에 맞춘다.
+ */
+export const MEETING_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    summary: { type: "array", items: { type: "string" } },
+    decisions: { type: "array", items: { type: "string" } },
+    actionItems: { type: "array", items: { type: "string" } },
+    nextAgenda: { type: "array", items: { type: "string" } },
+    planningLoop: { type: "array", items: { type: "string" } },
+    excerpts: { type: "array", items: { type: "string" } },
+  },
+  required: ["summary", "decisions", "actionItems", "nextAgenda", "planningLoop", "excerpts"],
+} as const;

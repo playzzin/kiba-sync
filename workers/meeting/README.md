@@ -30,7 +30,7 @@
 1. origin 허용 목록 + 처리 비밀번호 검증
 2. 크기 제한 / 확장자 / 바이너리 위장 검증
 3. 오디오 → Workers AI Whisper STT, 텍스트 → TXT/VTT/SRT 정규화
-4. Workers AI LLM 요약 → 실패 시 원문 기반 자동 초안 폴백
+4. Workers AI LLM 요약 (JSON 모드 `response_format`로 순수 JSON 강제) → 실패 시 원문 기반 자동 초안 폴백
 5. R2 자동 저장 (원본/전사/회의록/metadata) — 저장 실패해도 회의록은 반환
 6. 회의록 Markdown 반환 (프론트가 다운로드)
 
@@ -72,7 +72,7 @@ NEXT_PUBLIC_MEETING_SUMMARIZE_URL=https://kiba-meeting-summarize.<계정>.worker
 | --- | --- | --- |
 | `ALLOWED_ORIGINS` | `https://playzzin.github.io` | 콤마 구분 허용 origin (`*` 허용 가능) |
 | `STT_MODEL` | `@cf/openai/whisper` | STT 모델 |
-| `LLM_MODEL` | `@cf/meta/llama-3.1-8b-instruct` | 요약 모델 |
+| `LLM_MODEL` | `@cf/meta/llama-3.3-70b-instruct-fp8-fast` | 요약 모델 (JSON 모드 지원 모델이어야 함) |
 | `MAX_AUDIO_MB` | `25` | 오디오 최대 크기 |
 | `MAX_TEXT_MB` | `2` | 텍스트 최대 크기 |
 
