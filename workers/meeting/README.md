@@ -20,8 +20,10 @@
 성공 응답(JSON):
 
 ```json
-{ "markdown": "...", "filename": "2026-07-03_1400_주제.md", "requestId": "uuid", "usedStt": true, "usedFallback": false }
+{ "markdown": "...", "filename": "2026-07-03_1400_주제.md", "requestId": "uuid", "usedStt": true, "usedFallback": false, "fallbackReason": null }
 ```
+
+`usedFallback`가 `true`이면 요약 모델을 쓰지 못해 원문 기반 초안으로 대체된 것이며, `fallbackReason`에 실패 원인(모델/인프라 오류 메시지)이 담깁니다. 회의록 Markdown 상단 안내 문구에도 같은 원인이 노출됩니다.
 
 ## 처리 흐름
 

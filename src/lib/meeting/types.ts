@@ -28,6 +28,8 @@ export interface MeetingSummarizeResult {
   usedStt: boolean;
   /** 요약 실패로 원문 기반 초안 fallback을 사용했는지 여부. */
   usedFallback: boolean;
+  /** fallback을 사용한 경우 실패 원인(모델/인프라 오류 메시지). 성공 시 null. */
+  fallbackReason?: string | null;
 }
 
 /** Worker 오류 응답. */

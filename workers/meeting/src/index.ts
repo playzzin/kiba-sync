@@ -176,6 +176,7 @@ export default {
     // 4) LLM 요약 (실패 시 원문 기반 폴백)
     let sections: MeetingSections;
     let usedFallback = false;
+    let fallbackReason: string | undefined;
     try {
       const { system, user } = buildSummaryPrompt(normalized, meta);
       const llmModel = env.LLM_MODEL || "@cf/meta/llama-3.1-8b-instruct";
@@ -195,13 +196,19 @@ export default {
       } else {
         sections = buildFallbackSections(normalized);
         usedFallback = true;
+        fallbackReason = "요약 모델이 유효한 JSON을 반환하지 않았습니다.";
       }
-    } catch {
+    } catch (error) {
       sections = buildFallbackSections(normalized);
       usedFallback = true;
+      fallbackReason = `요약 모델 호출 실패: ${error instanceof Error ? error.message : "알 수 없음"}`;
+      console.error("LLM summary failed", error);
     }
 
-    const markdown = renderMeetingMarkdown(meta, sections, { draftNotice: usedFallback });
+    const markdown = renderMeetingMarkdown(meta, sections, {
+      draftNotice: usedFallback,
+      draftReason: fallbackReason,
+    });
     const filename = meetingFilename(meta);
     const requestId = crypto.randomUUID();
 
@@ -234,6 +241,7 @@ export default {
               savedAt: new Date().toISOString(),
               usedStt,
               usedFallback,
+              fallbackReason: fallbackReason ?? null,
             },
             null,
             2,
@@ -246,6 +254,10 @@ export default {
       console.error("R2 save failed", error);
     }
 
-    return json({ markdown, filename, requestId, usedStt, usedFallback }, 200, cors);
+    return json(
+      { markdown, filename, requestId, usedStt, usedFallback, fallbackReason: fallbackReason ?? null },
+      200,
+      cors,
+    );
   },
 };
