@@ -220,7 +220,33 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#
       본 대시보드는 검증 가능한 <b>비용</b>(지점수×단가)까지만 확정 제시하고, 인원·시간 환산은 품셈 반영 후 추가할 예정입니다. 근거 없는 인원수 추정은 넣지 않았습니다.
       <div style="margin-top:8px" class="mut">참고 재원: 예산 편성목상 <b>인건비·여비</b>가 현장 투입(사람·이동)의 대리지표입니다 — v1 각 항목 시트의 인건비/여비 소계 참조.</div>
     </div>
-  </div>
+
+      <!-- 단계별 로드맵 -->
+      <div class="grid g3" style="margin-top:14px">
+        <div class="panel" style="border-left:4px solid var(--ok)">
+          <div class="lab" style="font-size:12.5px;font-weight:700">✔ 1-feature <span class="badge ok" style="font-size:10px">완료</span></div>
+          <div class="flow" style="margin-top:8px;font-size:13px"><span class="box">비용</span><span class="op">=</span><span class="box">지점수</span><span class="op">×</span><span class="box">단가</span></div>
+          <div class="cite" style="margin-top:8px">v2 현황·단가 시트 기반 · 오차 &lt;0.1% 검증됨</div>
+        </div>
+        <div class="panel" style="border-left:4px solid var(--warn)">
+          <div class="lab" style="font-size:12.5px;font-weight:700">⏳ 2-feature <span class="badge warn" style="font-size:10px">진행중</span></div>
+          <div class="flow" style="margin-top:8px;font-size:13px"><span class="box">인건비·여비</span><span class="op">→</span><span class="box">대리지표</span></div>
+          <div class="cite" style="margin-top:8px">v1 항목별 시트 인건비/여비 소계 추출 예정</div>
+        </div>
+        <div class="panel" style="border-left:4px solid var(--acc2)">
+          <div class="lab" style="font-size:12.5px;font-weight:700">⋯ 3-feature <span class="badge" style="font-size:10px;background:rgba(129,140,248,.15);color:var(--acc2);border:1px solid rgba(129,140,248,.3)">계획</span></div>
+          <div class="flow" style="margin-top:8px;font-size:13px"><span class="box">표준품셈</span><span class="op">×</span><span class="box">지점수</span><span class="op">→</span><span class="box">인원·시간</span></div>
+          <div class="cite" style="margin-top:8px">수자원 표준품셈(산업통상자원부 2023) 반영 후</div>
+        </div>
+      </div>
+
+      <!-- 인건비·여비 proxy 테이블 -->
+      <div class="panel scroll" style="margin-top:14px">
+        <h2 style="font-size:14px">인건비·여비 현황 (현장투입 대리지표) <span class="badge warn" id="lp_badge">v1 추출 예정</span></h2>
+        <table id="t_labor_proxy"></table>
+        <div class="cite"><b>근거:</b> 01_사업별 예산 › v1 각 항목 시트 › 인건비/여비 소계 (단위: 백만원). 예산 편성목상 인건비·여비 합계가 현장 인원·이동 비용의 직접 대리지표입니다.</div>
+      </div>
+    </div>
 
   <div style="text-align:center;margin-top:24px">
     <button class="toggle" style="cursor:pointer;padding:10px 20px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-weight:700" onclick="setMode('m1')">← ⚡ 1분 요약으로</button>
@@ -355,6 +381,28 @@ function renderDeep(){
   let e='<thead><tr><th>장비</th><th>보유(대)</th><th>신규단가(원)</th></tr></thead><tbody>';
   DATA.equip.filter(x=>x.cnt).forEach(x=>{e+=`<tr><td>${x.name}</td><td>${x.cnt}</td><td>${x.price?x.price.toLocaleString():'-'}</td></tr>`;});
   $('t_eq').innerHTML=e+'</tbody>';
+
+  // 7. 인건비·여비 proxy 테이블
+  const lp=DATA.labor_proxy;
+  const lpItems=lp&&lp.items&&lp.items.length>0?lp.items:[];
+  if(lpItems.length>0){
+    if($('lp_badge')){$('lp_badge').textContent='v1 데이터';$('lp_badge').className='badge ok';}
+    let h='<thead><tr><th>항목</th><th>구분</th>'+CY.map(y=>`<th>${y}</th>`).join('')+'<th>합계</th></tr></thead><tbody>';
+    lpItems.forEach(item=>{
+      const totalLab=item.years.reduce((s,y)=>s+(y['인건비']||0),0);
+      const totalTrv=item.years.reduce((s,y)=>s+(y['여비']||0),0);
+      h+=`<tr><td rowspan="3"><b>${item.name}</b></td><td class="mut">인건비</td>`+item.years.map(y=>`<td>${y['인건비']!=null?mw(y['인건비']):'-'}</td>`).join('')+`<td class="ok-txt">${totalLab?mw(totalLab):'-'}</td></tr>`;
+      h+=`<tr><td class="mut">여비</td>`+item.years.map(y=>`<td>${y['여비']!=null?mw(y['여비']):'-'}</td>`).join('')+`<td class="ok-txt">${totalTrv?mw(totalTrv):'-'}</td></tr>`;
+      h+=`<tr><td class="mut warn-txt">소계</td>`+item.years.map(y=>{const s=(y['인건비']||0)+(y['여비']||0);return`<td class="warn-txt">${s?mw(s):'-'}</td>`;}).join('')+`<td class="warn-txt">${(totalLab+totalTrv)?mw(totalLab+totalTrv):'-'}</td></tr>`;
+    });
+    $('t_labor_proxy').innerHTML=h+'</tbody>';
+  } else {
+    $('t_labor_proxy').innerHTML=
+      `<tbody><tr><td colspan="${CY.length+3}" style="text-align:center;color:var(--warn);padding:20px;font-size:12.5px">`+
+      `⏳ v1 xlsx 추출 후 표시됩니다 — 01_사업별 예산 › v1 각 항목 시트 › 인건비/여비 소계<br>`+
+      `<span class="mut" style="font-size:11.5px">(_build_원가분석.py 실행 시 자동 추출)</span>`+
+      `</td></tr></tbody>`;
+  }
 }
 renderSummary();
 </script>

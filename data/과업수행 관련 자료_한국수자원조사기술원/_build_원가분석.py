@@ -222,6 +222,82 @@ for r in cont_rows[4:9]:
 wr.close()
 
 # ────────────────────────────────────────────────────────────
+# 5a) v1 인건비·여비 소계 — 현장 투입 대리지표(2-feature)
+#     v1 각 항목 시트: 연도별 인건비·여비 행을 탐색해 합계를 추출한다.
+#     행 레이블(셀 A 또는 B열)에 '인건비' 또는 '여비'가 포함된 합계행 사용.
+# ────────────────────────────────────────────────────────────
+LABOR_ITEMS = ["유량", "유사량", "토양수분량", "증발산량"]
+LABOR_KEY_MAP = {"인건비": "인건비", "여비": "여비"}
+
+def _find_label_col(sheet_rows, keywords, max_rows=50):
+    """키워드를 포함하는 행 인덱스와 값 컬럼 범위를 탐색."""
+    hits = {}
+    for ri, r in enumerate(sheet_rows[:max_rows]):
+        for ci in range(min(4, len(r))):
+            cell = str(r[ci]) if r[ci] is not None else ""
+            for kw in keywords:
+                if kw in cell and kw not in hits:
+                    hits[kw] = ri
+    return hits
+
+def extract_v1_labor(wb_v1, item_name, years):
+    """v1 항목 시트에서 연도별 인건비·여비 합계 추출."""
+    try:
+        ws = wb_v1[item_name]
+    except KeyError:
+        return None
+    rs = rows(ws, 80)
+    hits = _find_label_col(rs, list(LABOR_KEY_MAP.keys()))
+    if not hits:
+        return None
+    # 연도 헤더 행 탐색: 연도 문자열(예 '2021') 이 포함된 첫 번째 행
+    yr_row_idx = None
+    yr_cols = {}
+    for ri, r in enumerate(rs[:10]):
+        found = {y: None for y in years}
+        for ci, v in enumerate(r):
+            sv = str(v).replace("년","").strip() if v is not None else ""
+            if sv in years:
+                found[sv] = ci
+        if any(v is not None for v in found.values()):
+            yr_row_idx = ri
+            yr_cols = found
+            break
+    if yr_row_idx is None:
+        return None
+    result = []
+    for y in years:
+        ci = yr_cols.get(y)
+        entry = {"year": y}
+        for kw, key in LABOR_KEY_MAP.items():
+            ri = hits.get(kw)
+            if ri is not None and ci is not None:
+                entry[key] = num(rs[ri][ci]) if ci < len(rs[ri]) else None
+            else:
+                entry[key] = None
+        result.append(entry)
+    return result
+
+labor_proxy_items = []
+if os.path.exists(F_V1):
+    try:
+        w1 = wb(F_V1)
+        for it in LABOR_ITEMS:
+            ydata = extract_v1_labor(w1, it, YEARS)
+            if ydata:
+                labor_proxy_items.append({"name": it, "years": ydata})
+        w1.close()
+    except Exception as e:
+        print(f"v1 인건비/여비 추출 실패: {e}")
+else:
+    print(f"v1 파일 없음(건너뜀): {F_V1}")
+
+labor_proxy = {
+    "note": "v1 각 항목 시트 인건비/여비 소계 — 현장 투입(사람·이동) 대리지표. 표준품셈 반영 전 1차 대리지표.",
+    "items": labor_proxy_items,
+}
+
+# ────────────────────────────────────────────────────────────
 # 5) 검증: 계산 총계(Σ 수량×단가) vs 공식 총예산_01 소계
 # ────────────────────────────────────────────────────────────
 calc_total=[]
@@ -243,6 +319,7 @@ DATA = {
     "n_cars":n_cars,"car_rent_sum":car_rent_sum,"eco_cnt":OrderedDict(eco_cnt.most_common()),
     "fuel":fuel,"rent":rent,"cont_region":cont_region,
     "calc_total":calc_total,"official_total":official_total,
+    "labor_proxy":labor_proxy,
 }
 
 out = os.path.join(BASE, "data_원가분석.json")
