@@ -6514,6 +6514,32 @@ body.mobile-lock {
   box-shadow: inset 3px 0 0 var(--primary);
 }
 
+.ceg-match-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ceg-match-badge.matched {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.ceg-match-badge.partial {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.ceg-match-badge.unmatched {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
 .ceg-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -6723,6 +6749,100 @@ body.mobile-lock {
   color: var(--text);
 }
 
+.ceg-rate-preview-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 18px;
+}
+
+.ceg-sheet-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.ceg-rate-basis-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel2);
+}
+
+.ceg-rate-basis-tabs button {
+  flex: 0 0 auto;
+  min-width: 74px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ceg-rate-basis-tabs button.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.18);
+}
+
+.ceg-rate-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff 0%, var(--panel2) 100%);
+}
+
+.ceg-rate-sheet-head div {
+  display: grid;
+  gap: 5px;
+}
+
+.ceg-rate-sheet-head strong {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.ceg-rate-sheet-head div span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ceg-rate-sheet-head > span {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ceg-rate-basis-table {
+  min-width: 900px;
+}
+
+.ceg-rate-basis-table tr.is-total td {
+  background: var(--panel2);
+  font-weight: 900;
+}
+
 .ceg-summary-table {
   display: grid;
   gap: 2px;
@@ -6892,6 +7012,11 @@ body.mobile-lock {
     align-items: flex-start;
     flex-direction: column;
     gap: 7px;
+  }
+
+  .ceg-rate-sheet-head {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .ceg-validation-item {

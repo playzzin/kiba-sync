@@ -4202,6 +4202,7 @@ type CestDraftStatus = { kind: "success" | "error"; message: string } | null;
 type CestParseStatus = { kind: "success" | "error" | "info"; messages: string[] } | null;
 type CestRelationStatus = "ok" | "warning";
 type CestValidationLevel = "ok" | "warning" | "info";
+type CestMatchStatus = "matched" | "partial" | "unmatched";
 
 type CostRow = {
   id: string;
@@ -4243,6 +4244,9 @@ type CestPricePreviewItem = {
   sourceCell: string;
   usedBy: string;
   relationIds: string[];
+  matchStatus: CestMatchStatus;
+  matchedUnitPriceRefs: string[];
+  matchedDetailRefs: string[];
 };
 
 type CestUnitPricePreviewItem = {
@@ -4257,6 +4261,23 @@ type CestUnitPricePreviewItem = {
   sourceRefs: string;
   usedBy: string;
   relationIds: string[];
+};
+
+type CestRateBasisRow = {
+  name: string;
+  base: string | number;
+  rate: string | number;
+  amount: string | number;
+  source: string;
+  tone?: "normal" | "total";
+};
+
+type CestRateBasisSheet = {
+  sheetName: string;
+  title: string;
+  projectName: string;
+  stamp: string;
+  rows: CestRateBasisRow[];
 };
 
 const COST_CATEGORY_LABELS: Record<CostCategory, string> = {
@@ -4459,6 +4480,9 @@ const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
     sourceCell: "단가대비표!M7",
     usedBy: "내역서!E9",
     relationIds: ["price-to-detail"],
+    matchStatus: "matched",
+    matchedUnitPriceRefs: [],
+    matchedDetailRefs: ["내역서!E9"],
   },
   {
     id: "price-pipe-worker",
@@ -4470,6 +4494,9 @@ const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
     sourceCell: "단가대비표!M55",
     usedBy: "일위대가표!G8",
     relationIds: ["price-to-unit"],
+    matchStatus: "matched",
+    matchedUnitPriceRefs: ["일위대가표!L21"],
+    matchedDetailRefs: [],
   },
   {
     id: "price-common-worker",
@@ -4481,6 +4508,9 @@ const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
     sourceCell: "단가대비표!M56",
     usedBy: "일위대가표!G9, 내역서!G63",
     relationIds: ["price-to-unit", "price-to-detail"],
+    matchStatus: "matched",
+    matchedUnitPriceRefs: ["일위대가표!L21", "일위대가표!L36"],
+    matchedDetailRefs: ["내역서!G63"],
   },
   {
     id: "price-mechanical-worker",
@@ -4492,6 +4522,9 @@ const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
     sourceCell: "단가대비표!M57",
     usedBy: "일위대가표!G23",
     relationIds: ["price-to-unit"],
+    matchStatus: "matched",
+    matchedUnitPriceRefs: ["일위대가표!L36"],
+    matchedDetailRefs: [],
   },
   {
     id: "price-equipment",
@@ -4503,6 +4536,9 @@ const REFERENCE_PRICE_PREVIEW_ITEMS: CestPricePreviewItem[] = [
     sourceCell: "단가대비표!M68",
     usedBy: "내역서!I68",
     relationIds: ["price-to-detail"],
+    matchStatus: "matched",
+    matchedUnitPriceRefs: [],
+    matchedDetailRefs: ["내역서!I68"],
   },
 ];
 
@@ -4580,6 +4616,13 @@ function parseMoney(v: string) {
 
 function formatMoney(v: number) {
   return v.toLocaleString("ko-KR");
+}
+
+function formatBasisCell(value: string | number) {
+  if (typeof value === "number") {
+    return formatMoney(value);
+  }
+  return value || "-";
 }
 
 function calcRows(rows: CostRow[]) {
@@ -4668,8 +4711,29 @@ function sourceAmountCell(row: CostRow) {
   return row.sourceRow ? `내역서!${amountCol}${row.sourceRow}` : "사용자 입력";
 }
 
+function sourceUnitPriceCell(row: CostRow) {
+  const unitPriceCol = row.category === "material" ? "E" : row.category === "labor" ? "G" : "I";
+  return row.sourceRow ? `내역서!${unitPriceCol}${row.sourceRow}` : "사용자 입력";
+}
+
 function sourceBasis(row: CostRow) {
   return row.section ? `${row.section} / ${sourceAmountCell(row)}` : sourceAmountCell(row);
+}
+
+function normalizeMatchText(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\s/g, "")
+    .replace(/[()"'·,_./\\-]/g, "");
+}
+
+function sourceCellRow(sourceCell: string) {
+  const match = sourceCell.match(/(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+
+function uniqueRefs(refs: string[]) {
+  return Array.from(new Set(refs.filter(Boolean)));
 }
 
 function relationIdsForCostRow(row: CostRow) {
@@ -4692,6 +4756,76 @@ function relationIdsForCostRow(row: CostRow) {
   return relationIds;
 }
 
+function detailSourceRef(row: CostRow) {
+  const relationIds = relationIdsForCostRow(row);
+  const unitMatch = REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.find((item) => {
+    const rowSource = sourceUnitPriceCell(row);
+    const rowName = normalizeMatchText(row.itemName);
+    return item.usedBy.includes(rowSource) || normalizeMatchText(item.title).includes(rowName);
+  });
+
+  if (relationIds.includes("unit-to-detail") && unitMatch) {
+    return `${unitMatch.totalCell} → ${sourceUnitPriceCell(row)} / ${sourceAmountCell(row)}`;
+  }
+
+  if (row.sourceRow) {
+    return `단가대비표 적용단가 → ${sourceUnitPriceCell(row)} / ${sourceAmountCell(row)}`;
+  }
+
+  return sourceBasis(row);
+}
+
+function buildMatchedPricePreviewItems(items: CestPricePreviewItem[], rows: CostRow[]) {
+  return items.map<CestPricePreviewItem>((item) => {
+    const normalizedName = normalizeMatchText(item.itemName);
+    const normalizedSpec = normalizeMatchText(item.spec);
+    const normalizedUnit = normalizeMatchText(item.unit);
+    const sourceRow = sourceCellRow(item.sourceCell);
+    const sourceTail = sourceRow ? `M${sourceRow}` : "";
+
+    const unitMatches = REFERENCE_UNIT_PRICE_PREVIEW_ITEMS.filter((unitItem) =>
+      sourceTail ? normalizeMatchText(unitItem.sourceRefs).includes(normalizeMatchText(sourceTail)) : false,
+    );
+
+    const detailMatches = rows.filter((row) => {
+      const sameName = normalizeMatchText(row.itemName) === normalizedName;
+      const sameSpec = normalizedSpec.length > 0 && normalizeMatchText(row.spec) === normalizedSpec;
+      const sameUnit = normalizedUnit.length > 0 && normalizeMatchText(row.unit) === normalizedUnit;
+      const samePrice = parseMoney(row.unitPrice) === item.appliedUnitPrice;
+      const relatedName =
+        normalizeMatchText(row.itemName).includes(normalizedName) ||
+        normalizedName.includes(normalizeMatchText(row.itemName));
+
+      return (sameName && (sameSpec || sameUnit || samePrice)) || (samePrice && (sameName || relatedName));
+    });
+
+    const matchedUnitPriceRefs = uniqueRefs(
+      unitMatches.map((unitItem) => `${unitItem.totalCell} (${unitItem.title})`),
+    );
+    const matchedDetailRefs = uniqueRefs(detailMatches.map((row) => sourceUnitPriceCell(row)));
+    const relationIds = uniqueRefs([
+      ...(matchedUnitPriceRefs.length > 0 ? ["price-to-unit"] : []),
+      ...(matchedDetailRefs.length > 0 ? ["price-to-detail"] : []),
+    ]);
+    const matchStatus: CestMatchStatus =
+      matchedUnitPriceRefs.length + matchedDetailRefs.length === 0
+        ? "unmatched"
+        : "matched";
+    const usedBy =
+      uniqueRefs([...matchedUnitPriceRefs, ...matchedDetailRefs]).join(", ") ||
+      "미매칭";
+
+    return {
+      ...item,
+      usedBy,
+      relationIds: relationIds.length > 0 ? relationIds : ["price-to-detail"],
+      matchStatus,
+      matchedUnitPriceRefs,
+      matchedDetailRefs,
+    };
+  });
+}
+
 function toPreviewPriceItems(items: Array<{ itemName: string; spec: string; unit: string; appliedUnitPrice: number; sourceRow: number }>) {
   return items.map<CestPricePreviewItem>((item, index) => ({
     id: `parsed-price-${index + 1}`,
@@ -4701,8 +4835,11 @@ function toPreviewPriceItems(items: Array<{ itemName: string; spec: string; unit
     appliedUnitPrice: item.appliedUnitPrice,
     formula: `단가대비표 적용단가 행 ${item.sourceRow}`,
     sourceCell: `단가대비표!M${item.sourceRow}`,
-    usedBy: "일위대가표/내역서 매칭 예정",
+    usedBy: "미매칭",
     relationIds: ["price-to-unit", "price-to-detail"],
+    matchStatus: "unmatched",
+    matchedUnitPriceRefs: [],
+    matchedDetailRefs: [],
   }));
 }
 
@@ -4912,31 +5049,34 @@ function buildMainCostEstimateXml(rows: CostRow[], rates: CostRates, projectName
   ]);
 }
 
-function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: string) {
+function buildRateBasisSheets(rows: CostRow[], rates: CostRates, projectName: string): CestRateBasisSheet[] {
   const summary = calcCostSummary(rows, rates);
   const stamp = todayStamp();
+  const project = projectName || "탱크 설비";
 
-  function rateRows(title: string, body: Array<Array<string | number>>) {
-    return [
-      xmlRow(xmlCell(title), xmlCell(projectName || "탱크 설비"), xmlCell(stamp)),
-      xmlRow(xmlCell("비목"), xmlCell("적용대상액"), xmlCell("요율(%)"), xmlCell("금액"), xmlCell("근거")),
-      ...body.map(([name, base, rate, amount, source]) =>
-        xmlRow(
-          xmlCell(name),
-          typeof base === "number" ? xmlCell(base, "Number") : xmlCell(base),
-          typeof rate === "number" ? xmlCell(rate, "Number") : xmlCell(rate),
-          typeof amount === "number" ? xmlCell(amount, "Number") : xmlCell(amount),
-          xmlCell(source),
-        ),
-      ),
-    ];
+  function sheet(sheetName: string, title: string, body: Array<Array<string | number>>): CestRateBasisSheet {
+    return {
+      sheetName,
+      title,
+      projectName: project,
+      stamp,
+      rows: body.map(([name, base, rate, amount, source]) => ({
+        name: String(name),
+        base,
+        rate,
+        amount,
+        source: String(source),
+        tone: String(name) === "계" ? "total" : "normal",
+      })),
+    };
   }
 
-  return xmlWorkbook([
-    xmlSheet("간노비", rateRows("간접노무비율 산출표", [["간접노무비", summary.directLabor, parseMoney(rates.indirectLabor), summary.indirectLaborAmt, "직접노무비*14%, 원가계산서!J11"]])),
-    xmlSheet(
+  return [
+    sheet("간노비", "간접노무비율 산출표", [["간접노무비", summary.directLabor, parseMoney(rates.indirectLabor), summary.indirectLaborAmt, "직접노무비*14%, 원가계산서!J11"]]),
+    sheet(
       "경비",
-      rateRows("경비 산출표", [
+      "경비 산출표",
+      [
         ["기계경비", "집계표!I19", "", summary.machineExpense, "내역서!J9:J68"],
         ["산재보험료", summary.totalLabor, parseMoney(rates.industrialAccident), summary.industrialAccidentAmt, "산재"],
         ["고용보험료", summary.totalLabor, parseMoney(rates.employment), summary.employmentAmt, "고용"],
@@ -4949,22 +5089,44 @@ function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: strin
         ["산업안전보건관리비", summary.directMaterials + summary.directLabor, parseMoney(rates.safetyHealth), summary.safetyAmt, "안전"],
         ["기타경비", summary.directMaterials + summary.totalLabor, parseMoney(rates.miscExpense), summary.miscExpenseAmt, "원가계산서!J23"],
         ["계", "", "", summary.expenseSubtotal, "원가계산서!E30"],
-      ]),
+      ],
     ),
-    xmlSheet("산재", rateRows("산재보험료 산출표", [["산재보험료", summary.totalLabor, parseMoney(rates.industrialAccident), summary.industrialAccidentAmt, "조달청적용기준 비율"]])),
-    xmlSheet("고용", rateRows("고용보험료 산출표", [["고용보험료", summary.totalLabor, parseMoney(rates.employment), summary.employmentAmt, "조달청적용기준 비율"]])),
-    xmlSheet("건강", rateRows("건강보험료 산출표", [["건강보험료", summary.directLabor, parseMoney(rates.health), summary.healthAmt, "2026년 조달청 제비율 적용기준"]])),
-    xmlSheet("연금", rateRows("연금보험료 산출표", [["연금보험료", summary.directLabor, parseMoney(rates.pension), summary.pensionAmt, "2026년 조달청 제비율 적용기준"]])),
-    xmlSheet("석면", rateRows("석면분담금 산출표", [["석면분담금", summary.totalLabor, parseMoney(rates.asbestos), summary.asbestosAmt, "2026년 조달청 제비율 적용기준"]])),
-    xmlSheet("장기", rateRows("노인장기요양보험료 산출표", [["노인장기요양보험료", summary.healthAmt, parseMoney(rates.longTermCare), summary.longTermCareAmt, "건강보험료*13.14%"]])),
-    xmlSheet("임금", rateRows("임금채권부담금 산출표", [["임금채권부담금", summary.totalLabor, parseMoney(rates.wageClaim), summary.wageClaimAmt, "2026년 조달청 제비율 적용기준"]])),
-    xmlSheet("퇴공", rateRows("퇴직공제부금비 산출표", [["퇴직공제부금비", summary.directLabor, parseMoney(rates.retirement), summary.retirementAmt, "2026년 조달청 제비율 적용기준"]])),
-    xmlSheet("안전", rateRows("산업안전보건관리비 산출표", [["산업안전보건관리비", summary.directMaterials + summary.directLabor, parseMoney(rates.safetyHealth), summary.safetyAmt, "(재료비+직접노무비)*3.11%"]])),
-    xmlSheet("일반", rateRows("일반관리비 산출표", [["일반관리비", summary.pureCost, parseMoney(rates.generalAdmin), summary.generalAdminAmt, "순공사원가*8%"]])),
-    xmlSheet("일반비율", rateRows("일반관리비 비율표", [["전문,전기,정보통신,소방 및 그밖의 공사 5억원미만", "", 8, "", "일반비율!H8"], ["본조사적용비율", "", parseMoney(rates.generalAdmin), "", "일반비율!H14"]])),
-    xmlSheet("이윤", rateRows("이윤 산출표", [["이윤", summary.totalLabor + summary.expenseSubtotal + summary.generalAdminAmt, parseMoney(rates.profit), summary.profitAmt, "(노무비+경비+일반관리비)*15%"]])),
-    xmlSheet("이윤비율", rateRows("이윤 비율표", [["시설공사", "", 15, "", "이윤비율!F7"], ["본조사적용비율", "", parseMoney(rates.profit), "", "이윤비율"]])),
-  ]);
+    sheet("산재", "산재보험료 산출표", [["산재보험료", summary.totalLabor, parseMoney(rates.industrialAccident), summary.industrialAccidentAmt, "조달청적용기준 비율"]]),
+    sheet("고용", "고용보험료 산출표", [["고용보험료", summary.totalLabor, parseMoney(rates.employment), summary.employmentAmt, "조달청적용기준 비율"]]),
+    sheet("건강", "건강보험료 산출표", [["건강보험료", summary.directLabor, parseMoney(rates.health), summary.healthAmt, "2026년 조달청 제비율 적용기준"]]),
+    sheet("연금", "연금보험료 산출표", [["연금보험료", summary.directLabor, parseMoney(rates.pension), summary.pensionAmt, "2026년 조달청 제비율 적용기준"]]),
+    sheet("석면", "석면분담금 산출표", [["석면분담금", summary.totalLabor, parseMoney(rates.asbestos), summary.asbestosAmt, "2026년 조달청 제비율 적용기준"]]),
+    sheet("장기", "노인장기요양보험료 산출표", [["노인장기요양보험료", summary.healthAmt, parseMoney(rates.longTermCare), summary.longTermCareAmt, "건강보험료*13.14%"]]),
+    sheet("임금", "임금채권부담금 산출표", [["임금채권부담금", summary.totalLabor, parseMoney(rates.wageClaim), summary.wageClaimAmt, "2026년 조달청 제비율 적용기준"]]),
+    sheet("퇴공", "퇴직공제부금비 산출표", [["퇴직공제부금비", summary.directLabor, parseMoney(rates.retirement), summary.retirementAmt, "2026년 조달청 제비율 적용기준"]]),
+    sheet("안전", "산업안전보건관리비 산출표", [["산업안전보건관리비", summary.directMaterials + summary.directLabor, parseMoney(rates.safetyHealth), summary.safetyAmt, "(재료비+직접노무비)*3.11%"]]),
+    sheet("일반", "일반관리비 산출표", [["일반관리비", summary.pureCost, parseMoney(rates.generalAdmin), summary.generalAdminAmt, "순공사원가*8%"]]),
+    sheet("일반비율", "일반관리비 비율표", [["전문,전기,정보통신,소방 및 그밖의 공사 5억원미만", "", 8, "", "일반비율!H8"], ["본조사적용비율", "", parseMoney(rates.generalAdmin), "", "일반비율!H14"]]),
+    sheet("이윤", "이윤 산출표", [["이윤", summary.totalLabor + summary.expenseSubtotal + summary.generalAdminAmt, parseMoney(rates.profit), summary.profitAmt, "(노무비+경비+일반관리비)*15%"]]),
+    sheet("이윤비율", "이윤 비율표", [["시설공사", "", 15, "", "이윤비율!F7"], ["본조사적용비율", "", parseMoney(rates.profit), "", "이윤비율"]]),
+  ];
+}
+
+function buildRateBasisXml(rows: CostRow[], rates: CostRates, projectName: string) {
+  const sheets = buildRateBasisSheets(rows, rates, projectName);
+
+  function rateRows(sheet: CestRateBasisSheet) {
+    return [
+      xmlRow(xmlCell(sheet.title), xmlCell(sheet.projectName), xmlCell(sheet.stamp)),
+      xmlRow(xmlCell("비목"), xmlCell("적용대상액"), xmlCell("요율(%)"), xmlCell("금액"), xmlCell("근거")),
+      ...sheet.rows.map((row) =>
+        xmlRow(
+          xmlCell(row.name),
+          typeof row.base === "number" ? xmlCell(row.base, "Number") : xmlCell(row.base),
+          typeof row.rate === "number" ? xmlCell(row.rate, "Number") : xmlCell(row.rate),
+          typeof row.amount === "number" ? xmlCell(row.amount, "Number") : xmlCell(row.amount),
+          xmlCell(row.source),
+        ),
+      ),
+    ];
+  }
+
+  return xmlWorkbook(sheets.map((sheet) => xmlSheet(sheet.sheetName, rateRows(sheet))));
 }
 
 function toCostRow(
@@ -5073,19 +5235,32 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
   const [previewTab, setPreviewTab] = useState<CestPreviewTab>("flow");
   const [pricePreviewItems, setPricePreviewItems] = useState<CestPricePreviewItem[]>(REFERENCE_PRICE_PREVIEW_ITEMS);
   const [selectedRelationId, setSelectedRelationId] = useState(COST_PREVIEW_RELATIONS[0].id);
+  const [rateBasisSheetName, setRateBasisSheetName] = useState("간노비");
 
   const canProceed =
     uploadMode === "unified" ? unifiedFile !== null : file1 !== null || file2 !== null || file3 !== null;
 
   const summary = calcCostSummary(rows, rates);
   const calculated = calcRows(rows);
+  const matchedPricePreviewItems = buildMatchedPricePreviewItems(pricePreviewItems, rows);
+  const matchedPriceCount = matchedPricePreviewItems.filter((item) => item.matchStatus === "matched").length;
+  const partialPriceCount = matchedPricePreviewItems.filter((item) => item.matchStatus === "partial").length;
+  const unmatchedPriceCount = matchedPricePreviewItems.filter((item) => item.matchStatus === "unmatched").length;
+  const rateBasisSheets = buildRateBasisSheets(rows, rates, projectName);
+  const selectedRateBasisSheet =
+    rateBasisSheets.find((sheet) => sheet.sheetName === rateBasisSheetName) ?? rateBasisSheets[0];
   const selectedRelation =
     COST_PREVIEW_RELATIONS.find((relation) => relation.id === selectedRelationId) ?? COST_PREVIEW_RELATIONS[0];
   const previewValidationItems: { level: CestValidationLevel; title: string; detail: string }[] = [
     {
-      level: pricePreviewItems.length > 0 ? "ok" : "warning",
+      level: matchedPricePreviewItems.length > 0 ? "ok" : "warning",
       title: "단가대비표 미리보기",
-      detail: `${pricePreviewItems.length}개 적용단가를 표로 표시합니다.`,
+      detail: `${matchedPricePreviewItems.length}개 적용단가를 표로 표시합니다.`,
+    },
+    {
+      level: unmatchedPriceCount > 0 ? "warning" : "ok",
+      title: "단가 매칭 결과",
+      detail: `확정 ${matchedPriceCount}개, 부분 ${partialPriceCount}개, 미매칭 ${unmatchedPriceCount}개입니다.`,
     },
     {
       level: "info",
@@ -5455,7 +5630,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                 onClick={() => setPreviewTab("price")}
               >
                 <span>단가대비표</span>
-                <strong>{pricePreviewItems.length}</strong>
+                <strong>{matchedPricePreviewItems.length}</strong>
                 <small>적용단가</small>
               </button>
               <button
@@ -5540,7 +5715,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                 <div className="ceg-flow-preview-grid">
                   <div className="ceg-flow-preview-card">
                     <strong>단가대비표</strong>
-                    {pricePreviewItems.slice(0, 3).map((item) => (
+                    {matchedPricePreviewItems.slice(0, 3).map((item) => (
                       <button
                         key={item.id}
                         type="button"
@@ -5599,11 +5774,12 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                         <th className="num">적용단가</th>
                         <th>산식</th>
                         <th>원본 셀</th>
+                        <th>상태</th>
                         <th>참조 대상</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {pricePreviewItems.map((item) => (
+                      {matchedPricePreviewItems.map((item) => (
                         <tr
                           key={item.id}
                           className={previewRelationClass(item.relationIds, selectedRelationId)}
@@ -5615,6 +5791,11 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                           <td className="num">{formatMoney(item.appliedUnitPrice)}</td>
                           <td>{item.formula}</td>
                           <td>{item.sourceCell}</td>
+                          <td>
+                            <span className={`ceg-match-badge ${item.matchStatus}`}>
+                              {item.matchStatus === "matched" ? "확정" : item.matchStatus === "partial" ? "부분" : "미매칭"}
+                            </span>
+                          </td>
                           <td>{item.usedBy}</td>
                         </tr>
                       ))}
@@ -5702,7 +5883,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                             <td><input className="input ceg-input num" value={editDraft.qty} onChange={(e) => setEditDraft({ ...editDraft, qty: e.target.value })} /></td>
                             <td><input className="input ceg-input num" value={editDraft.unitPrice} onChange={(e) => setEditDraft({ ...editDraft, unitPrice: e.target.value })} /></td>
                             <td className="num">{formatMoney(parseMoney(editDraft.qty) * parseMoney(editDraft.unitPrice))}</td>
-                            <td>{sourceBasis(editDraft)}</td>
+                            <td>{detailSourceRef(editDraft)}</td>
                             <td className="ceg-row-actions">
                               <button className="primary-btn" type="button" onClick={handleEditSave}>저장</button>
                               <button className="ghost-btn" type="button" onClick={handleEditCancel}>취소</button>
@@ -5722,7 +5903,7 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                             <td className="num">{row.qty}</td>
                             <td className="num">{formatMoney(parseMoney(row.unitPrice))}</td>
                             <td className="num">{formatMoney(row.amount)}</td>
-                            <td>{sourceBasis(row)}</td>
+                            <td>{detailSourceRef(row)}</td>
                             <td className="ceg-row-actions">
                               <button className="ghost-btn" type="button" onClick={() => handleEditStart(row)}>편집</button>
                               <button className="ghost-btn danger" type="button" onClick={() => handleDeleteRow(row.id)}>삭제</button>
@@ -5855,6 +6036,65 @@ function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) 
                   <p className="ceg-download-note">
                     주 계산 파일에는 원가계산서 · 집계표 · 내역서 · 일위대가목록 · 단가대비표가, 산출근거 파일에는 요율/보험료 산출표 15개 시트가 포함됩니다.
                   </p>
+                </div>
+              </section>
+
+              <section className="card ceg-rate-preview-panel">
+                <div className="ceg-panel-head">
+                  <div>
+                    <span className="eyebrow">Rate Basis Preview</span>
+                    <h2>산출근거 15개 시트 미리보기</h2>
+                    <p>다운로드될 산출근거 파일과 같은 계산 모델로 시트별 적용대상액·요율·금액을 확인합니다.</p>
+                  </div>
+                  <span className="ceg-sheet-count-badge">{rateBasisSheets.length} sheets</span>
+                </div>
+
+                <div className="ceg-rate-basis-tabs" role="tablist" aria-label="산출근거 시트 선택">
+                  {rateBasisSheets.map((sheet) => (
+                    <button
+                      key={sheet.sheetName}
+                      type="button"
+                      role="tab"
+                      aria-selected={selectedRateBasisSheet.sheetName === sheet.sheetName}
+                      className={selectedRateBasisSheet.sheetName === sheet.sheetName ? "active" : ""}
+                      onClick={() => setRateBasisSheetName(sheet.sheetName)}
+                    >
+                      {sheet.sheetName}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="ceg-rate-sheet-head">
+                  <div>
+                    <strong>{selectedRateBasisSheet.title}</strong>
+                    <span>{selectedRateBasisSheet.projectName} · {selectedRateBasisSheet.stamp}</span>
+                  </div>
+                  <span>{selectedRateBasisSheet.sheetName}</span>
+                </div>
+
+                <div className="ceg-table-wrap">
+                  <table className="table ceg-table ceg-rate-basis-table">
+                    <thead>
+                      <tr>
+                        <th>비목</th>
+                        <th className="num">적용대상액</th>
+                        <th className="num">요율(%)</th>
+                        <th className="num">금액</th>
+                        <th>근거</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedRateBasisSheet.rows.map((row, index) => (
+                        <tr key={`${selectedRateBasisSheet.sheetName}-${row.name}-${index}`} className={row.tone === "total" ? "is-total" : ""}>
+                          <td>{row.name}</td>
+                          <td className="num">{formatBasisCell(row.base)}</td>
+                          <td className="num">{formatBasisCell(row.rate)}</td>
+                          <td className="num">{formatBasisCell(row.amount)}</td>
+                          <td>{row.source}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </section>
             </div>
