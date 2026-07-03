@@ -23,6 +23,7 @@ import {
   Mail,
   MapPin,
   Menu,
+  Mic,
   Moon,
   Navigation,
   Phone,
@@ -30,7 +31,9 @@ import {
   Server,
   Settings,
   ShieldCheck,
+  Square,
   Sun,
+  Upload,
   Users,
   X,
   type LucideIcon,
@@ -55,6 +58,15 @@ import {
   parseUnifiedWorkbook,
 } from "@/lib/cost-estimate/excel-parser";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
+import { transcriptExtFromName, normalizeTranscript } from "@/lib/meeting/transcript";
+import {
+  buildFallbackSections,
+  renderMeetingMarkdown,
+  meetingTitle,
+  meetingFilename,
+  meetingStampPrefix,
+} from "@/lib/meeting/markdown";
+import { isMeetingApiConfigured, summarizeMeeting } from "@/lib/meeting/client";
 import professionalStaffData from "@/lib/kiba/professional-staff-data.json";
 import { kibaSeedPagesByRoute, kibaSeedSummary, type KibaSeedPage } from "@/lib/kiba/source-content";
 
@@ -290,6 +302,7 @@ const menus: Record<Mode, MenuGroup[]> = {
           children: [
             { label: "회의록 생성", href: "/erp/automation/meeting-minutes", icon: "doc", badge: "NEW" },
             { label: "원가계산서 만들기", href: "/erp/automation/cost-estimate-generator", icon: "doc", badge: "NEW" },
+            { label: "분석", href: "/erp/automation/analysis", icon: "chart", badge: "NEW" },
           ],
         },
         {
@@ -411,6 +424,7 @@ const titles: Record<string, string> = {
   "/erp/settings": "실무 설정",
   "/erp/automation/cost-estimate-generator": "원가계산서 만들기",
   "/erp/automation/meeting-minutes": "회의록 생성",
+  "/erp/automation/analysis": "수문조사 원가분석",
 };
 
 type KibaPageDetail = {
@@ -477,6 +491,7 @@ const kibaPageDetails: Record<string, KibaPageDetail> = {
   "/support/resources": page("고객센터", "자료실", "법령, 서식, 참고자료, 보고서 파일을 관리하는 자료실입니다.", ["서식", "참고자료", "보고서"], ["파일 업로드", "카테고리", "다운로드 통계"], ["/cost-guide/laws", "/support/news"]),
   "/support/contact": page("고객센터", "상담 및 문의", "원가계산, 계약금액조정, 개발부담금 상담을 접수하는 페이지입니다.", ["문의 유형", "담당자 배정", "답변 상태"], ["상담 폼", "CRM 전환", "알림 연동"], ["/intro/location", "/performance/costing"]),
   "/erp/automation/cost-estimate-generator": page("업무자동화", "원가계산서 만들기", "단가대비표·일위대가표·내역서 파일을 업로드하면 원가계산서와 집계표를 자동 생성하고 다운로드할 수 있는 업무 도구입니다.", ["파일 업로드·검증", "행 수정/추가/삭제", "요율 설정", "다중 시트 Excel 다운로드"], ["원가계산서", "집계표", "산출근거", "요율표"], ["/cost-guide/practice", "/support/contact"]),
+  "/erp/automation/analysis": page("업무자동화", "수문조사 원가분석", "수문조사 예산·단가 DB를 기반으로 지점·권역·교통비를 Chart.js로 시각화한 원가분석 대시보드입니다.", ["지점별 필터", "권역 비교 차트", "교통비 상위 지점", "CSV/Excel 내보내기"], ["지점", "권역", "교통비", "장비·차량"], ["/erp/automation/cost-estimate-generator", "/support/contact"]),
 };
 
 function page(
@@ -3687,8 +3702,14 @@ function ErpDashboard({ route, go }: { route: string; go: (route: string) => voi
   if (route === "/erp/cost-estimates/new") {
     return <CostEstimateBuilderPage />;
   }
+  if (route === "/erp/automation/meeting-minutes") {
+    return <MeetingMinutesToolPage />;
+  }
   if (route === "/erp/automation/cost-estimate-generator") {
     return <KibaCostEstimateGeneratorPage go={go} />;
+  }
+  if (route === "/erp/automation/analysis") {
+    return <HydrologyAnalysisPage />;
   }
 
   const pageTitle = titles[route] ?? "실무 대시보드";
@@ -5212,6 +5233,322 @@ function sanitizeDraftFileNames(value: unknown): CostEstimateDraftFileNames | nu
     unitPrice: typeof current.unitPrice === "string" ? current.unitPrice : undefined,
     detail: typeof current.detail === "string" ? current.detail : undefined,
   };
+}
+
+// ─── 회의록 생성 도구 ───────────────────────────────────────────────────────
+
+const EXTERNAL_RECORDER_URL = "https://clovanote.naver.com/";
+
+type MeetingStatusKind = "idle" | "info" | "success" | "error";
+type MeetingStatus = { kind: MeetingStatusKind; message: string };
+type MeetingSource = { file: File | Blob; name: string; kind: "audio" | "text" };
+
+function HydrologyAnalysisPage() {
+  const src = `${publicBasePath}/analysis/hydrology-cost-analysis.html`;
+  return (
+    <div className="mm-page">
+      <section className="page-hero">
+        <span className="eyebrow">업무자동화</span>
+        <h1>수문조사 원가분석</h1>
+        <p>
+          수문조사 예산·단가 DB를 기반으로 지점·권역·교통비를 <strong>Chart.js</strong>로 시각화한 원가분석
+          대시보드입니다. 지점별 필터, 권역 비교, 교통비 상위 지점, CSV/Excel 내보내기를 지원합니다.
+        </p>
+      </section>
+
+      <section className="card">
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+          <a className="mm-btn mm-btn-ghost" href={src} target="_blank" rel="noopener noreferrer">
+            새 탭에서 열기
+          </a>
+        </div>
+        <iframe
+          title="수문조사 원가분석 대시보드"
+          src={src}
+          style={{ width: "100%", height: "80vh", border: "1px solid var(--line, #e2e8f0)", borderRadius: 12 }}
+        />
+      </section>
+    </div>
+  );
+}
+
+function MeetingMinutesToolPage() {
+  const serverEnabled = isMeetingApiConfigured();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedName, setRecordedName] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState("");
+  const [topic, setTopic] = useState("");
+  const [password, setPassword] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [status, setStatus] = useState<MeetingStatus>({ kind: "idle", message: "" });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    // 언마운트 시 열려 있는 마이크 스트림 정리.
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  function activeSource(): MeetingSource | null {
+    if (recordedBlob) {
+      return { file: recordedBlob, name: recordedName || "recording.webm", kind: "audio" };
+    }
+    if (selectedFile) {
+      const textExt = transcriptExtFromName(selectedFile.name);
+      return { file: selectedFile, name: selectedFile.name, kind: textExt ? "text" : "audio" };
+    }
+    return null;
+  }
+
+  const source = activeSource();
+
+  function handleFileChange(file: File | null) {
+    setSelectedFile(file);
+    if (file) {
+      setRecordedBlob(null);
+      setRecordedName("");
+    }
+  }
+
+  async function startRecording() {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      setStatus({ kind: "error", message: "이 브라우저에서는 녹음을 지원하지 않습니다. 파일 선택을 이용하세요." });
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        const mimeType = recorder.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const ext = mimeType.includes("ogg") ? "ogg" : mimeType.includes("mp4") ? "mp4" : "webm";
+        setRecordedBlob(blob);
+        setRecordedName(`recording_${meetingStampPrefix(date, time)}.${ext}`);
+        setSelectedFile(null);
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setRecording(true);
+      setStatus({ kind: "info", message: "녹음 중입니다. 종료를 누르면 녹음 파일이 준비됩니다." });
+    } catch {
+      setStatus({ kind: "error", message: "마이크 접근이 거부되었거나 사용할 수 없습니다." });
+    }
+  }
+
+  function stopRecording() {
+    mediaRecorderRef.current?.stop();
+    mediaRecorderRef.current = null;
+    setRecording(false);
+  }
+
+  function clearInput() {
+    setSelectedFile(null);
+    setRecordedBlob(null);
+    setRecordedName("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function generateLocalDraft(current: MeetingSource) {
+    const ext = transcriptExtFromName(current.name) ?? "txt";
+    const raw = await (current.file as File).text();
+    const normalized = normalizeTranscript(raw, ext);
+    const sections = buildFallbackSections(normalized);
+    const title = meetingTitle(date, time, topic);
+    const markdown = renderMeetingMarkdown(title, { date, time, topic }, sections, { draftNotice: true });
+    downloadBlob(meetingFilename(date, time, topic), "text/markdown;charset=utf-8", markdown);
+  }
+
+  async function handleGenerate() {
+    if (recording) {
+      setStatus({ kind: "error", message: "녹음을 먼저 종료하세요." });
+      return;
+    }
+    const current = activeSource();
+    if (!current) {
+      setStatus({ kind: "error", message: "녹음하거나 자막/오디오 파일을 선택하세요." });
+      return;
+    }
+    if (!date.trim()) {
+      setStatus({ kind: "error", message: "회의 날짜를 입력하세요." });
+      return;
+    }
+    if (!password.trim()) {
+      setStatus({ kind: "error", message: "처리 비밀번호를 입력하세요." });
+      return;
+    }
+
+    setProcessing(true);
+    setStatus({ kind: "info", message: "회의록을 생성하고 있습니다…" });
+    try {
+      if (serverEnabled) {
+        const result = await summarizeMeeting({
+          file: current.file,
+          filename: current.name,
+          date,
+          time: time || undefined,
+          topic: topic || undefined,
+          kind: current.kind,
+          password,
+        });
+        downloadBlob(result.filename, "text/markdown;charset=utf-8", result.markdown);
+        setStatus({ kind: "success", message: "회의록을 생성해 다운로드했습니다." });
+      } else if (current.kind === "audio") {
+        throw new Error(
+          "오디오 STT는 서버 엔드포인트 설정(NEXT_PUBLIC_MEETING_SUMMARIZE_URL)이 필요합니다. 자막 텍스트(TXT/VTT/SRT)는 지금도 로컬 초안 생성이 가능합니다.",
+        );
+      } else {
+        await generateLocalDraft(current);
+        setStatus({ kind: "info", message: "서버 미설정 상태라 원문 기반 로컬 초안을 생성했습니다." });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "회의록 생성에 실패했습니다.";
+      // 서버 실패이지만 텍스트 입력이면 로컬 초안으로 최소 결과를 제공한다.
+      if (current.kind === "text") {
+        try {
+          await generateLocalDraft(current);
+          setStatus({ kind: "info", message: `${message} 원문 기반 로컬 초안을 대신 생성했습니다.` });
+        } catch {
+          setStatus({ kind: "error", message });
+        }
+      } else {
+        setStatus({ kind: "error", message });
+      }
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  return (
+    <div className="mm-page">
+      <section className="page-hero">
+        <span className="eyebrow">업무자동화</span>
+        <h1>회의록 생성</h1>
+        <p>
+          녹음하거나 자막·오디오 파일을 넣고 회의 정보를 입력한 뒤 <strong>회의록 생성 및 저장</strong>을 누르면
+          회의록 Markdown을 생성해 내려받습니다.
+        </p>
+      </section>
+
+      <section className="card mm-tool">
+        {/* 1. 입력: 녹음 / 외부도구 / 파일 */}
+        <div className="mm-block">
+          <h2 className="mm-block-title">1. 회의 자료</h2>
+          <div className="mm-input-row">
+            {recording ? (
+              <button type="button" className="mm-btn mm-btn-stop" onClick={stopRecording}>
+                <Square size={15} /> 녹음 종료
+              </button>
+            ) : (
+              <button type="button" className="mm-btn mm-btn-record" onClick={startRecording} disabled={processing}>
+                <Mic size={15} /> 녹음 시작
+              </button>
+            )}
+            <button
+              type="button"
+              className="mm-btn mm-btn-ghost"
+              onClick={() => window.open(EXTERNAL_RECORDER_URL, "_blank", "noopener,noreferrer")}
+            >
+              <ExternalLink size={15} /> 외부 녹음 도구
+            </button>
+            <button
+              type="button"
+              className="mm-btn mm-btn-ghost"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={processing}
+            >
+              <Upload size={15} /> 파일 선택
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/*,.txt,.vtt,.srt"
+              style={{ display: "none" }}
+              onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
+            />
+          </div>
+          <div className="mm-source">
+            {source ? (
+              <span className="mm-source-chip">
+                <FileText size={14} />
+                {source.name}
+                <button type="button" aria-label="입력 제거" onClick={clearInput} className="mm-source-clear">
+                  <X size={13} />
+                </button>
+              </span>
+            ) : (
+              <span className="mm-source-empty">녹음 또는 파일을 선택하면 여기에 표시됩니다. (TXT/VTT/SRT · 짧은 오디오)</span>
+            )}
+          </div>
+        </div>
+
+        {/* 2. 회의 정보 */}
+        <div className="mm-block">
+          <h2 className="mm-block-title">2. 회의 정보</h2>
+          <div className="mm-form-grid">
+            <label className="mm-field">
+              <span>회의 날짜</span>
+              <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+            </label>
+            <label className="mm-field">
+              <span>회의 시간 (선택)</span>
+              <input type="time" value={time} onChange={(event) => setTime(event.target.value)} />
+            </label>
+            <label className="mm-field mm-field-wide">
+              <span>회의 주제 (선택)</span>
+              <input
+                type="text"
+                value={topic}
+                placeholder="예: 2026 상반기 정기회의"
+                onChange={(event) => setTopic(event.target.value)}
+              />
+            </label>
+            <label className="mm-field">
+              <span>처리 비밀번호</span>
+              <input
+                type="password"
+                value={password}
+                placeholder="서버 처리 암호"
+                autoComplete="off"
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </label>
+          </div>
+          {!serverEnabled ? (
+            <p className="mm-note">
+              ※ 서버 엔드포인트가 설정되지 않아 STT·요약·R2 저장은 비활성화됩니다. 자막 텍스트는 원문 기반 로컬 초안으로 생성됩니다.
+            </p>
+          ) : null}
+        </div>
+
+        {/* 3. 실행 */}
+        <div className="mm-actions">
+          <button type="button" className="primary-btn mm-generate" onClick={handleGenerate} disabled={processing}>
+            <ClipboardCheck size={16} />
+            {processing ? "생성 중…" : "회의록 생성 및 저장"}
+          </button>
+        </div>
+
+        {status.kind !== "idle" && status.message ? (
+          <p className={`mm-status mm-status-${status.kind}`}>{status.message}</p>
+        ) : null}
+      </section>
+    </div>
+  );
 }
 
 function KibaCostEstimateGeneratorPage({ go }: { go: (route: string) => void }) {

@@ -1,0 +1,16 @@
+{
+  "name": "kiba-meeting-summarize",
+  "version": "0.1.0",
+  "private": true,
+  "description": "회의록 생성 백엔드 (STT + LLM 요약 + R2 저장) Cloudflare Worker",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250601.0",
+    "typescript": "^5",
+    "wrangler": "^4"
+  }
+}

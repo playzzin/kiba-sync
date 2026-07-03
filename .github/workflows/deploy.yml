@@ -37,6 +37,10 @@ jobs:
 
       - name: Build static site
         run: npm run build
+        env:
+          # 회의록 도구 백엔드(Cloudflare Worker) 엔드포인트. 비밀 아님 → repo Variable 사용.
+          # 미설정 시 회의록 도구는 서버 비활성(자막 로컬 초안) 모드로 빌드됨.
+          NEXT_PUBLIC_MEETING_SUMMARIZE_URL: ${{ vars.MEETING_SUMMARIZE_URL }}
 
       - name: Disable Jekyll processing
         run: touch out/.nojekyll

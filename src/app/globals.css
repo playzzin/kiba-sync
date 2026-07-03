@@ -7033,3 +7033,220 @@ body.mobile-lock {
     align-items: flex-start;
   }
 }
+
+/* ─── 회의록 생성 도구 ─────────────────────────────────────────────── */
+.mm-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mm-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.mm-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mm-block-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+}
+
+.mm-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.mm-btn:hover:not(:disabled) {
+  background: var(--panel-hover);
+}
+
+.mm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mm-btn-record {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.mm-btn-stop {
+  border-color: var(--danger);
+  color: #ffffff;
+  background: var(--danger);
+}
+
+.mm-btn-stop:hover:not(:disabled) {
+  background: var(--danger);
+  opacity: 0.9;
+}
+
+.mm-source {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.mm-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.mm-source-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.mm-source-clear:hover {
+  color: var(--danger);
+}
+
+.mm-source-empty {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mm-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mm-field-wide {
+  grid-column: 1 / -1;
+}
+
+.mm-field > span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.mm-field input {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  width: 100%;
+}
+
+.mm-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.mm-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.mm-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mm-generate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+}
+
+.mm-status {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.mm-status-info {
+  background: var(--primary-light);
+  color: var(--text);
+}
+
+.mm-status-success {
+  background: var(--success-light);
+  color: var(--text);
+}
+
+.mm-status-error {
+  background: var(--danger-light);
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .mm-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mm-input-row .mm-btn {
+    flex: 1 1 calc(50% - 5px);
+    justify-content: center;
+  }
+
+  .mm-actions {
+    justify-content: stretch;
+  }
+
+  .mm-generate {
+    width: 100%;
+    justify-content: center;
+  }
+}
