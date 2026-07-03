@@ -51,6 +51,26 @@ tbody tr:hover{background:rgba(56,189,248,.05)}
 .hide{display:none!important}
 footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#64748b;font-size:11.5px}
 .scroll{overflow-x:auto}
+/* ── 탭 UI (A 대시보드 통합) ── */
+.tabnav{display:flex;flex-wrap:wrap;gap:4px;margin:16px 0 6px;border-bottom:1px solid var(--line)}
+.tabnav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);font-weight:700;font-size:14px;padding:10px 15px;cursor:pointer;transition:.15s;margin-bottom:-1px}
+.tabnav button:hover{color:var(--txt)}
+.tabnav button.on{color:var(--acc);border-bottom-color:var(--acc)}
+.tabpanel{display:none} .tabpanel.on{display:block}
+.calc-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:820px){.calc-grid{grid-template-columns:1fr}}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12.5px;color:var(--mut);font-weight:600;margin-bottom:6px}
+.field select,.field input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:9px 11px;font-size:14px}
+.field input[type=range]{width:100%;accent-color:var(--acc)}
+.rangeval{float:right;color:var(--acc);font-weight:800}
+.bigval{font-size:30px;font-weight:800;color:var(--acc);letter-spacing:-.5px;margin:2px 0}
+.brk{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.brk:last-child{border-bottom:0} .brk .v{font-weight:800}
+.srclist{display:grid;gap:10px}
+.srcitem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.srcitem h3{margin:0 0 4px;font-size:14px}
+.srcitem .meta{color:var(--mut);font-size:12px}
 </style></head>
 <body><div class="wrap">
 <header class="top">
@@ -62,6 +82,14 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#
   </div>
 </header>
 
+<div class="tabnav">
+  <button class="on" data-tab="analysis" onclick="switchTab('analysis')">📊 원가 분석</button>
+  <button data-tab="calc" onclick="switchTab('calc')">🧮 1회 조사 계산기</button>
+  <button data-tab="band" onclick="switchTab('band')">🌊 수문 대역도</button>
+  <button data-tab="sources" onclick="switchTab('sources')">📚 자료 출처</button>
+</div>
+
+<div class="tabpanel on" id="tp-analysis">
 <div class="model">
   <div class="flow"><span class="box">연간 비용</span><span class="op">≈</span>
   <span class="box">지점수 <span class="mut">(개소)</span></span><span class="op">×</span>
@@ -194,6 +222,11 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#
   <!-- 7. 인건비·여비 / 몇명 몇시간 -->
   <div class="sec"><h2>7. “몇 명 · 몇 시간” — 다음 단계(2-feature) <span class="badge warn">추정·미검증</span></h2>
     <p class="desc">현재 예산 데이터는 <b>비용</b>은 직접 주지만, <b>투입 인원·시간</b>은 직접 담고 있지 않습니다. 이는 <b>표준품셈</b>으로 환산해야 하는 2단계 feature입니다.</p>
+    <div class="panel scroll" style="margin-top:14px">
+      <h2 style="font-size:14px">v1 인건비·여비 소계 (실행예산, 원)</h2>
+      <table id="t_labor_travel"></table>
+      <div class="cite"><b>근거:</b> 01_사업별 예산 › 수문조사 항목별 세부예산 현황_v1.xlsx › 각 항목 시트의 인건비/여비 소계 행. 잔액 예산은 제외하고 실행예산만 표시.</div>
+    </div>
     <div class="note">
       ⚠ <b>한계와 근거:</b> 인원/시간은 「수자원 조사·계획 표준품셈(산업통상자원부, 2023)」(03_지침 폴더 PDF)의 조사종류별 품(工) 기준으로 산정해야 정확합니다.
       본 대시보드는 검증 가능한 <b>비용</b>(지점수×단가)까지만 확정 제시하고, 인원·시간 환산은 품셈 반영 후 추가할 예정입니다. 근거 없는 인원수 추정은 넣지 않았습니다.
@@ -205,6 +238,51 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#
     <button class="toggle" style="cursor:pointer;padding:10px 20px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-weight:700" onclick="setMode('m1')">← ⚡ 1분 요약으로</button>
   </div>
 </div>
+</div><!-- /tp-analysis -->
+
+<!-- ══════════ 1회 조사 계산기 (A 인터랙티브 모델 통합) ══════════ -->
+<div class="tabpanel" id="tp-calc">
+  <div class="sec"><h2>1회 조사 원가 계산기 <span class="badge ok">B 단가 기준</span></h2>
+    <p class="desc">조사 유형·지점수·난이도·간접비율을 조절하면 <b>비용 = 지점수 × 단가</b> 모델로 총원가를 즉시 계산합니다. 단가는 2026년 v2 단가 시트 기준입니다.</p>
+    <div class="calc-grid">
+      <div class="panel">
+        <div class="field"><label>조사 유형</label><select id="ca_type"></select></div>
+        <div class="field"><label>지점 수 <span class="mut">(개소)</span></label><input type="number" id="ca_pts" min="0" step="1"></div>
+        <div class="field"><label>난이도 계수 <span class="rangeval" id="ca_diffv">1.00</span></label><input type="range" id="ca_diff" min="0.8" max="1.5" step="0.05" value="1"></div>
+        <div class="field"><label>간접비율 <span class="rangeval" id="ca_indv">0%</span></label><input type="range" id="ca_ind" min="0" max="30" step="1" value="0"></div>
+        <div class="cite" id="ca_cite"></div>
+      </div>
+      <div class="panel">
+        <div class="mut" style="font-size:12.5px;font-weight:600">예상 총원가</div>
+        <div class="bigval" id="ca_total"></div>
+        <div class="mut" style="font-size:12px;margin-bottom:12px" id="ca_total_won"></div>
+        <div class="brk"><span>기본비용 (지점수 × 단가)</span><span class="v" id="ca_base"></span></div>
+        <div class="brk"><span>난이도 가산</span><span class="v" id="ca_diffadd"></span></div>
+        <div class="brk"><span>간접비</span><span class="v" id="ca_indadd"></span></div>
+        <div class="brk"><span><b>합계</b></span><span class="v ok-txt" id="ca_sum"></span></div>
+        <div class="chartbox" style="height:210px;margin-top:14px"><canvas id="c_calc"></canvas></div>
+      </div>
+    </div>
+    <div class="cite">모델: 연간 비용 ≈ 지점수 × 단가(1-feature). 난이도·간접비율은 사용자 시나리오 계수이며 원본 예산에 포함되지 않은 가정값입니다.</div>
+  </div>
+</div>
+
+<!-- ══════════ 수문 대역도 (A 대역도 통합 · 배분 가정) ══════════ -->
+<div class="tabpanel" id="tp-band">
+  <div class="sec"><h2>수문 대역도 <span class="badge warn">모델 가정 곡선</span></h2>
+    <p class="desc">계산기에서 선택한 조사의 <b>연간 총원가</b>를 월별로 배분한 <b>조사·비용 부하 프로파일</b>입니다. 우기(6~9월) 현장 조사 집중을 반영한 계절 가정이며, <b class="warn-txt">관측 수문자료가 아니라 배분 가정에 따른 모델 곡선</b>입니다.</p>
+    <div class="panel"><div class="chartbox" style="height:320px"><canvas id="c_band"></canvas></div>
+      <div class="cite">월 배분 가중치(계절 가정) × 계산기 총원가. 계산기 탭에서 유형/지점수를 바꾸면 함께 갱신됩니다.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ 자료 출처 (A 자료출처 탭 통합) ══════════ -->
+<div class="tabpanel" id="tp-sources">
+  <div class="sec"><h2>자료 출처</h2>
+    <p class="desc">모든 수치는 한국수자원조사기술원 과업수행 관련 자료(원본 xlsx)에서 직접 추출했습니다.</p>
+    <div class="srclist" id="src_list"></div>
+  </div>
+</div>
 
 <footer>
   <b>출처 파일</b> (D:\kiba-sync\data\과업수행 관련 자료_한국수자원조사기술원) —
@@ -214,7 +292,7 @@ footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:#
 </div>
 
 <script>
-const DATA = {"years": ["2021", "2022", "2023", "2024", "2025", "2026"], "qty": {"유량": [194.0, 244.0, 244.0, 284.0, 186.0, 144.0], "유사량": [24.0, 25.0, 25.0, 25.0, 25.0, 30.0], "토양수분량": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0], "증발산량": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0], "자동유량_운영": [64.0, 67.0, 71.0, 76.0, 176.0, 218.0], "자동유량_설치": [0.0, 4.0, 3.0, 10.0, 75.0, 42.0], "자동유량_유지관리": [0.0, 10.0, 10.0, 17.0, 25.0, 25.0]}, "price": {"유량": [84.0, 84.0, 84.0, 84.0, 84.0, 84.0], "유사량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "토양수분량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "증발산량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "자동유량_운영": [49.0, 49.0, 49.0, 49.0, 49.0, 51.0], "자동유량_설치": [420.0, 420.0, 420.0, 420.0, 373.0, 299.0], "자동유량_유지관리": [120.0, 120.0, 120.0, 120.0, 120.0, 120.0]}, "detail": {"유량": [{"year": "2021", "qty": 194.0, "price": 84.0, "total": 16296.0, "gov": 15106.0, "gov_pct": 92.7, "biz": 1190.0, "biz_pct": 7.3}, {"year": "2022", "qty": 244.0, "price": 84.0, "total": 20496.0, "gov": 17006.0, "gov_pct": 82.97, "biz": 3490.0, "biz_pct": 17.03}, {"year": "2023", "qty": 244.0, "price": 84.0, "total": 20496.0, "gov": 17907.0, "gov_pct": 87.37, "biz": 2589.0, "biz_pct": 12.63}, {"year": "2024", "qty": 284.0, "price": 84.0, "total": 23856.0, "gov": 20064.0, "gov_pct": 84.1, "biz": 3792.0, "biz_pct": 15.9}, {"year": "2025", "qty": 186.0, "price": 84.0, "total": 15624.0, "gov": 12996.0, "gov_pct": 83.18, "biz": 2628.0, "biz_pct": 16.82}, {"year": "2026", "qty": 144.0, "price": 84.0, "total": 12096.0, "gov": 10056.0, "gov_pct": 83.13, "biz": 2040.0, "biz_pct": 16.87}], "유사량": [{"year": "2021", "qty": 24.0, "price": 50.0, "total": 1200.0, "gov": 862.0, "gov_pct": 71.83, "biz": 338.0, "biz_pct": 28.17}, {"year": "2022", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 894.0, "gov_pct": 71.52, "biz": 356.0, "biz_pct": 28.48}, {"year": "2023", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 834.0, "gov_pct": 66.72, "biz": 416.0, "biz_pct": 33.28}, {"year": "2024", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 1029.0, "gov_pct": 82.32, "biz": 221.0, "biz_pct": 17.68}, {"year": "2025", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 1075.0, "gov_pct": 86.0, "biz": 175.0, "biz_pct": 14.0}, {"year": "2026", "qty": 30.0, "price": 50.0, "total": 1500.0, "gov": 1341.0, "gov_pct": 89.4, "biz": 159.0, "biz_pct": 10.6}], "토양수분량": [{"year": "2021", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2022", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 73.0, "gov_pct": 73.0, "biz": 27.0, "biz_pct": 27.0}, {"year": "2023", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 45.0, "gov_pct": 45.0, "biz": 55.0, "biz_pct": 55.0}, {"year": "2024", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 70.0, "gov_pct": 70.0, "biz": 30.0, "biz_pct": 30.0}, {"year": "2025", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2026", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}], "증발산량": [{"year": "2021", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 84.0, "gov_pct": 84.0, "biz": 16.0, "biz_pct": 16.0}, {"year": "2022", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 71.0, "gov_pct": 71.0, "biz": 29.0, "biz_pct": 29.0}, {"year": "2023", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 62.0, "gov_pct": 62.0, "biz": 38.0, "biz_pct": 38.0}, {"year": "2024", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 70.0, "gov_pct": 70.0, "biz": 30.0, "biz_pct": 30.0}, {"year": "2025", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2026", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}]}, "auto": [{"year": "2021", "total": 3136.0, "gov": 2213.0, "gov_pct": 70.57, "biz": 923.0, "biz_pct": 29.43}, {"year": "2022", "total": 6163.0, "gov": 545.0, "gov_pct": 8.84, "biz": 5618.0, "biz_pct": 91.16}, {"year": "2023", "total": 5939.0, "gov": 562.0, "gov_pct": 9.46, "biz": 5377.0, "biz_pct": 90.54}, {"year": "2024", "total": 9964.0, "gov": 3052.0, "gov_pct": 30.63, "biz": 6912.0, "biz_pct": 69.37}, {"year": "2025", "total": 39549.0, "gov": 6688.0, "gov_pct": 16.91, "biz": 32861.0, "biz_pct": 83.09}, {"year": "2026", "total": 26681.0, "gov": 10432.0, "gov_pct": 39.1, "biz": 16249.0, "biz_pct": 60.9}], "totbud": [{"year": "2021", "total": 20832.0, "gov": 18345.0, "gov_pct": 88.06, "biz": 2487.0, "biz_pct": 11.94}, {"year": "2022", "total": 28109.0, "gov": 18589.0, "gov_pct": 66.13, "biz": 9520.0, "biz_pct": 33.87}, {"year": "2023", "total": 27885.0, "gov": 19410.0, "gov_pct": 69.61, "biz": 8475.0, "biz_pct": 30.39}, {"year": "2024", "total": 35270.0, "gov": 24285.0, "gov_pct": 68.85, "biz": 10985.0, "biz_pct": 31.15}, {"year": "2025", "total": 56623.0, "gov": 20919.0, "gov_pct": 36.94, "biz": 35704.0, "biz_pct": 63.06}, {"year": "2026", "total": 40477.0, "gov": 21989.0, "gov_pct": 54.32, "biz": 18488.0, "biz_pct": 45.68}], "budget_krw": {"2021": 2487456225.0, "2022": 9520000000.0, "2023": 8475000000.0, "2024": 10985000000.0, "2025": 35704000000.0, "2026": 18488000000.0}, "n_points": 355, "sido": {"경북": 62, "강원": 40, "경기": 39, "충남": 37, "전북": 35, "전남": 35, "충북": 29, "경남": 29, "광주": 12, "서울": 8, "대전": 8, "울산": 6, "세종": 6, "대구": 5, "부산": 3, "군위": 1}, "fare_stats": {"min": 1500.0, "max": 59800.0, "avg": 25628, "median": 23700, "n": 355}, "mode_cnt": {"KTX": 184, "고속버스": 122, "새마을호": 25, "수도권 대중교통": 20, "준용": 4}, "fares_top": [{"range": "182 ~ 183", "obs": "부산시 (대동낙동강교, 구포대교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "부산역 / 구포역", "fare": 59800.0, "cnt": 2}, {"range": "196", "obs": "부산시 (동천교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "부산역", "fare": 59800.0, "cnt": 1}, {"range": "166 ~ 168", "obs": "진주시 (옥산교, 월강교, 장박교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "진주역", "fare": 57600.0, "cnt": 3}, {"range": "189", "obs": "포항시 (형산교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "포항역", "fare": 53600.0, "cnt": 1}, {"range": "201", "obs": "포항시 (문덕3교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "포항역", "fare": 53600.0, "cnt": 1}, {"range": "190 ~ 195", "obs": "울산시 (구수교, 사연교, 구영교, 태화교, 병영교, 덕신교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "울산역", "fare": 53500.0, "cnt": 6}, {"range": "165", "obs": "함안군 (송도교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "171", "obs": "함안군 (대사교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "172", "obs": "함안군 (계내리)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "184", "obs": "김해시 (정천교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "진영역", "fare": 51500.0, "cnt": 1}, {"range": "180 ~ 181", "obs": "양산시 (삼계교, 양산교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "물금역", "fare": 51300.0, "cnt": 2}, {"range": "174", "obs": "밀양시 (인교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "밀양역", "fare": 49900.0, "cnt": 1}], "fares_bottom": [{"range": "82", "obs": "동두천시 (송천교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "동두천역 (1호선)", "fare": 2500.0, "cnt": 1}, {"range": "85 ~ 86", "obs": "파주시 (비룡대교, 만장교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "문산역 / 금촌역", "fare": 2500.0, "cnt": 2}, {"range": "65", "obs": "의정부시 (신곡교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "의정부역 (1호선 연계)", "fare": 2000.0, "cnt": 1}, {"range": "63 ~ 64", "obs": "서울시 (광진교, 대곡교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 2}, {"range": "66", "obs": "서울시 (중랑교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "67", "obs": "서울시 (한강대교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "69", "obs": "서울시 (신림5교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "71 ~ 73", "obs": "서울시 (너부대교, 오금교, 신대방1교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 3}], "eq_total": 408.0, "equip": [{"name": "ADCP 저수심", "cnt": 44.0, "price": 40000000.0}, {"name": "다중수심", "cnt": 52.0, "price": 70000000.0}, {"name": "고수심", "cnt": 6.0, "price": 68117500.0}, {"name": "무선조종보트 저평수", "cnt": 74.0, "price": 10000000.0}, {"name": "고유속", "cnt": 21.0, "price": 29470000.0}, {"name": "전자파표면유속계 일반", "cnt": 54.0, "price": 19620000.0}, {"name": "드론용", "cnt": 19.0, "price": null}, {"name": "핸디형", "cnt": 8.0, "price": 8358000.0}, {"name": "멀티라인 이동형", "cnt": 50.0, "price": 19620000.0}, {"name": "고정형", "cnt": 50.0, "price": 21945000.0}, {"name": "드론 유속측정용", "cnt": 20.0, "price": 40000000.0}, {"name": "유사량 이미지 입도분석기", "cnt": 2.0, "price": 101847750.0}, {"name": "측량장비 위성측량(GNSS)", "cnt": 8.0, "price": 6602608.0}], "cal": [0.0, 0.0, 36784.0, 11880.0, 18810.0, 3112.0, 836.0, 5391.6, 2662.8, 4906.0, 0.0, 5823.4], "cal_total": 90205.8, "n_cars": 62, "car_rent_sum": 65361730.0, "eco_cnt": {"전기/수소/하이브리드": 45, "일반(내연)": 17}, "fuel": {"elec": [2995862.0, 5210403.0, 2177627.0, 871539.0, 1466656.0, 2369056.0], "oil": [2999938.0, 4173632.0, 2233828.0, 960124.0, 1001904.0, 2900007.0], "months": ["2025년 10월", "2025년 11월", "2025년 12월", "2026년 01월", "2026년 02월", "2026년 03월"]}, "rent": {"컨테이너(창고)": 76960.0, "주차시설": 22968.199999999997, "측량장비": 6600.0}, "cont_region": [{"name": "한강권역실", "total": 6138.0}, {"name": "낙동강권역실", "total": 25830.0}, {"name": "금강권역실", "total": 17292.0}, {"name": "영산강권역실", "total": 15640.0}, {"name": "첨단인프라실", "total": 12060.0}], "calc_total": [20832, 28109, 27885, 35270, 56673, 40472], "official_total": [20832.0, 28109.0, 27885.0, 35270.0, 56623.0, 40477.0]};
+const DATA = {"years": ["2021", "2022", "2023", "2024", "2025", "2026"], "qty": {"유량": [194.0, 244.0, 244.0, 284.0, 186.0, 144.0], "유사량": [24.0, 25.0, 25.0, 25.0, 25.0, 30.0], "토양수분량": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0], "증발산량": [2.0, 2.0, 2.0, 2.0, 2.0, 2.0], "자동유량_운영": [64.0, 67.0, 71.0, 76.0, 176.0, 218.0], "자동유량_설치": [0.0, 4.0, 3.0, 10.0, 75.0, 42.0], "자동유량_유지관리": [0.0, 10.0, 10.0, 17.0, 25.0, 25.0]}, "price": {"유량": [84.0, 84.0, 84.0, 84.0, 84.0, 84.0], "유사량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "토양수분량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "증발산량": [50.0, 50.0, 50.0, 50.0, 50.0, 50.0], "자동유량_운영": [49.0, 49.0, 49.0, 49.0, 49.0, 51.0], "자동유량_설치": [420.0, 420.0, 420.0, 420.0, 373.0, 299.0], "자동유량_유지관리": [120.0, 120.0, 120.0, 120.0, 120.0, 120.0]}, "detail": {"유량": [{"year": "2021", "qty": 194.0, "price": 84.0, "total": 16296.0, "gov": 15106.0, "gov_pct": 92.7, "biz": 1190.0, "biz_pct": 7.3}, {"year": "2022", "qty": 244.0, "price": 84.0, "total": 20496.0, "gov": 17006.0, "gov_pct": 82.97, "biz": 3490.0, "biz_pct": 17.03}, {"year": "2023", "qty": 244.0, "price": 84.0, "total": 20496.0, "gov": 17907.0, "gov_pct": 87.37, "biz": 2589.0, "biz_pct": 12.63}, {"year": "2024", "qty": 284.0, "price": 84.0, "total": 23856.0, "gov": 20064.0, "gov_pct": 84.1, "biz": 3792.0, "biz_pct": 15.9}, {"year": "2025", "qty": 186.0, "price": 84.0, "total": 15624.0, "gov": 12996.0, "gov_pct": 83.18, "biz": 2628.0, "biz_pct": 16.82}, {"year": "2026", "qty": 144.0, "price": 84.0, "total": 12096.0, "gov": 10056.0, "gov_pct": 83.13, "biz": 2040.0, "biz_pct": 16.87}], "유사량": [{"year": "2021", "qty": 24.0, "price": 50.0, "total": 1200.0, "gov": 862.0, "gov_pct": 71.83, "biz": 338.0, "biz_pct": 28.17}, {"year": "2022", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 894.0, "gov_pct": 71.52, "biz": 356.0, "biz_pct": 28.48}, {"year": "2023", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 834.0, "gov_pct": 66.72, "biz": 416.0, "biz_pct": 33.28}, {"year": "2024", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 1029.0, "gov_pct": 82.32, "biz": 221.0, "biz_pct": 17.68}, {"year": "2025", "qty": 25.0, "price": 50.0, "total": 1250.0, "gov": 1075.0, "gov_pct": 86.0, "biz": 175.0, "biz_pct": 14.0}, {"year": "2026", "qty": 30.0, "price": 50.0, "total": 1500.0, "gov": 1341.0, "gov_pct": 89.4, "biz": 159.0, "biz_pct": 10.6}], "토양수분량": [{"year": "2021", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2022", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 73.0, "gov_pct": 73.0, "biz": 27.0, "biz_pct": 27.0}, {"year": "2023", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 45.0, "gov_pct": 45.0, "biz": 55.0, "biz_pct": 55.0}, {"year": "2024", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 70.0, "gov_pct": 70.0, "biz": 30.0, "biz_pct": 30.0}, {"year": "2025", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2026", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}], "증발산량": [{"year": "2021", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 84.0, "gov_pct": 84.0, "biz": 16.0, "biz_pct": 16.0}, {"year": "2022", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 71.0, "gov_pct": 71.0, "biz": 29.0, "biz_pct": 29.0}, {"year": "2023", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 62.0, "gov_pct": 62.0, "biz": 38.0, "biz_pct": 38.0}, {"year": "2024", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 70.0, "gov_pct": 70.0, "biz": 30.0, "biz_pct": 30.0}, {"year": "2025", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}, {"year": "2026", "qty": 2.0, "price": 50.0, "total": 100.0, "gov": 80.0, "gov_pct": 80.0, "biz": 20.0, "biz_pct": 20.0}]}, "auto": [{"year": "2021", "total": 3136.0, "gov": 2213.0, "gov_pct": 70.57, "biz": 923.0, "biz_pct": 29.43}, {"year": "2022", "total": 6163.0, "gov": 545.0, "gov_pct": 8.84, "biz": 5618.0, "biz_pct": 91.16}, {"year": "2023", "total": 5939.0, "gov": 562.0, "gov_pct": 9.46, "biz": 5377.0, "biz_pct": 90.54}, {"year": "2024", "total": 9964.0, "gov": 3052.0, "gov_pct": 30.63, "biz": 6912.0, "biz_pct": 69.37}, {"year": "2025", "total": 39549.0, "gov": 6688.0, "gov_pct": 16.91, "biz": 32861.0, "biz_pct": 83.09}, {"year": "2026", "total": 26681.0, "gov": 10432.0, "gov_pct": 39.1, "biz": 16249.0, "biz_pct": 60.9}], "totbud": [{"year": "2021", "total": 20832.0, "gov": 18345.0, "gov_pct": 88.06, "biz": 2487.0, "biz_pct": 11.94}, {"year": "2022", "total": 28109.0, "gov": 18589.0, "gov_pct": 66.13, "biz": 9520.0, "biz_pct": 33.87}, {"year": "2023", "total": 27885.0, "gov": 19410.0, "gov_pct": 69.61, "biz": 8475.0, "biz_pct": 30.39}, {"year": "2024", "total": 35270.0, "gov": 24285.0, "gov_pct": 68.85, "biz": 10985.0, "biz_pct": 31.15}, {"year": "2025", "total": 56623.0, "gov": 20919.0, "gov_pct": 36.94, "biz": 35704.0, "biz_pct": 63.06}, {"year": "2026", "total": 40477.0, "gov": 21989.0, "gov_pct": 54.32, "biz": 18488.0, "biz_pct": 45.68}], "budget_krw": {"2021": 2487456225.0, "2022": 9520000000.0, "2023": 8475000000.0, "2024": 10985000000.0, "2025": 35704000000.0, "2026": 18488000000.0}, "n_points": 355, "sido": {"경북": 62, "강원": 40, "경기": 39, "충남": 37, "전북": 35, "전남": 35, "충북": 29, "경남": 29, "광주": 12, "서울": 8, "대전": 8, "울산": 6, "세종": 6, "대구": 5, "부산": 3, "군위": 1}, "fare_stats": {"min": 1500.0, "max": 59800.0, "avg": 25628, "median": 23700, "n": 355}, "mode_cnt": {"KTX": 184, "고속버스": 122, "새마을호": 25, "수도권 대중교통": 20, "준용": 4}, "fares_top": [{"range": "182 ~ 183", "obs": "부산시 (대동낙동강교, 구포대교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "부산역 / 구포역", "fare": 59800.0, "cnt": 2}, {"range": "196", "obs": "부산시 (동천교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "부산역", "fare": 59800.0, "cnt": 1}, {"range": "166 ~ 168", "obs": "진주시 (옥산교, 월강교, 장박교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "진주역", "fare": 57600.0, "cnt": 3}, {"range": "189", "obs": "포항시 (형산교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "포항역", "fare": 53600.0, "cnt": 1}, {"range": "201", "obs": "포항시 (문덕3교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "포항역", "fare": 53600.0, "cnt": 1}, {"range": "190 ~ 195", "obs": "울산시 (구수교, 사연교, 구영교, 태화교, 병영교, 덕신교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "울산역", "fare": 53500.0, "cnt": 6}, {"range": "165", "obs": "함안군 (송도교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "171", "obs": "함안군 (대사교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "172", "obs": "함안군 (계내리)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "함안역", "fare": 52100.0, "cnt": 1}, {"range": "184", "obs": "김해시 (정천교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "진영역", "fare": 51500.0, "cnt": 1}, {"range": "180 ~ 181", "obs": "양산시 (삼계교, 양산교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "물금역", "fare": 51300.0, "cnt": 2}, {"range": "174", "obs": "밀양시 (인교)", "mode": "1순위 KTX", "mode_s": "KTX", "hub": "밀양역", "fare": 49900.0, "cnt": 1}], "fares_bottom": [{"range": "82", "obs": "동두천시 (송천교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "동두천역 (1호선)", "fare": 2500.0, "cnt": 1}, {"range": "85 ~ 86", "obs": "파주시 (비룡대교, 만장교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "문산역 / 금촌역", "fare": 2500.0, "cnt": 2}, {"range": "65", "obs": "의정부시 (신곡교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "의정부역 (1호선 연계)", "fare": 2000.0, "cnt": 1}, {"range": "63 ~ 64", "obs": "서울시 (광진교, 대곡교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 2}, {"range": "66", "obs": "서울시 (중랑교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "67", "obs": "서울시 (한강대교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "69", "obs": "서울시 (신림5교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 1}, {"range": "71 ~ 73", "obs": "서울시 (너부대교, 오금교, 신대방1교)", "mode": "수도권 대중교통", "mode_s": "수도권 대중교통", "hub": "시내 대중교통망", "fare": 1500.0, "cnt": 3}], "eq_total": 408.0, "equip": [{"name": "ADCP 저수심", "cnt": 44.0, "price": 40000000.0}, {"name": "다중수심", "cnt": 52.0, "price": 70000000.0}, {"name": "고수심", "cnt": 6.0, "price": 68117500.0}, {"name": "무선조종보트 저평수", "cnt": 74.0, "price": 10000000.0}, {"name": "고유속", "cnt": 21.0, "price": 29470000.0}, {"name": "전자파표면유속계 일반", "cnt": 54.0, "price": 19620000.0}, {"name": "드론용", "cnt": 19.0, "price": null}, {"name": "핸디형", "cnt": 8.0, "price": 8358000.0}, {"name": "멀티라인 이동형", "cnt": 50.0, "price": 19620000.0}, {"name": "고정형", "cnt": 50.0, "price": 21945000.0}, {"name": "드론 유속측정용", "cnt": 20.0, "price": 40000000.0}, {"name": "유사량 이미지 입도분석기", "cnt": 2.0, "price": 101847750.0}, {"name": "측량장비 위성측량(GNSS)", "cnt": 8.0, "price": 6602608.0}], "cal": [0.0, 0.0, 36784.0, 11880.0, 18810.0, 3112.0, 836.0, 5391.6, 2662.8, 4906.0, 0.0, 5823.4], "cal_total": 90205.8, "n_cars": 62, "car_rent_sum": 65361730.0, "eco_cnt": {"전기/수소/하이브리드": 45, "일반(내연)": 17}, "fuel": {"elec": [2995862.0, 5210403.0, 2177627.0, 871539.0, 1466656.0, 2369056.0], "oil": [2999938.0, 4173632.0, 2233828.0, 960124.0, 1001904.0, 2900007.0], "months": ["2025년 10월", "2025년 11월", "2025년 12월", "2026년 01월", "2026년 02월", "2026년 03월"]}, "rent": {"컨테이너(창고)": 76960.0, "주차시설": 22968.199999999997, "측량장비": 6600.0}, "cont_region": [{"name": "한강권역실", "total": 6138.0}, {"name": "낙동강권역실", "total": 25830.0}, {"name": "금강권역실", "total": 17292.0}, {"name": "영산강권역실", "total": 15640.0}, {"name": "첨단인프라실", "total": 12060.0}], "labor_travel": [{"item": "유량", "budget": "인건비", "values": {"2021": 123200000.0, "2022": 443000000.0, "2023": 747380000.0, "2024": 572951413.0, "2025": 342209542.0, "2026": 12800000.0}, "total": 2241540955.0, "source": "v1 › 유량 › 인건비 소계", "source_row": 5}, {"item": "유량", "budget": "여비", "values": {"2021": 551584900.0, "2022": 878000000.0, "2023": 990470000.0, "2024": 874270000.0, "2025": 799020000.0, "2026": 622000000.0}, "total": 4715344900.0, "source": "v1 › 유량 › 여비 소계", "source_row": 23}, {"item": "유사량", "budget": "인건비", "values": {"2021": 88000000.0, "2022": 164000000.0, "2023": 213508440.0, "2024": 52067667.0, "2025": 70200000.0, "2026": 79015500.0}, "total": 666791607.0, "source": "v1 › 유사량 › 인건비 소계", "source_row": 5}, {"item": "유사량", "budget": "여비", "values": {"2021": 34452200.0, "2022": 45000000.0, "2023": 52160000.0, "2024": 33160000.0, "2025": 24630600.0, "2026": 10870000.0}, "total": 200272800.0, "source": "v1 › 유사량 › 여비 소계", "source_row": 23}, {"item": "토양수분량", "budget": "인건비", "values": {"2021": 0.0, "2022": 0.0, "2023": 11196400.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "total": 11196400.0, "source": "v1 › 토양수분량 › 인건비 소계", "source_row": 5}, {"item": "토양수분량", "budget": "여비", "values": {"2021": 3268500.0, "2022": 6000000.0, "2023": 5960000.0, "2024": 8440000.0, "2025": 10000000.0, "2026": 9000000.0}, "total": 42668500.0, "source": "v1 › 토양수분량 › 여비 소계", "source_row": 23}, {"item": "증발산량", "budget": "인건비", "values": {"2021": 0.0, "2022": 0.0, "2023": 696400.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "total": 696400.0, "source": "v1 › 증발산량 › 인건비 소계", "source_row": 5}, {"item": "증발산량", "budget": "여비", "values": {"2021": 1571460.0, "2022": 6000000.0, "2023": 7152000.0, "2024": 10128000.0, "2025": 9830000.0, "2026": 9410000.0}, "total": 44091460.0, "source": "v1 › 증발산량 › 여비 소계", "source_row": 23}, {"item": "자동유량", "budget": "인건비", "values": {"2021": 22000000.0, "2022": 56000000.0, "2023": 65049195.0, "2024": 50061407.0, "2025": 300581085.0, "2026": 0.0}, "total": 493691687.0, "source": "v1 › 자동유량 › 인건비 소계", "source_row": 5}, {"item": "자동유량", "budget": "여비", "values": {"2021": 75689060.0, "2022": 142000000.0, "2023": 189000000.0, "2024": 233200000.0, "2025": 268005320.0, "2026": 203010000.0}, "total": 1110904380.0, "source": "v1 › 자동유량 › 여비 소계", "source_row": 23}], "calc_total": [20832, 28109, 27885, 35270, 56673, 40472], "official_total": [20832.0, 28109.0, 27885.0, 35270.0, 56623.0, 40477.0]};
 const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
 const mw =n=>Number(n).toLocaleString('ko-KR')+'백만원';
 const $=id=>document.getElementById(id);
@@ -226,6 +304,7 @@ Chart.defaults.plugins.legend.labels.boxWidth=12;
 const gridc={color:'rgba(148,163,184,.12)'};
 let charts={};
 function mkChart(id,cfg){ if(charts[id])charts[id].destroy(); const el=$(id); if(!el)return; charts[id]=new Chart(el,cfg); }
+function wonCell(n){ return n===null || n===undefined || Number.isNaN(Number(n)) ? '-' : Math.round(Number(n)).toLocaleString('ko-KR')+'원'; }
 
 function setMode(m){
   $('m1').classList.toggle('hide',m!=='m1');
@@ -267,6 +346,20 @@ function renderSummary(){
     h+=`<tr><td>${y}</td><td>${mw(c)}</td><td>${mw(o)}</td><td class="${diff===0?'ok-txt':'warn-txt'}">${diff===0?'0':(diff>0?'+':'')+mw(diff)}</td>`+
        `<td class="${pct<0.5?'ok-txt':'warn-txt'}">${pct.toFixed(2)}%</td></tr>`;});
   $('t_valid_mini').innerHTML=h+'</tbody>';
+}
+
+function renderLaborTravel(){
+  const target=$('t_labor_travel');
+  if(!target) return;
+  const rows=DATA.labor_travel || [];
+  let h='<thead><tr><th>항목</th><th>편성목</th>'+CY.map(y=>`<th>${y}</th>`).join('')+'<th>6년 합계</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    h+=`<tr><td><b>${r.item}</b><div class="mut" style="font-size:11px;margin-top:2px">${r.source} · ${r.source_row}행</div></td>`+
+       `<td><span class="tag">${r.budget}</span></td>`+
+       CY.map(y=>`<td>${wonCell(r.values[y])}</td>`).join('')+
+       `<td class="ok-txt">${wonCell(r.total)}</td></tr>`;
+  });
+  target.innerHTML=h+'</tbody>';
 }
 
 // ── 10분 심화 ──
@@ -334,7 +427,83 @@ function renderDeep(){
   let e='<thead><tr><th>장비</th><th>보유(대)</th><th>신규단가(원)</th></tr></thead><tbody>';
   DATA.equip.filter(x=>x.cnt).forEach(x=>{e+=`<tr><td>${x.name}</td><td>${x.cnt}</td><td>${x.price?x.price.toLocaleString():'-'}</td></tr>`;});
   $('t_eq').innerHTML=e+'</tbody>';
+  renderLaborTravel();
 }
+// ══════════ 탭 UI · A 대시보드 기능 통합 ══════════
+const TABS=['analysis','calc','band','sources'];
+let calcInited=false,bandInited=false,srcInited=false;
+function switchTab(t){
+  TABS.forEach(x=>{const el=$('tp-'+x); if(el) el.classList.toggle('on',x===t);});
+  document.querySelectorAll('.tabnav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  const tg=document.querySelector('.toggle'); if(tg) tg.style.display=(t==='analysis')?'inline-flex':'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(t==='calc'&&!calcInited){calcInited=true;initCalc();}
+  if(t==='band'){bandInited=true;renderBand();}
+  if(t==='sources'&&!srcInited){srcInited=true;renderSources();}
+}
+
+// ── 1회 조사 계산기 (단가 = 2026 v2 단가 시트) ──
+const SURVEY_TYPES=[
+  ['유량','유량조사'],['유사량','유사량조사'],['토양수분량','토양수분량'],['증발산량','증발산량'],
+  ['자동유량_운영','자동유량(운영)'],['자동유량_설치','자동유량(설치)'],['자동유량_유지관리','자동유량(유지관리)']
+];
+const typePrice=k=>DATA.price[k][5];
+const typeQty=k=>DATA.qty[k][5];
+let calcTotal=typeQty('유량')*typePrice('유량');
+function initCalc(){
+  $('ca_type').innerHTML=SURVEY_TYPES.map(([k,l])=>`<option value="${k}">${l} · ${typePrice(k)}백만원/개소</option>`).join('');
+  $('ca_pts').value=typeQty('유량');
+  ['ca_pts','ca_diff','ca_ind'].forEach(id=>$(id).addEventListener('input',recalc));
+  $('ca_type').addEventListener('change',()=>{$('ca_pts').value=typeQty($('ca_type').value);recalc();});
+  recalc();
+}
+function recalc(){
+  const k=$('ca_type').value,price=typePrice(k),pts=Math.max(0,Number($('ca_pts').value)||0);
+  const diff=Number($('ca_diff').value),ind=Number($('ca_ind').value);
+  $('ca_diffv').textContent=diff.toFixed(2);
+  $('ca_indv').textContent=ind+'%';
+  const base=pts*price,subtotal=base*diff,diffAdd=subtotal-base,indAdd=subtotal*ind/100,total=subtotal+indAdd;
+  $('ca_base').textContent=mw(Math.round(base));
+  $('ca_diffadd').textContent=(diffAdd>=0?'+':'')+mw(Math.round(diffAdd));
+  $('ca_indadd').textContent='+'+mw(Math.round(indAdd));
+  $('ca_sum').textContent=mw(Math.round(total));
+  $('ca_total').textContent=mw(Math.round(total));
+  $('ca_total_won').textContent='= '+won(Math.round(total*1e6));
+  $('ca_cite').innerHTML=`단가 ${price}백만원/개소 · 기본 지점수 ${typeQty(k)}개소(2026 현황) · 출처 v2 단가/현황 시트`;
+  mkChart('c_calc',{type:'doughnut',data:{labels:['조사비(난이도 반영)','간접비'],
+    datasets:[{data:[Math.round(subtotal),Math.round(indAdd)],backgroundColor:['#38bdf8','#818cf8']}]},
+    options:{plugins:{legend:{position:'right'},tooltip:{callbacks:{label:c=>c.label+': '+mw(c.raw)}}}}});
+  calcTotal=total; if(bandInited) renderBand();
+}
+
+// ── 수문 대역도 (월 배분 가정 곡선) ──
+const MONTHW=[3,3,5,7,9,12,16,15,10,7,4,3];
+function renderBand(){
+  const total=calcTotal,sumw=MONTHW.reduce((a,b)=>a+b,0);
+  const mid=MONTHW.map(w=>total*w/sumw),hi=mid.map(v=>v*1.25),lo=mid.map(v=>v*0.75);
+  const mlab=['1','2','3','4','5','6','7','8','9','10','11','12'].map(m=>m+'월');
+  mkChart('c_band',{type:'line',data:{labels:mlab,datasets:[
+    {label:'상한(+25%)',data:hi,borderColor:'rgba(56,189,248,.35)',backgroundColor:'rgba(56,189,248,.15)',fill:'+1',pointRadius:0,tension:.4},
+    {label:'하한(-25%)',data:lo,borderColor:'rgba(56,189,248,.35)',backgroundColor:'transparent',fill:false,pointRadius:0,tension:.4},
+    {label:'배분 중앙값',data:mid,borderColor:'#38bdf8',backgroundColor:'transparent',fill:false,pointRadius:3,tension:.4}]},
+    options:{plugins:{legend:{labels:{filter:i=>i.text==='배분 중앙값'}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+mw(Math.round(c.raw))}}},
+      scales:{x:{grid:{display:false}},y:{grid:gridc,ticks:{callback:v=>Number(v).toLocaleString()}}}}});
+}
+
+// ── 자료 출처 ──
+const SOURCES=[
+  ['01_사업별 예산','연도별 총예산·항목별 예산·단가(v1/v2), 인건비·여비 소계','총예산_02, 항목별예산, 단가, 각 항목 시트'],
+  ['02_수문조사 단가표','조사 항목별 개소당 단가','단가표'],
+  ['03_수자원·수문조사 관련 지침','표준품셈 등 인원·시간 산정 근거','수자원 조사·계획 표준품셈(2023)'],
+  ['04_조사지점 현황','전국 조사지점 수·권역 분포·교통비','조사지점 현황(24), 조사거점 별 주요 교통비'],
+  ['05_조사장비 관련','보유 장비 현황·신규단가·월 검·교정 비용','보유장비 현황, 검·교정 비용'],
+  ['06_운영비 관련','업무차량 임차료·연료비·임대(컨테이너/주차/측량)','업무차량, 임대']
+];
+function renderSources(){
+  $('src_list').innerHTML=SOURCES.map(([n,d,s])=>
+    `<div class="srcitem"><h3>${n}</h3><div style="font-size:13px">${d}</div><div class="meta" style="margin-top:4px">시트/항목: ${s}</div></div>`).join('');
+}
+
 renderSummary();
 </script>
 </body></html>
